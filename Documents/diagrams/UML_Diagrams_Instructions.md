@@ -1,6 +1,6 @@
 # HƯỚNG DẪN VẼ UML DIAGRAMS
 
-**Hạn chót**: 12/8 | **Xem lại**: 13/8 | **Công cụ**: draw.io
+**Hạn chót**: 5/8 | **Xem lại**: 6/8 | **Công cụ**: draw.io
 
 ---
 
