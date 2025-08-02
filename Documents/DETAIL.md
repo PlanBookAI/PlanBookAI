@@ -149,7 +149,7 @@ public class XacThucController {
 
 ```java
 @Entity
-@Table(name = "nguoi_dung")
+@Table(name = "users", schema = "users")
 public class NguoiDung {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -279,7 +279,7 @@ plan-service/
 
 ```java
 @Entity
-@Table(name = "giao_an")
+@Table(name = "lesson_plans", schema = "content")
 public class GiaoAn {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -305,7 +305,7 @@ public class GiaoAn {
     private NguoiDung giaoVien;
     
     @ManyToOne
-    @JoinColumn(name = "mau_giao_an_id")
+    @JoinColumn(name = "template_id")
     private MauGiaoAn mauGiaoAn;
     
     @Column(nullable = false)
@@ -411,7 +411,7 @@ task-service/
 
 ```java
 @Entity
-@Table(name = "de_thi")
+@Table(name = "exams", schema = "assessment")
 public class DeThi {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -444,7 +444,7 @@ public class DeThi {
 }
 
 @Entity
-@Table(name = "hoc_sinh")
+@Table(name = "students", schema = "students")
 public class HocSinh {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -471,18 +471,18 @@ public class HocSinh {
 }
 
 @Entity
-@Table(name = "ket_qua")
+@Table(name = "student_results", schema = "students")
 public class KetQua {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     @ManyToOne
-    @JoinColumn(name = "hoc_sinh_id")
+    @JoinColumn(name = "student_id")
     private HocSinh hocSinh;
     
     @ManyToOne
-    @JoinColumn(name = "de_thi_id")
+    @JoinColumn(name = "exam_id")
     private DeThi deThi;
     
     private Double diem;
@@ -592,130 +592,188 @@ public class DichVuOCR {
 
 ```mermaid
 erDiagram
-    NGUOI_DUNG {
-        bigint id PK
+    USERS {
+        uuid id PK
         varchar email UK
-        varchar mat_khau_ma_hoa
-        varchar ho_ten
-        enum vai_tro
-        boolean trang_thai_hoat_dong
-        timestamp thoi_gian_tao
-        timestamp thoi_gian_cap_nhat
+        varchar password_hash
+        varchar full_name
+        int role_id FK
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
     }
     
-    HOC_SINH {
-        bigint id PK
-        varchar ho_ten
-        varchar ma_so_hoc_sinh
-        varchar lop
-        bigint giao_vien_id FK
-        double diem_trung_binh
-        int so_lan_thi
-        timestamp thoi_gian_tao
+    ROLES {
+        int id PK
+        varchar name UK
+        text description
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
     }
     
-    GIAO_AN {
-        bigint id PK
-        varchar tieu_de
-        text muc_tieu
-        text noi_dung
-        text hoat_dong
-        text danh_gia
-        bigint giao_vien_id FK
-        bigint mau_giao_an_id FK
-        varchar mon_hoc
-        varchar lop
-        int thoi_gian_day
-        enum trang_thai
-        timestamp thoi_gian_tao
+    STUDENTS {
+        uuid id PK
+        varchar full_name
+        varchar student_code
+        date birth_date
+        varchar gender
+        uuid class_id FK
+        uuid owner_teacher_id FK
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
     }
     
-    CAU_HOI {
-        bigint id PK
-        text noi_dung_cau_hoi
-        text dap_an_a
-        text dap_an_b
-        text dap_an_c
-        text dap_an_d
-        char dap_an_dung
-        varchar mon_hoc
-        varchar chu_de
-        enum muc_do_kho
-        bigint nguoi_tao_id FK
-        timestamp thoi_gian_tao
+    CLASSES {
+        uuid id PK
+        varchar name
+        int grade
+        int student_count
+        uuid homeroom_teacher_id FK
+        varchar academic_year
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
     }
     
-    DE_THI {
-        bigint id PK
-        varchar tieu_de
-        varchar mon_hoc
-        varchar lop
-        int thoi_gian_lam
-        int tong_diem
-        bigint giao_vien_id FK
-        text huong_dan_lam_bai
-        enum trang_thai
-        timestamp thoi_gian_tao
+    LESSON_PLANS {
+        uuid id PK
+        varchar title
+        text objectives
+        jsonb content
+        varchar subject
+        int grade
+        uuid teacher_id FK
+        uuid template_id FK
+        varchar status
+        timestamp created_at
+        timestamp updated_at
     }
     
-    CAU_HOI_TRONG_DE_THI {
-        bigint id PK
-        bigint de_thi_id FK
-        bigint cau_hoi_id FK
-        int thu_tu
-        int diem
+    LESSON_TEMPLATES {
+        uuid id PK
+        varchar title
+        text description
+        jsonb template_content
+        varchar subject
+        int grade
+        uuid created_by FK
+        varchar status
+        timestamp created_at
+        timestamp updated_at
     }
     
-    KET_QUA {
-        bigint id PK
-        bigint hoc_sinh_id FK
-        bigint de_thi_id FK
-        double diem
-        int so_cau_dung
-        int tong_so_cau
-        text chi_tiet_dap_an
-        varchar duong_dan_bai_lam
-        enum trang_thai_cham
-        timestamp thoi_gian_nop
-        timestamp thoi_gian_cham
+    QUESTIONS {
+        uuid id PK
+        text content
+        varchar type
+        varchar difficulty
+        varchar subject
+        varchar topic
+        varchar correct_answer
+        text explanation
+        uuid created_by FK
+        varchar status
+        timestamp created_at
+        timestamp updated_at
     }
     
-    NGUOI_DUNG ||--o{ HOC_SINH : "quản lý"
-    NGUOI_DUNG ||--o{ GIAO_AN : "tạo"
-    NGUOI_DUNG ||--o{ CAU_HOI : "tạo"
-    NGUOI_DUNG ||--o{ DE_THI : "tạo"
+    QUESTION_CHOICES {
+        uuid id PK
+        uuid question_id FK
+        char choice_order
+        text content
+        timestamp created_at
+    }
     
-    DE_THI ||--o{ CAU_HOI_TRONG_DE_THI : "chứa"
-    CAU_HOI ||--o{ CAU_HOI_TRONG_DE_THI : "được sử dụng trong"
+    EXAMS {
+        uuid id PK
+        varchar title
+        text description
+        varchar subject
+        int grade
+        int duration_minutes
+        decimal total_score
+        uuid teacher_id FK
+        varchar status
+        timestamp created_at
+        timestamp updated_at
+    }
     
-    HOC_SINH ||--o{ KET_QUA : "có"
-    DE_THI ||--o{ KET_QUA : "được làm bởi"
+    EXAM_QUESTIONS {
+        uuid id PK
+        uuid exam_id FK
+        uuid question_id FK
+        int question_order
+        decimal points
+        timestamp created_at
+    }
+    
+    STUDENT_RESULTS {
+        uuid id PK
+        uuid student_id FK
+        uuid exam_id FK
+        decimal score
+        int actual_duration
+        jsonb answer_details
+        varchar grading_method
+        text notes
+        timestamp exam_date
+        timestamp graded_at
+    }
+    
+    USERS ||--o{ ROLES : "has"
+    USERS ||--o{ STUDENTS : "manages"
+    USERS ||--o{ LESSON_PLANS : "creates"
+    USERS ||--o{ QUESTIONS : "creates"
+    USERS ||--o{ EXAMS : "creates"
+    USERS ||--o{ CLASSES : "teaches"
+    
+    CLASSES ||--o{ STUDENTS : "contains"
+    LESSON_TEMPLATES ||--o{ LESSON_PLANS : "used_in"
+    
+    EXAMS ||--o{ EXAM_QUESTIONS : "contains"
+    QUESTIONS ||--o{ EXAM_QUESTIONS : "used_in"
+    QUESTIONS ||--o{ QUESTION_CHOICES : "has"
+    
+    STUDENTS ||--o{ STUDENT_RESULTS : "has"
+    EXAMS ||--o{ STUDENT_RESULTS : "taken_by"
 ```
 
 ### 4.2 Thiết kế Index và Performance
 
 ```sql
--- Indexes cho hiệu suất truy vấn
-CREATE INDEX idx_nguoi_dung_email ON nguoi_dung(email);
-CREATE INDEX idx_nguoi_dung_vai_tro ON nguoi_dung(vai_tro);
+-- Indexes cho hiệu suất truy vấn (Schema: users, content, assessment, students)
 
-CREATE INDEX idx_hoc_sinh_giao_vien ON hoc_sinh(giao_vien_id);
-CREATE INDEX idx_hoc_sinh_lop ON hoc_sinh(lop);
+-- User Management indexes
+CREATE INDEX idx_users_email ON users.users(email);
+CREATE INDEX idx_users_role ON users.users(role_id);
+CREATE INDEX idx_sessions_user ON users.sessions(user_id);
+CREATE INDEX idx_sessions_token ON users.sessions(token);
 
-CREATE INDEX idx_giao_an_giao_vien ON giao_an(giao_vien_id);
-CREATE INDEX idx_giao_an_mon_hoc ON giao_an(mon_hoc);
-CREATE INDEX idx_giao_an_trang_thai ON giao_an(trang_thai);
+-- Educational Content indexes
+CREATE INDEX idx_lesson_plans_teacher ON content.lesson_plans(teacher_id);
+CREATE INDEX idx_lesson_plans_subject ON content.lesson_plans(subject);
+CREATE INDEX idx_lesson_plans_status ON content.lesson_plans(status);
+CREATE INDEX idx_lesson_templates_subject ON content.lesson_templates(subject);
 
-CREATE INDEX idx_cau_hoi_mon_hoc ON cau_hoi(mon_hoc);
-CREATE INDEX idx_cau_hoi_chu_de ON cau_hoi(chu_de);
-CREATE INDEX idx_cau_hoi_muc_do_kho ON cau_hoi(muc_do_kho);
+-- Assessment indexes
+CREATE INDEX idx_questions_subject ON assessment.questions(subject);
+CREATE INDEX idx_questions_topic ON assessment.questions(topic);
+CREATE INDEX idx_questions_difficulty ON assessment.questions(difficulty);
+CREATE INDEX idx_questions_created_by ON assessment.questions(created_by);
+CREATE INDEX idx_exams_teacher ON assessment.exams(teacher_id);
+CREATE INDEX idx_exams_subject ON assessment.exams(subject);
+CREATE INDEX idx_question_choices_question ON assessment.question_choices(question_id);
 
-CREATE INDEX idx_de_thi_giao_vien ON de_thi(giao_vien_id);
-CREATE INDEX idx_de_thi_mon_hoc ON de_thi(mon_hoc);
-
-CREATE INDEX idx_ket_qua_hoc_sinh ON ket_qua(hoc_sinh_id);
-CREATE INDEX idx_ket_qua_de_thi ON ket_qua(de_thi_id);
-CREATE INDEX idx_ket_qua_thoi_gian_nop ON ket_qua(thoi_gian_nop);
+-- Student Data indexes
+CREATE INDEX idx_students_class ON students.students(class_id);
+CREATE INDEX idx_students_teacher ON students.students(owner_teacher_id);
+CREATE INDEX idx_students_code ON students.students(student_code);
+CREATE INDEX idx_student_results_student ON students.student_results(student_id);
+CREATE INDEX idx_student_results_exam ON students.student_results(exam_id);
+CREATE INDEX idx_student_results_exam_date ON students.student_results(exam_date);
 ```
 
 ## 5. THIẾT KẾ API CHI TIẾT
