@@ -41,6 +41,13 @@ logs/
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.test
+
+### Development Database ###
+# Development database credentials are safe to share
+# Production credentials should never be committed
 
 ### System Files ###
 .DS_Store
