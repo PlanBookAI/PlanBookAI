@@ -8,6 +8,7 @@
 
 **Tên file**: `XDPMHDT.drawio`
 **Link**: <https://drive.google.com/file/d/1GjMuz0on3FUFTG1JTo5xbxhi-zxCrns-/view?usp=sharing>
+**Link vẽ sequence diagram**: <https://sequencediagram.org/>
 **14 Pages trong file**:
 
 ```
