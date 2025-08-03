@@ -1,0 +1,100 @@
+services:
+  # API Gateway
+  gateway-service:
+    build: ./gateway-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/planbookai
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - postgres
+      - auth-service
+      - user-service
+      - plan-service
+      - task-service
+    networks:
+      - planbookai-network
+
+  # Authentication Service
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/planbookai
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - postgres
+    networks:
+      - planbookai-network
+
+  # User Management Service
+  user-service:
+    build: ./user-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/planbookai
+    depends_on:
+      - postgres
+    networks:
+      - planbookai-network
+
+  # Lesson Plan Service
+  plan-service:
+    build: ./plan-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/planbookai
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - postgres
+    networks:
+      - planbookai-network
+
+  # Task Management Service
+  task-service:
+    build: ./task-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/planbookai
+      - GOOGLE_VISION_API_KEY=${GOOGLE_VISION_API_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      - postgres
+    networks:
+      - planbookai-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17
+    container_name: planbookai-postgres
+    environment:
+      POSTGRES_DB: planbookai
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - planbookai-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  planbookai-network:
+    driver: bridge

@@ -35,7 +35,7 @@ if ($containerExists) {
     }
 } else {
     Write-Host "[INFO] Creating new PostgreSQL container..." -ForegroundColor Yellow
-    docker-compose -f docker-compose.dev.yml up -d
+    docker-compose -f src/docker-compose.dev.yml up -d
     if ($LASTEXITCODE -ne 0) {
         Write-Host "[ERROR] Failed to create container. Check Docker Desktop" -ForegroundColor Red
         exit 1
@@ -99,6 +99,6 @@ Write-Host "USEFUL COMMANDS:" -ForegroundColor Yellow
 Write-Host "  View logs: docker logs planbookai-postgres-dev" -ForegroundColor White
 Write-Host "  Stop DB: docker stop planbookai-postgres-dev" -ForegroundColor White
 Write-Host "  Restart: docker restart planbookai-postgres-dev" -ForegroundColor White
-Write-Host "  Remove all: docker-compose -f docker-compose.dev.yml down -v" -ForegroundColor White
+Write-Host "  Remove all: docker-compose -f src/docker-compose.dev.yml down -v" -ForegroundColor White
 Write-Host ""
 Write-Host "TIP: Check README-DEV-DATABASE.md for more details!" -ForegroundColor Yellow

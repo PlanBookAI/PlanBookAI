@@ -6,7 +6,7 @@ Write-Host "=========================================" -ForegroundColor Red
 
 # Stop containers
 Write-Host "Stopping containers..." -ForegroundColor Yellow
-docker-compose -f docker-compose.dev.yml down
+docker-compose -f src/docker-compose.dev.yml down
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "[OK] Containers stopped successfully" -ForegroundColor Green
@@ -31,5 +31,5 @@ Write-Host "RESTART COMMANDS:" -ForegroundColor Yellow
 Write-Host "  Start again: .\scripts\start-dev-db.ps1" -ForegroundColor White
 Write-Host ""
 Write-Host "CLEANUP COMMANDS:" -ForegroundColor Red
-Write-Host "  Remove all data: docker-compose -f docker-compose.dev.yml down -v" -ForegroundColor White
+Write-Host "  Remove all data: docker-compose -f src/docker-compose.dev.yml down -v" -ForegroundColor White
 Write-Host "  Remove images: docker rmi postgres:17" -ForegroundColor White
