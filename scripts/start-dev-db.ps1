@@ -13,7 +13,9 @@ try {
     Write-Host "[ERROR] Docker not running or not installed" -ForegroundColor Red
     Write-Host "Please install Docker Desktop first" -ForegroundColor Yellow
     Write-Host "Download: https://www.docker.com/products/docker-desktop" -ForegroundColor Cyan
-    pause
+    Write-Host ""
+    Write-Host "Press any key to continue..." -ForegroundColor Cyan
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit 1
 }
 
@@ -30,14 +32,20 @@ if ($containerExists) {
         docker start planbookai-postgres-dev
         if ($LASTEXITCODE -ne 0) {
             Write-Host "[ERROR] Failed to start container" -ForegroundColor Red
+            Write-Host ""
+            Write-Host "Press any key to continue..." -ForegroundColor Cyan
+            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
             exit 1
         }
     }
 } else {
     Write-Host "[INFO] Creating new PostgreSQL container..." -ForegroundColor Yellow
-    docker-compose -f src/docker-compose.dev.yml up -d
+    docker run -d --name planbookai-postgres-dev -e POSTGRES_DB=postgres -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test123 -p 5432:5432 postgres:17
     if ($LASTEXITCODE -ne 0) {
         Write-Host "[ERROR] Failed to create container. Check Docker Desktop" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Press any key to continue..." -ForegroundColor Cyan
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         exit 1
     }
     Write-Host "[OK] Container created successfully" -ForegroundColor Green
@@ -63,6 +71,9 @@ if ($retries -eq $maxRetries) {
     Write-Host ""
     Write-Host "[ERROR] Database failed to start within timeout" -ForegroundColor Red
     Write-Host "Try: docker logs planbookai-postgres-dev" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Press any key to continue..." -ForegroundColor Cyan
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit 1
 }
 
@@ -99,6 +110,9 @@ Write-Host "USEFUL COMMANDS:" -ForegroundColor Yellow
 Write-Host "  View logs: docker logs planbookai-postgres-dev" -ForegroundColor White
 Write-Host "  Stop DB: docker stop planbookai-postgres-dev" -ForegroundColor White
 Write-Host "  Restart: docker restart planbookai-postgres-dev" -ForegroundColor White
-Write-Host "  Remove all: docker-compose -f src/docker-compose.dev.yml down -v" -ForegroundColor White
+Write-Host "  Remove all: .\scripts\stop-dev-db.ps1" -ForegroundColor White
 Write-Host ""
 Write-Host "TIP: Check README-DEV-DATABASE.md for more details!" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Press any key to continue..." -ForegroundColor Cyan
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
