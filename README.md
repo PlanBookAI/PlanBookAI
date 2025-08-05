@@ -27,7 +27,7 @@ Giảm tải công việc thủ công và lặp đi lặp lại cho giáo viên,
 
 ### ⚙️ Kiến trúc và Công nghệ
 - **Frontend**: ReactJS
-- **Backend**: Spring Boot
+- **Backend**: ASP .NET
 - **API**: RESTful
 - **Cơ sở dữ liệu**: PostgreSQL (qua Supabase)
 - **Dịch vụ AI**: Gemini
