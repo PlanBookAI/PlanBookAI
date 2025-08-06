@@ -433,6 +433,7 @@ node_modules/
 # IDE
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~
