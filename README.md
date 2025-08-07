@@ -284,7 +284,7 @@ Authorization: Bearer {token}
 
 ## 🎓 Academic Supervisor
 
-**MSc. Nguyễn Văn Chiến** - Faculty Advisor
+**[MSc. Nguyễn Văn Chiến](https://github.com/ChienNguyensrdn)** - Faculty Advisor
 
 ## 📄 License
 
