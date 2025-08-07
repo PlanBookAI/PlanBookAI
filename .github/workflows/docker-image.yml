@@ -29,14 +29,25 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Build and push with Docker Compose
-      uses: docker/build-push-action@v5
-      with:
-        context: ./src
-        file: ./src/docker-compose.yml
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/planbookai:${{ github.run_id }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      run: |
+        cd src
+        docker-compose build
+        docker-compose push
+        
+    - name: Tag and push images
+      run: |
+        cd src
+        docker tag authservice:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.run_id }}
+        docker tag userservice:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/user-service:${{ github.run_id }}
+        docker tag planservice:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/plan-service:${{ github.run_id }}
+        docker tag taskservice:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/task-service:${{ github.run_id }}
+        docker tag gatewayservice:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ github.run_id }}
+        
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.run_id }}
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/user-service:${{ github.run_id }}
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/plan-service:${{ github.run_id }}
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/task-service:${{ github.run_id }}
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ github.run_id }}
 
   deploy:
     needs: build-and-test
