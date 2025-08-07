@@ -263,14 +263,18 @@ Authorization: Bearer {token}
 ## 👥 Development Team
 
 ### 🎯 Team Members
-- **Nguyễn Vương Minh Khôi** (22H1120108) - Team Lead - Gateway Service & Architecture
-- **Phạm Văn Phi Long** (068205003905) - Backend - User Service
-- **Lê Tùng Lâm** (2251120302) - Backend - User Service
-- **Trần Khắc Quân** (2251120439) - Backend - Plan Service
-- **Ngô Đình Quốc Thịnh** (2251120443) - Backend - Plan Service
-- **Nguyễn Trọng Kim** (2251120299) - Backend - Task Service
+
+- **Nguyễn Vương Minh Khôi** (22H1120108) - Project/Team Lead & Technical Architect & DevOps & Developer
+- **Phạm Văn Phi Long** (068205003905) - Developer
+- **Lê Tùng Lâm** (2251120302) - Developer
+- **Trần Khắc Quân** (2251120439) - Developer
+- **Ngô Đình Quốc Thịnh** (2251120443) - Developer
+- **Nguyễn Trọng Kim** (2251120299) - Developer
 
 ### 📧 Contact Information
+
+#### [Trường Đại Học Giao Thông Vận Tải TPHCM Khoa CNTT](https://it3e.ut.edu.vn/)
+
 - **Khôi**: 22H1120108@ut.edu.vn
 - **Long**: longpvp3905@ut.edu.vn
 - **Lâm**: 2251120302@ut.edu.vn
@@ -280,7 +284,7 @@ Authorization: Bearer {token}
 
 ## 🎓 Academic Supervisor
 
-**Ths. Nguyễn Văn Chiến** - Faculty Advisor
+**MSc. Nguyễn Văn Chiến** - Faculty Advisor
 
 ## 📄 License
 
