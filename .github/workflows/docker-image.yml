@@ -31,8 +31,8 @@ jobs:
     - name: Build and push with Docker Compose
       run: |
         cd src
-        docker-compose build
-        docker-compose push
+        docker compose build
+        docker compose push
         
     - name: Tag and push images
       run: |
