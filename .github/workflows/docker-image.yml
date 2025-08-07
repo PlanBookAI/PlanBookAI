@@ -1,19 +1,21 @@
-name: Docker Build and Deploy
+name: Build and Push Docker Services
 
 on:
   push:
     branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: planbookai
+  IMAGE_NAME: planbookai/planbookai
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  build-and-test:
+  build-and-push:
     runs-on: ubuntu-latest
     
     steps:
@@ -33,7 +35,7 @@ jobs:
     - name: Build and push AuthService
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ./src
         file: ./src/AuthService/Dockerfile
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.run_id }}
@@ -43,7 +45,7 @@ jobs:
     - name: Build and push UserService
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ./src
         file: ./src/UserService/Dockerfile
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/user-service:${{ github.run_id }}
@@ -53,7 +55,7 @@ jobs:
     - name: Build and push PlanService
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ./src
         file: ./src/PlanService/Dockerfile
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/plan-service:${{ github.run_id }}
@@ -63,7 +65,7 @@ jobs:
     - name: Build and push TaskService
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ./src
         file: ./src/TaskService/Dockerfile
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/task-service:${{ github.run_id }}
@@ -73,7 +75,7 @@ jobs:
     - name: Build and push GatewayService
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ./src
         file: ./src/GatewayService/Dockerfile
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ github.run_id }}
@@ -81,7 +83,7 @@ jobs:
         cache-to: type=gha,mode=max
 
   deploy:
-    needs: build-and-test
+    needs: build-and-push
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     
@@ -89,3 +91,9 @@ jobs:
     - name: Deploy to production
       run: |
         echo "Deployment completed successfully!"
+        echo "Images pushed to:"
+        echo "- ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.run_id }}"
+        echo "- ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/user-service:${{ github.run_id }}"
+        echo "- ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/plan-service:${{ github.run_id }}"
+        echo "- ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/task-service:${{ github.run_id }}"
+        echo "- ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ github.run_id }}"
