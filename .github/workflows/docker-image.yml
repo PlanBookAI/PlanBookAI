@@ -3,8 +3,6 @@ name: Docker Build and Deploy
 on:
   push:
     branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
 
 env:
   REGISTRY: ghcr.io
@@ -30,28 +28,16 @@ jobs:
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
-        password: ${{ secrets.PACKAGES_TOKEN }}
+        password: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Build and push with Docker Compose
-      run: |
-        cd src
-        docker compose build
-        docker compose push
-        
-    - name: Tag and push images
-      run: |
-        cd src
-        docker tag authservice:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.run_id }}
-        docker tag userservice:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/user-service:${{ github.run_id }}
-        docker tag planservice:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/plan-service:${{ github.run_id }}
-        docker tag taskservice:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/task-service:${{ github.run_id }}
-        docker tag gatewayservice:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ github.run_id }}
-        
-        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.run_id }}
-        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/user-service:${{ github.run_id }}
-        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/plan-service:${{ github.run_id }}
-        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/task-service:${{ github.run_id }}
-        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ github.run_id }}
+    - name: Build and push AuthService
+      uses: docker/build-push-action@v5
+      with:
+        context: ./src/AuthService
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.run_id }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
   deploy:
     needs: build-and-test
@@ -60,11 +46,5 @@ jobs:
     
     steps:
     - name: Deploy to production
-      run: |
-        echo "Deploying to production..."
-        # Add your deployment commands here
-        # Example: kubectl apply, docker-compose up, etc.
-        
-    - name: Notify deployment
       run: |
         echo "Deployment completed successfully!"
