@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: planbookai
 
 jobs:
   build-and-test:
@@ -33,7 +33,7 @@ jobs:
       with:
         context: ./src/AuthService
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.sha }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.run_id }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
@@ -42,7 +42,7 @@ jobs:
       with:
         context: ./src/UserService
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/user-service:${{ github.sha }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/user-service:${{ github.run_id }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
@@ -51,7 +51,7 @@ jobs:
       with:
         context: ./src/PlanService
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/plan-service:${{ github.sha }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/plan-service:${{ github.run_id }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
@@ -60,7 +60,7 @@ jobs:
       with:
         context: ./src/TaskService
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/task-service:${{ github.sha }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/task-service:${{ github.run_id }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
@@ -69,7 +69,7 @@ jobs:
       with:
         context: ./src/GatewayService
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ github.sha }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ github.run_id }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
