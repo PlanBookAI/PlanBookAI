@@ -262,10 +262,25 @@ Authorization: Bearer {token}
 
 ## 👥 Development Team
 
-- **Team Lead**: Khôi - Gateway Service & Architecture
-- **Backend**: Lâm, Long - User Service
-- **Backend**: Quân, Thịnh - Plan Service  
-- **Backend**: Kim, Quân - Task Service
+### 🎯 Team Members
+- **Nguyễn Vương Minh Khôi** (22H1120108) - Team Lead - Gateway Service & Architecture
+- **Phạm Văn Phi Long** (068205003905) - Backend - User Service
+- **Lê Tùng Lâm** (2251120302) - Backend - User Service
+- **Trần Khắc Quân** (2251120439) - Backend - Plan Service
+- **Ngô Đình Quốc Thịnh** (2251120443) - Backend - Plan Service
+- **Nguyễn Trọng Kim** (2251120299) - Backend - Task Service
+
+### 📧 Contact Information
+- **Khôi**: 22H1120108@ut.edu.vn
+- **Long**: longpvp3905@ut.edu.vn
+- **Lâm**: 2251120302@ut.edu.vn
+- **Quân**: 2251120439@ut.edu.vn
+- **Thịnh**: 2251120443@ut.edu.vn
+- **Kim**: 2251120299@ut.edu.vn
+
+## 🎓 Academic Supervisor
+
+**Ths. Nguyễn Văn Chiến** - Faculty Advisor
 
 ## 📄 License
 
