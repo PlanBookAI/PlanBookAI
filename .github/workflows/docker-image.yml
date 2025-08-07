@@ -72,16 +72,6 @@ jobs:
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        
-    - name: Build and push Docker Compose
-      uses: docker/build-push-action@v5
-      with:
-        context: ./src
-        file: ./src/docker-compose.yml
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/planbookai:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
 
   deploy:
     needs: build-and-test
