@@ -1,6 +1,25 @@
-@PlanService_HostAddress = http://localhost:5003
+@PlanService_HostAddress = http://localhost:8083
 
-GET {{PlanService_HostAddress}}/weatherforecast/
+### Test PlanService Health Check
+GET {{PlanService_HostAddress}}/health
+Accept: application/json
+
+###
+
+### Test PlanService Health Check API
+GET {{PlanService_HostAddress}}/api/v1/health
+Accept: application/json
+
+###
+
+### Test PlanService Detailed Health Check
+GET {{PlanService_HostAddress}}/api/v1/health/detailed
+Accept: application/json
+
+###
+
+### Test via Gateway - Giáo án Service Health
+GET http://localhost:8080/api/v1/giao-an/health
 Accept: application/json
 
 ###

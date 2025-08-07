@@ -1,6 +1,25 @@
-@AuthService_HostAddress = http://localhost:5001
+@AuthService_HostAddress = http://localhost:8081
 
-GET {{AuthService_HostAddress}}/weatherforecast/
+### Test AuthService Health Check
+GET {{AuthService_HostAddress}}/health
+Accept: application/json
+
+###
+
+### Test AuthService Health Check API
+GET {{AuthService_HostAddress}}/api/v1/health
+Accept: application/json
+
+###
+
+### Test AuthService Detailed Health Check
+GET {{AuthService_HostAddress}}/api/v1/health/detailed
+Accept: application/json
+
+###
+
+### Test via Gateway - Xác thực Service Health
+GET http://localhost:8080/api/v1/xac-thuc/health
 Accept: application/json
 
 ###

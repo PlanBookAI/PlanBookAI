@@ -1,6 +1,25 @@
-@UserService_HostAddress = http://localhost:5005
+@UserService_HostAddress = http://localhost:8082
 
-GET {{UserService_HostAddress}}/weatherforecast/
+### Test UserService Health Check
+GET {{UserService_HostAddress}}/health
+Accept: application/json
+
+###
+
+### Test UserService Health Check API
+GET {{UserService_HostAddress}}/api/v1/health
+Accept: application/json
+
+###
+
+### Test UserService Detailed Health Check
+GET {{UserService_HostAddress}}/api/v1/health/detailed
+Accept: application/json
+
+###
+
+### Test via Gateway - Người dùng Service Health
+GET http://localhost:8080/api/v1/nguoi-dung/health
 Accept: application/json
 
 ###

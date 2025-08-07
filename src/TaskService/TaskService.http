@@ -1,6 +1,25 @@
-@TaskService_HostAddress = http://localhost:5004
+@TaskService_HostAddress = http://localhost:8084
 
-GET {{TaskService_HostAddress}}/weatherforecast/
+### Test TaskService Health Check
+GET {{TaskService_HostAddress}}/health
+Accept: application/json
+
+###
+
+### Test TaskService Health Check API
+GET {{TaskService_HostAddress}}/api/v1/health
+Accept: application/json
+
+###
+
+### Test TaskService Detailed Health Check
+GET {{TaskService_HostAddress}}/api/v1/health/detailed
+Accept: application/json
+
+###
+
+### Test via Gateway - Câu hỏi Service Health
+GET http://localhost:8080/api/v1/cau-hoi/health
 Accept: application/json
 
 ###
