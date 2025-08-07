@@ -33,9 +33,50 @@ jobs:
     - name: Build and push AuthService
       uses: docker/build-push-action@v5
       with:
-        context: ./src/AuthService
+        context: .
+        file: ./src/AuthService/Dockerfile
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.run_id }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push UserService
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./src/UserService/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/user-service:${{ github.run_id }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push PlanService
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./src/PlanService/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/plan-service:${{ github.run_id }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push TaskService
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./src/TaskService/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/task-service:${{ github.run_id }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push GatewayService
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./src/GatewayService/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ github.run_id }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
