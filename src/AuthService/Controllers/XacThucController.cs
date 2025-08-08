@@ -36,7 +36,7 @@ namespace AuthService.Controllers
                     Id = Guid.NewGuid(),
                     Email = yeuCau.Email,
                     HoTen = "Test User",
-                    MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword("123456"),
+                    MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword("Password123"),
                     VaiTroId = 4,
                     LaHoatDong = true,
                     LanDangNhapCuoi = DateTime.UtcNow,
@@ -54,8 +54,8 @@ namespace AuthService.Controllers
                     CapNhatLuc = DateTime.UtcNow
                 };
 
-                // Verify password (mock: accept "123456")
-                if (yeuCau.MatKhau != "123456")
+                // Verify password (mock: accept "Password123")
+                if (yeuCau.MatKhau != "Password123")
                 {
                     _logger.LogWarning("Invalid password for email: {Email}", yeuCau.Email);
                     return Ok(new PhanHoiDangNhap
