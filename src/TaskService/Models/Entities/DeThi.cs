@@ -15,6 +15,9 @@ namespace TaskService.Models.Entities
 
         // Navigation properties để liên kết với các câu hỏi trong đề thi
         public virtual ICollection<CauHoi> CauHois { get; set; }
+        
+        // Navigation property cho relationship với BaiLam (1:N)
+        public virtual ICollection<BaiLam> BaiLams { get; set; }
 
         // Các phương thức (Methods)
 

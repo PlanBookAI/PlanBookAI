@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using TaskService.Models.Entities;
 
-namespace TaskService.Models.Entities
+namespace TaskService.Models.DTOs
 {
     public class YeuCauTaoDeThi
     {
         // Thuộc tính
-        public String id { get; set; }
-        public String giaoVienId { get; set; }
-        public String monHoc { get; set; }
-        public int soLuongCauHoi { get; set; }
-        public float tongDiem { get; set; }
-        public int thoiGianLam { get; set; }
+        public String Id { get; set; }
+        public String GiaoVienId { get; set; }
+        public String MonHoc { get; set; }
+        public int SoLuongCauHoi { get; set; }
+        public float TongDiem { get; set; }
+        public int ThoiGianLam { get; set; }
 
         // Có thể thêm thuộc tính cho mức độ khó của câu hỏi
-        public String doKho { get; set; } // Ví dụ: "De", "TrungBinh", "Kho"
+        public String DoKho { get; set; } // Ví dụ: "De", "TrungBinh", "Kho"
 
         // Các phương thức (Methods)
 
@@ -28,17 +30,17 @@ namespace TaskService.Models.Entities
             var deThi = new DeThi
             {
                 id = Guid.NewGuid().ToString(),
-                tieuDe = "Đề thi tự động cho môn " + this.monHoc,
-                monHoc = this.monHoc,
-                thoiGianLam = this.thoiGianLam,
-                tongDiem = this.tongDiem
+                tieuDe = "Đề thi tự động cho môn " + this.MonHoc,
+                monHoc = this.MonHoc,
+                thoiGianLam = this.ThoiGianLam,
+                tongDiem = this.TongDiem
             };
 
             // Lọc câu hỏi theo môn học và độ khó
-            var cauHoiPhuHop = tatCaCauHoi.Where(c => c.monHoc == this.monHoc && c.doKho == this.doKho).ToList();
+            var cauHoiPhuHop = tatCaCauHoi.Where(c => c.monHoc == this.MonHoc && c.doKho == this.DoKho).ToList();
 
             // Tạo ngẫu nhiên câu hỏi cho đề thi
-            deThi.taoNgauNhien(cauHoiPhuHop, this.soLuongCauHoi);
+            deThi.taoNgauNhien(cauHoiPhuHop, this.SoLuongCauHoi);
 
             return deThi;
         }

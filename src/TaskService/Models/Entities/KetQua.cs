@@ -12,12 +12,15 @@ namespace TaskService.Models.Entities
         public float diem { get; set; }
         public int soCauDung { get; set; }
         public String chiTietDapAn { get; set; }
+        public String baiLamId { get; set; } // Foreign key cho BaiLam
 
         // Navigation properties cho Entity Framework Core
         // Mỗi kết quả liên kết với một Học sinh
         public virtual HocSinh HocSinh { get; set; }
         // Mỗi kết quả liên kết với một Đề thi
         public virtual DeThi DeThi { get; set; }
+        // Mỗi kết quả liên kết với một Bài làm (1:1)
+        public virtual BaiLam BaiLam { get; set; }
 
         // Các phương thức (Methods)
 

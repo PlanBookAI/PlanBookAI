@@ -1,40 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TaskService.Models.Entities
+namespace TaskService.Models.Enums
 {
-    public class TrangThaiDeThi
+    /// <summary>
+    /// Enum định nghĩa các trạng thái của đề thi
+    /// </summary>
+    public enum TrangThaiDeThi
     {
-        // Thuộc tính (Attributes)
-        public String id { get; set; }
-        public String tenTrangThai { get; set; }
-        public String moTa { get; set; }
-
-        // Các phương thức (Methods)
-
         /// <summary>
-        /// Tạo một trạng thái mới cho đề thi.
+        /// Đề thi đang được tạo
         /// </summary>
-        /// <param name="tenTrangThaiMoi">Tên của trạng thái mới.</param>
-        /// <param name="moTaMoi">Mô tả chi tiết về trạng thái.</param>
-        public void taoTrangThai(string tenTrangThaiMoi, string moTaMoi)
-        {
-            this.id = Guid.NewGuid().ToString();
-            this.tenTrangThai = tenTrangThaiMoi;
-            this.moTa = moTaMoi;
-            Console.WriteLine($"Đã tạo trạng thái đề thi mới: '{this.tenTrangThai}'");
-        }
-
+        DangTao = 1,
+        
         /// <summary>
-        /// Cập nhật tên và mô tả của một trạng thái.
+        /// Đề thi đã hoàn thành và sẵn sàng sử dụng
         /// </summary>
-        /// <param name="tenMoi">Tên mới của trạng thái.</param>
-        /// <param name="moTaMoi">Mô tả mới của trạng thái.</param>
-        public void capNhatTrangThai(string tenMoi, string moTaMoi)
-        {
-            this.tenTrangThai = tenMoi;
-            this.moTa = moTaMoi;
-            Console.WriteLine($"Đã cập nhật trạng thái đề thi thành: '{this.tenTrangThai}'");
-        }
+        HoanThanh = 2,
+        
+        /// <summary>
+        /// Đề thi đang được sử dụng trong kỳ thi
+        /// </summary>
+        DangSuDung = 3,
+        
+        /// <summary>
+        /// Đề thi đã kết thúc và không còn sử dụng
+        /// </summary>
+        KetThuc = 4,
+        
+        /// <summary>
+        /// Đề thi bị vô hiệu hóa
+        /// </summary>
+        VoHieuHoa = 5
     }
 }

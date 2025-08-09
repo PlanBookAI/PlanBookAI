@@ -16,9 +16,6 @@ namespace TaskService.Models.Entities
         public virtual DeThi DeThi { get; set; } // Mối quan hệ N-1 với DeThi
         public virtual KetQua KetQua { get; set; } // Mối quan hệ 1-1 với KetQua
 
-        // Có thể thêm một collection các câu trả lời chi tiết
-        public virtual ICollection<CauTraLoi> CauTraLois { get; set; }
-
         // Các phương thức (Methods)
 
         /// <summary>
@@ -28,20 +25,6 @@ namespace TaskService.Models.Entities
         {
             this.thoiGianNopBai = DateTime.Now;
             Console.WriteLine($"Bài làm '{this.id}' của học sinh '{this.hocSinhId}' đã được nộp vào lúc {this.thoiGianNopBai}.");
-        }
-
-        /// <summary>
-        /// Thêm một câu trả lời của học sinh vào bài làm.
-        /// </summary>
-        /// <param name="cauTraLoi">Câu trả lời chi tiết.</param>
-        public void themCauTraLoi(CauTraLoi cauTraLoi)
-        {
-            if (this.CauTraLois == null)
-            {
-                this.CauTraLois = new List<CauTraLoi>();
-            }
-            this.CauTraLois.Add(cauTraLoi);
-            Console.WriteLine($"Đã thêm câu trả lời cho câu hỏi '{cauTraLoi.cauHoiId}' vào bài làm.");
         }
     }
 }
