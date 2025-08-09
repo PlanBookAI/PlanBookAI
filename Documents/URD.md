@@ -1,15 +1,4 @@
-# TÀI LIỆU YÊU CẦU NGƯỜI DÙNG (URD)
-
-## Tài liệu Đặc tả Yêu cầu Người dùng - PlanbookAI
-
----
-
-**Dự án:** PlanbookAI - Cổng công cụ AI dành cho giáo viên trung học phổ thông  
-**Phiên bản:** 1.0  
-**Ngày:** 24/07/2024  
-**Trạng thái:** Bản thảo  
-
----
+# URD - PlanbookAI
 
 ## 1. GIỚI THIỆU
 
@@ -31,7 +20,7 @@ Tài liệu này xác định các yêu cầu người dùng cho hệ thống Pl
 ### 1.3 Đối tượng sử dụng
 
 | Vai trò | Mô tả |
-|---------|-------|
+|---|----|
 | **Admin** | Quản trị viên hệ thống |
 | **Manager** | Quản lý nội dung và người dùng |
 | **Staff** | Nhân viên hỗ trợ kỹ thuật |
@@ -60,7 +49,7 @@ PlanbookAI cung cấp bộ công cụ AI tích hợp giúp:
 ### 2.2 Mục tiêu nghiệp vụ
 
 | Mục tiêu | Chỉ số đo lường |
-|----------|----------------|
+|----|----|
 | Giảm thời gian soạn giáo án | Giảm 50% thời gian so với làm thủ công |
 | Tăng hiệu quả chấm bài | Chấm được 100 bài trong 10 phút |
 | Cải thiện chất lượng đề thi | Đề thi cân bằng theo độ khó |
@@ -319,6 +308,7 @@ PlanbookAI cung cấp bộ công cụ AI tích hợp giúp:
 ### 5.1 Nhóm chức năng: Quản lý Ngân hàng Câu hỏi
 
 **CH001:** Tạo câu hỏi trắc nghiệm
+
 ```
 Với vai trò Nhân viên, tôi muốn tạo câu hỏi trắc nghiệm với 4 đáp án
 để có thể xây dựng ngân hàng câu hỏi cho giáo viên sử dụng.
@@ -331,6 +321,7 @@ Tiêu chí chấp nhận:
 ```
 
 **CH002:** Nhập câu hỏi từ Excel
+
 ```
 Với vai trò Nhân viên, tôi muốn nhập hàng loạt câu hỏi từ file Excel
 để tiết kiệm thời gian nhập liệu thủ công.
@@ -345,6 +336,7 @@ Tiêu chí chấp nhận:
 ### 5.2 Nhóm chức năng: Tạo và Chấm Đề Thi
 
 **CH003:** Tạo đề thi tự động
+
 ```
 Với vai trò Giáo viên, tôi muốn tạo đề thi trắc nghiệm từ ngân hàng câu hỏi
 để có đề thi cân bằng về độ khó và nội dung.
@@ -357,6 +349,7 @@ Tiêu chí chấp nhận:
 ```
 
 **CH004:** Chấm bài bằng OCR
+
 ```
 Với vai trò Giáo viên, tôi muốn tải lên ảnh bài làm và được hệ thống chấm tự động
 để tiết kiệm thời gian chấm bài thủ công.
@@ -371,6 +364,7 @@ Tiêu chí chấp nhận:
 ### 5.3 Nhóm chức năng: Phân tích Kết quả
 
 **CH005:** Bảng điều khiển kết quả học sinh
+
 ```
 Với vai trò Giáo viên, tôi muốn xem bảng điều khiển tổng quan về kết quả học sinh
 để hiểu được tình hình học tập của cả lớp.
@@ -419,10 +413,10 @@ graph TD
 
 ### 7.1 Ràng buộc kỹ thuật
 
-- Sử dụng Spring Boot cho backend
+- Sử dụng .NET Core cho backend
 - ReactJS/Next.js cho frontend
 - PostgreSQL database (qua Supabase)
-- Deploy trên VPS
+- Deploy trên AWS infrastructure
 - Mobile-responsive design
 
 ### 7.2 Ràng buộc nghiệp vụ
@@ -461,5 +455,3 @@ graph TD
 - ✅ Giảm 50% thời gian lập kế hoạch bài giảng
 - ✅ Độ chính xác OCR trên 95% trên bộ dữ liệu thử nghiệm
 - ✅ Thời gian hoạt động hệ thống > 99% trong 1 tháng thí điểm
-
----

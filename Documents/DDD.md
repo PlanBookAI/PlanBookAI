@@ -51,118 +51,129 @@ PlanbookAI là một nền tảng hỗ trợ giáo viên THPT thông qua các c�
 
 ### 3.1 User Management Domain
 
-```java
+```csharp
 // Aggregate Root
-public class NguoiDung {
-    private NguoiDungId id;
-    private Email email;
-    private MatKhauMaHoa matKhau;
-    private HoTen hoTen;
-    private VaiTro vaiTro;
-    private TrangThaiHoatDong trangThai;
+public class NguoiDung
+{
+    public NguoiDungId Id { get; private set; }
+    public Email Email { get; private set; }
+    public MatKhauMaHoa MatKhau { get; private set; }
+    public HoTen HoTen { get; private set; }
+    public VaiTro VaiTro { get; private set; }
+    public TrangThaiHoatDong TrangThai { get; private set; }
     
     // Domain behaviors
-    public void dangNhap(String matKhauGoc) { }
-    public void capNhatThongTin(HoTen hoTenMoi) { }
-    public void vohieuHoa() { }
+    public void DangNhap(string matKhauGoc) { }
+    public void CapNhatThongTin(HoTen hoTenMoi) { }
+    public void VoHieuHoa() { }
 }
 
 // Value Objects
-public class Email {
-    private final String value;
+public class Email
+{
+    public string Value { get; }
     // Validation logic
 }
 
-public class MatKhauMaHoa {
-    private final String hashedValue;
+public class MatKhauMaHoa
+{
+    public string HashedValue { get; }
     // Encryption logic
 }
 
 // Domain Services
-public class DichVuXacThuc {
-    public KetQuaXacThuc xacThuc(Email email, String matKhau) { }
+public class DichVuXacThuc
+{
+    public KetQuaXacThuc XacThuc(Email email, string matKhau) { }
 }
 ```
 
 ### 3.2 Educational Content Domain
 
-```java
+```csharp
 // Aggregate Root
-public class GiaoAn {
-    private GiaoAnId id;
-    private TieuDe tieuDe;
-    private MucTieu mucTieu;
-    private NoiDung noiDung;
-    private NguoiDungId giaoVienId;
-    private TrangThaiGiaoAn trangThai;
+public class GiaoAn
+{
+    public GiaoAnId Id { get; private set; }
+    public TieuDe TieuDe { get; private set; }
+    public MucTieu MucTieu { get; private set; }
+    public NoiDung NoiDung { get; private set; }
+    public NguoiDungId GiaoVienId { get; private set; }
+    public TrangThaiGiaoAn TrangThai { get; private set; }
     
     // Domain behaviors
-    public void taoTuMau(MauGiaoAn mau) { }
-    public void capNhatNoiDung(NoiDung noiDungMoi) { }
-    public void pheduyet() { }
+    public void TaoTuMau(MauGiaoAn mau) { }
+    public void CapNhatNoiDung(NoiDung noiDungMoi) { }
+    public void PheDuyet() { }
 }
 
 // Domain Services
-public class DichVuTaoGiaoAn {
-    public GiaoAn taoGiaoAnTuAI(YeuCauTaoGiaoAn yeuCau) { }
+public class DichVuTaoGiaoAn
+{
+    public GiaoAn TaoGiaoAnTuAI(YeuCauTaoGiaoAn yeuCau) { }
 }
 ```
 
 ### 3.3 Assessment Domain
 
-```java
+```csharp
 // Aggregate Root
-public class DeThi {
-    private DeThiId id;
-    private TieuDe tieuDe;
-    private List<CauHoiTrongDeThi> danhSachCauHoi;
-    private NguoiDungId giaoVienId;
-    private ThoiGianLamBai thoiGianLam;
+public class DeThi
+{
+    public DeThiId Id { get; private set; }
+    public TieuDe TieuDe { get; private set; }
+    public List<CauHoiTrongDeThi> DanhSachCauHoi { get; private set; }
+    public NguoiDungId GiaoVienId { get; private set; }
+    public ThoiGianLamBai ThoiGianLam { get; private set; }
     
     // Domain behaviors
-    public void themCauHoi(CauHoi cauHoi, Diem diem) { }
-    public void taoNgauNhien(TieuChiTaoDe tieuChi) { }
-    public KetQua chamDiem(BaiLam baiLam) { }
+    public void ThemCauHoi(CauHoi cauHoi, Diem diem) { }
+    public void TaoNgauNhien(TieuChiTaoDe tieuChi) { }
+    public KetQua ChamDiem(BaiLam baiLam) { }
 }
 
 // Aggregate Root
-public class CauHoi {
-    private CauHoiId id;
-    private NoiDungCauHoi noiDung;
-    private List<LuaChon> danhSachLuaChon;
-    private LuaChonDung dapAnDung;
-    private MucDoKho mucDoKho;
+public class CauHoi
+{
+    public CauHoiId Id { get; private set; }
+    public NoiDungCauHoi NoiDung { get; private set; }
+    public List<LuaChon> DanhSachLuaChon { get; private set; }
+    public LuaChonDung DapAnDung { get; private set; }
+    public MucDoKho MucDoKho { get; private set; }
     
     // Domain behaviors
-    public boolean kiemTraDapAn(LuaChon luaChon) { }
+    public bool KiemTraDapAn(LuaChon luaChon) { }
 }
 
 // Domain Services
-public class DichVuOCR {
-    public KetQuaOCR xuLyBaiLam(AnhBaiLam anh) { }
-    public ThongTinHocSinh trichXuatThongTin(KetQuaOCR ketQua) { }
+public class DichVuOCR
+{
+    public KetQuaOCR XuLyBaiLam(AnhBaiLam anh) { }
+    public ThongTinHocSinh TrichXuatThongTin(KetQuaOCR ketQua) { }
 }
 ```
 
 ### 3.4 Student Data Domain
 
-```java
+```csharp
 // Aggregate Root
-public class HocSinh {
-    private HocSinhId id;
-    private HoTen hoTen;
-    private MaSoHocSinh maSo;
-    private NguoiDungId giaoVienSoHuuId;
-    private List<KetQuaHocTap> lichSuKetQua;
+public class HocSinh
+{
+    public HocSinhId Id { get; private set; }
+    public HoTen HoTen { get; private set; }
+    public MaSoHocSinh MaSo { get; private set; }
+    public NguoiDungId GiaoVienSoHuuId { get; private set; }
+    public List<KetQuaHocTap> LichSuKetQua { get; private set; }
     
     // Domain behaviors
-    public void capNhatKetQua(KetQua ketQuaMoi) { }
-    public MucDoProficiency tinhMucDoProficiency() { }
+    public void CapNhatKetQua(KetQua ketQuaMoi) { }
+    public MucDoProficiency TinhMucDoProficiency() { }
 }
 
 // Domain Services
-public class DichVuImportHocSinh {
-    public List<HocSinh> importTuExcel(FileExcel file, NguoiDungId giaoVienId) { }
+public class DichVuImportHocSinh
+{
+    public List<HocSinh> ImportTuExcel(FileExcel file, NguoiDungId giaoVienId) { }
 }
 ```
 
@@ -170,30 +181,34 @@ public class DichVuImportHocSinh {
 
 ### 4.1 User Domain Events
 
-```java
-public class NguoiDungDaDangNhap implements DomainEvent {
-    private final NguoiDungId nguoiDungId;
-    private final LocalDateTime thoiGianDangNhap;
+```csharp
+public class NguoiDungDaDangNhap : IDomainEvent
+{
+    public NguoiDungId NguoiDungId { get; }
+    public DateTime ThoiGianDangNhap { get; }
 }
 
-public class NguoiDungDaCapNhatThongTin implements DomainEvent {
-    private final NguoiDungId nguoiDungId;
-    private final ThongTinCapNhat thongTinMoi;
+public class NguoiDungDaCapNhatThongTin : IDomainEvent
+{
+    public NguoiDungId NguoiDungId { get; }
+    public ThongTinCapNhat ThongTinMoi { get; }
 }
 ```
 
 ### 4.2 Assessment Domain Events
 
-```java
-public class DeThiDaTao implements DomainEvent {
-    private final DeThiId deThiId;
-    private final NguoiDungId giaoVienId;
+```csharp
+public class DeThiDaTao : IDomainEvent
+{
+    public DeThiId DeThiId { get; }
+    public NguoiDungId GiaoVienId { get; }
 }
 
-public class BaiLamDaCham implements DomainEvent {
-    private final KetQuaId ketQuaId;
-    private final HocSinhId hocSinhId;
-    private final Diem diem;
+public class BaiLamDaCham : IDomainEvent
+{
+    public KetQuaId KetQuaId { get; }
+    public HocSinhId HocSinhId { get; }
+    public Diem Diem { get; }
 }
 ```
 
@@ -201,49 +216,55 @@ public class BaiLamDaCham implements DomainEvent {
 
 ### 5.1 AI Integration Services
 
-```java
-public interface DichVuTichHopAI {
-    GiaoAn taoGiaoAnTuAI(YeuCauTaoGiaoAn yeuCau);
-    List<CauHoi> taoNganHangCauHoi(TieuChiTaoCauHoi tieuChi);
-    NoiDungGiaoAn caiThienNoiDung(NoiDungGiaoAn noiDungGoc);
+```csharp
+public interface IDichVuTichHopAI
+{
+    GiaoAn TaoGiaoAnTuAI(YeuCauTaoGiaoAn yeuCau);
+    List<CauHoi> TaoNganHangCauHoi(TieuChiTaoCauHoi tieuChi);
+    NoiDungGiaoAn CaiThienNoiDung(NoiDungGiaoAn noiDungGoc);
 }
 ```
 
 ### 5.2 OCR Processing Services
 
-```java
-public interface DichVuXuLyOCR {
-    KetQuaOCR nhanDangVanBan(AnhBaiLam anh);
-    ThongTinHocSinh trichXuatThongTinHocSinh(KetQuaOCR ketQua);
-    List<DapAn> trichXuatDapAn(KetQuaOCR ketQua, DeThi deThi);
+```csharp
+public interface IDichVuXuLyOCR
+{
+    KetQuaOCR NhanDangVanBan(AnhBaiLam anh);
+    ThongTinHocSinh TrichXuatThongTinHocSinh(KetQuaOCR ketQua);
+    List<DapAn> TrichXuatDapAn(KetQuaOCR ketQua, DeThi deThi);
 }
 ```
 
 ## 6. Repositories (Domain Layer)
 
-```java
-public interface NguoiDungRepository {
-    Optional<NguoiDung> findById(NguoiDungId id);
-    Optional<NguoiDung> findByEmail(Email email);
-    void save(NguoiDung nguoiDung);
+```csharp
+public interface INguoiDungRepository
+{
+    Task<NguoiDung?> GetByIdAsync(NguoiDungId id);
+    Task<NguoiDung?> GetByEmailAsync(Email email);
+    Task SaveAsync(NguoiDung nguoiDung);
 }
 
-public interface GiaoAnRepository {
-    Optional<GiaoAn> findById(GiaoAnId id);
-    List<GiaoAn> findByGiaoVienId(NguoiDungId giaoVienId);
-    void save(GiaoAn giaoAn);
+public interface IGiaoAnRepository
+{
+    Task<GiaoAn?> GetByIdAsync(GiaoAnId id);
+    Task<List<GiaoAn>> GetByGiaoVienIdAsync(NguoiDungId giaoVienId);
+    Task SaveAsync(GiaoAn giaoAn);
 }
 
-public interface CauHoiRepository {
-    Optional<CauHoi> findById(CauHoiId id);
-    List<CauHoi> findByTieuChi(TieuChiTimKiem tieuChi);
-    void save(CauHoi cauHoi);
+public interface ICauHoiRepository
+{
+    Task<CauHoi?> GetByIdAsync(CauHoiId id);
+    Task<List<CauHoi>> GetByTieuChiAsync(TieuChiTimKiem tieuChi);
+    Task SaveAsync(CauHoi cauHoi);
 }
 
-public interface HocSinhRepository {
-    Optional<HocSinh> findById(HocSinhId id);
-    List<HocSinh> findByGiaoVienId(NguoiDungId giaoVienId);
-    void save(HocSinh hocSinh);
+public interface IHocSinhRepository
+{
+    Task<HocSinh?> GetByIdAsync(HocSinhId id);
+    Task<List<HocSinh>> GetByGiaoVienIdAsync(NguoiDungId giaoVienId);
+    Task SaveAsync(HocSinh hocSinh);
 }
 ```
 
@@ -251,43 +272,50 @@ public interface HocSinhRepository {
 
 ### 7.1 Common Value Objects
 
-```java
-public class TieuDe {
-    private final String value;
+```csharp
+public class TieuDe
+{
+    public string Value { get; }
     // Validation: không null, độ dài 1-200 ký tự
 }
 
-public class NoiDung {
-    private final String value;
+public class NoiDung
+{
+    public string Value { get; }
     // Validation: không null, có thể chứa HTML
 }
 
-public class Diem {
-    private final double value;
+public class Diem
+{
+    public double Value { get; }
     // Validation: 0.0 <= value <= 10.0
 }
 
-public class MucDoKho {
-    public enum Level { DE, TRUNG_BINH, KHO, RAT_KHO }
-    private final Level level;
+public class MucDoKho
+{
+    public enum Level { De, TrungBinh, Kho, RatKho }
+    public Level Level { get; }
 }
 ```
 
 ### 7.2 Educational Specific Value Objects
 
-```java
-public class MonHoc {
-    public enum Type { HOA_HOC, VAT_LY, SINH_HOC, TOAN }
-    private final Type type;
+```csharp
+public class MonHoc
+{
+    public enum Type { HoaHoc, VatLy, SinhHoc, Toan }
+    public Type Type { get; }
 }
 
-public class LopHoc {
-    private final int khoi; // 10, 11, 12
-    private final String tenLop; // A1, B2, etc.
+public class LopHoc
+{
+    public int Khoi { get; } // 10, 11, 12
+    public string TenLop { get; } // A1, B2, etc.
 }
 
-public class ThoiGianLamBai {
-    private final int phut;
+public class ThoiGianLamBai
+{
+    public int Phut { get; }
     // Validation: 15 <= phut <= 180
 }
 ```
@@ -318,13 +346,14 @@ public class ThoiGianLamBai {
 
 ### 9.1 External Service Adapters
 
-```java
+```csharp
 // Gemini AI Adapter
-public class GeminiAIAdapter implements DichVuTichHopAI {
-    private final GeminiClient geminiClient;
+public class GeminiAIAdapter : IDichVuTichHopAI
+{
+    private readonly IGeminiClient _geminiClient;
     
-    @Override
-    public GiaoAn taoGiaoAnTuAI(YeuCauTaoGiaoAn yeuCau) {
+    public async Task<GiaoAn> TaoGiaoAnTuAI(YeuCauTaoGiaoAn yeuCau)
+    {
         // Convert domain objects to Gemini API format
         // Call external service
         // Convert response back to domain objects
@@ -332,11 +361,12 @@ public class GeminiAIAdapter implements DichVuTichHopAI {
 }
 
 // Google Vision OCR Adapter
-public class GoogleVisionAdapter implements DichVuXuLyOCR {
-    private final VisionClient visionClient;
+public class GoogleVisionAdapter : IDichVuXuLyOCR
+{
+    private readonly IVisionClient _visionClient;
     
-    @Override
-    public KetQuaOCR nhanDangVanBan(AnhBaiLam anh) {
+    public async Task<KetQuaOCR> NhanDangVanBan(AnhBaiLam anh)
+    {
         // Convert domain objects to Google Vision format
         // Process OCR
         // Return domain-specific result
@@ -367,9 +397,9 @@ Domain Layer
 │   ├── NguoiDungDaDangNhap
 │   └── BaiLamDaCham
 ├── Repositories (Interfaces)
-│   ├── NguoiDungRepository
-│   ├── GiaoAnRepository
-│   └── CauHoiRepository
+│   ├── INguoiDungRepository
+│   ├── IGiaoAnRepository
+│   └── ICauHoiRepository
 └── Specifications
     ├── CauHoiSpec
     └── GiaoAnSpec
@@ -380,7 +410,7 @@ Domain Layer
 ### 11.1 Core Terms (Vietnamese)
 
 | Term | Definition |
-|------|------------|
+|---|---|
 | Giáo án | Lesson plan - kế hoạch bài giảng chi tiết |
 | Đề thi | Exam - bộ câu hỏi để kiểm tra học sinh |
 | Câu hỏi | Question - đơn vị cơ bản trong ngân hàng câu hỏi |
@@ -406,22 +436,22 @@ Domain Layer
 - **Entities**: PascalCase, Vietnamese names (`NguoiDung`, `GiaoAn`)
 - **Value Objects**: PascalCase, descriptive (`TieuDe`, `MucDoKho`)
 - **Domain Services**: `DichVu` prefix (`DichVuXacThuc`)
-- **Repository Interfaces**: Entity name + `Repository`
+- **Repository Interfaces**: `I` + Entity name + `Repository`
 - **Domain Events**: Past tense, Vietnamese (`NguoiDungDaTao`)
 
 ### 12.2 Package Structure
 
 ```
-com.planbookai.domain
-├── nguoidung/           # User bounded context
-├── noidunggiaoduc/      # Educational content context  
-├── danhgia/             # Assessment context
-├── hocsinh/             # Student data context
-├── shared/              # Shared kernel
-│   ├── valueobjects/
-│   ├── events/
-│   └── exceptions/
-└── services/            # Domain services
+PlanbookAI.Domain
+├── NguoiDung/           # User bounded context
+├── NoiDungGiaoDuc/      # Educational content context  
+├── DanhGia/             # Assessment context
+├── HocSinh/             # Student data context
+├── Shared/              # Shared kernel
+│   ├── ValueObjects/
+│   ├── Events/
+│   └── Exceptions/
+└── Services/            # Domain services
 ```
 
 ### 12.3 Testing Strategy
@@ -456,464 +486,4 @@ com.planbookai.domain
 
 ---
 
-*Tài liệu này sẽ được cập nhật theo evolution của domain model trong quá trình development.*
-
-# Domain Driven Design (DDD) - PlanbookAI
-
-## 1. Domain Overview
-
-PlanbookAI là một nền tảng hỗ trợ giáo viên THPT thông qua các công cụ AI chuyên biệt, tập trung vào môn Hóa học trong phạm vi đồ án tốt nghiệp.
-
-## 2. Bounded Contexts
-
-### 2.1 User Management Context (Quản lý người dùng)
-
-**Trách nhiệm**: Xử lý authentication, authorization, và user lifecycle
-
-**Core Domain Objects**:
-
-- `NguoiDung` (User)
-- `VaiTro` (Role)
-- `PhienDangNhap` (Session)
-
-### 2.2 Educational Content Context (Nội dung giáo dục)
-
-**Trách nhiệm**: Quản lý lesson plans, templates, và educational resources
-
-**Core Domain Objects**:
-
-- `GiaoAn` (Lesson Plan)
-- `MauGiaoAn` (Lesson Template)
-- `NoiDungGiaoDuc` (Educational Content)
-
-### 2.3 Assessment Context (Đánh giá)
-
-**Trách nhiệm**: Question bank, exam generation, và grading
-
-**Core Domain Objects**:
-
-- `CauHoi` (Question)
-- `DeThi` (Exam)
-- `KetQua` (Result)
-- `BaiLam` (Answer Sheet)
-
-### 2.4 Student Data Context (Dữ liệu học sinh)
-
-**Trách nhiệm**: Student information management (teacher-owned)
-
-**Core Domain Objects**:
-
-- `HocSinh` (Student)
-- `LopHoc` (Class)
-- `KetQuaHocTap` (Academic Result)
-
-## 3. Domain Models
-
-### 3.1 User Management Domain
-
-```java
-// Aggregate Root
-public class NguoiDung {
-    private NguoiDungId id;
-    private Email email;
-    private MatKhauMaHoa matKhau;
-    private HoTen hoTen;
-    private VaiTro vaiTro;
-    private TrangThaiHoatDong trangThai;
-    
-    // Domain behaviors
-    public void dangNhap(String matKhauGoc) { }
-    public void capNhatThongTin(HoTen hoTenMoi) { }
-    public void vohieuHoa() { }
-}
-
-// Value Objects
-public class Email {
-    private final String value;
-    // Validation logic
-}
-
-public class MatKhauMaHoa {
-    private final String hashedValue;
-    // Encryption logic
-}
-
-// Domain Services
-public class DichVuXacThuc {
-    public KetQuaXacThuc xacThuc(Email email, String matKhau) { }
-}
-```
-
-### 3.2 Educational Content Domain
-
-```java
-// Aggregate Root
-public class GiaoAn {
-    private GiaoAnId id;
-    private TieuDe tieuDe;
-    private MucTieu mucTieu;
-    private NoiDung noiDung;
-    private NguoiDungId giaoVienId;
-    private TrangThaiGiaoAn trangThai;
-    
-    // Domain behaviors
-    public void taoTuMau(MauGiaoAn mau) { }
-    public void capNhatNoiDung(NoiDung noiDungMoi) { }
-    public void pheduyet() { }
-}
-
-// Domain Services
-public class DichVuTaoGiaoAn {
-    public GiaoAn taoGiaoAnTuAI(YeuCauTaoGiaoAn yeuCau) { }
-}
-```
-
-### 3.3 Assessment Domain
-
-```java
-// Aggregate Root
-public class DeThi {
-    private DeThiId id;
-    private TieuDe tieuDe;
-    private List<CauHoiTrongDeThi> danhSachCauHoi;
-    private NguoiDungId giaoVienId;
-    private ThoiGianLamBai thoiGianLam;
-    
-    // Domain behaviors
-    public void themCauHoi(CauHoi cauHoi, Diem diem) { }
-    public void taoNgauNhien(TieuChiTaoDe tieuChi) { }
-    public KetQua chamDiem(BaiLam baiLam) { }
-}
-
-// Aggregate Root
-public class CauHoi {
-    private CauHoiId id;
-    private NoiDungCauHoi noiDung;
-    private List<LuaChon> danhSachLuaChon;
-    private LuaChonDung dapAnDung;
-    private MucDoKho mucDoKho;
-    
-    // Domain behaviors
-    public boolean kiemTraDapAn(LuaChon luaChon) { }
-}
-
-// Domain Services
-public class DichVuOCR {
-    public KetQuaOCR xuLyBaiLam(AnhBaiLam anh) { }
-    public ThongTinHocSinh trichXuatThongTin(KetQuaOCR ketQua) { }
-}
-```
-
-### 3.4 Student Data Domain
-
-```java
-// Aggregate Root
-public class HocSinh {
-    private HocSinhId id;
-    private HoTen hoTen;
-    private MaSoHocSinh maSo;
-    private NguoiDungId giaoVienSoHuuId;
-    private List<KetQuaHocTap> lichSuKetQua;
-    
-    // Domain behaviors
-    public void capNhatKetQua(KetQua ketQuaMoi) { }
-    public MucDoProficiency tinhMucDoProficiency() { }
-}
-
-// Domain Services
-public class DichVuImportHocSinh {
-    public List<HocSinh> importTuExcel(FileExcel file, NguoiDungId giaoVienId) { }
-}
-```
-
-## 4. Domain Events
-
-### 4.1 User Domain Events
-
-```java
-public class NguoiDungDaDangNhap implements DomainEvent {
-    private final NguoiDungId nguoiDungId;
-    private final LocalDateTime thoiGianDangNhap;
-}
-
-public class NguoiDungDaCapNhatThongTin implements DomainEvent {
-    private final NguoiDungId nguoiDungId;
-    private final ThongTinCapNhat thongTinMoi;
-}
-```
-
-### 4.2 Assessment Domain Events
-
-```java
-public class DeThiDaTao implements DomainEvent {
-    private final DeThiId deThiId;
-    private final NguoiDungId giaoVienId;
-}
-
-public class BaiLamDaCham implements DomainEvent {
-    private final KetQuaId ketQuaId;
-    private final HocSinhId hocSinhId;
-    private final Diem diem;
-}
-```
-
-## 5. Domain Services
-
-### 5.1 AI Integration Services
-
-```java
-public interface DichVuTichHopAI {
-    GiaoAn taoGiaoAnTuAI(YeuCauTaoGiaoAn yeuCau);
-    List<CauHoi> taoNganHangCauHoi(TieuChiTaoCauHoi tieuChi);
-    NoiDungGiaoAn caiThienNoiDung(NoiDungGiaoAn noiDungGoc);
-}
-```
-
-### 5.2 OCR Processing Services
-
-```java
-public interface DichVuXuLyOCR {
-    KetQuaOCR nhanDangVanBan(AnhBaiLam anh);
-    ThongTinHocSinh trichXuatThongTinHocSinh(KetQuaOCR ketQua);
-    List<DapAn> trichXuatDapAn(KetQuaOCR ketQua, DeThi deThi);
-}
-```
-
-## 6. Repositories (Domain Layer)
-
-```java
-public interface NguoiDungRepository {
-    Optional<NguoiDung> findById(NguoiDungId id);
-    Optional<NguoiDung> findByEmail(Email email);
-    void save(NguoiDung nguoiDung);
-}
-
-public interface GiaoAnRepository {
-    Optional<GiaoAn> findById(GiaoAnId id);
-    List<GiaoAn> findByGiaoVienId(NguoiDungId giaoVienId);
-    void save(GiaoAn giaoAn);
-}
-
-public interface CauHoiRepository {
-    Optional<CauHoi> findById(CauHoiId id);
-    List<CauHoi> findByTieuChi(TieuChiTimKiem tieuChi);
-    void save(CauHoi cauHoi);
-}
-
-public interface HocSinhRepository {
-    Optional<HocSinh> findById(HocSinhId id);
-    List<HocSinh> findByGiaoVienId(NguoiDungId giaoVienId);
-    void save(HocSinh hocSinh);
-}
-```
-
-## 7. Value Objects
-
-### 7.1 Common Value Objects
-
-```java
-public class TieuDe {
-    private final String value;
-    // Validation: không null, độ dài 1-200 ký tự
-}
-
-public class NoiDung {
-    private final String value;
-    // Validation: không null, có thể chứa HTML
-}
-
-public class Diem {
-    private final double value;
-    // Validation: 0.0 <= value <= 10.0
-}
-
-public class MucDoKho {
-    public enum Level { DE, TRUNG_BINH, KHO, RAT_KHO }
-    private final Level level;
-}
-```
-
-### 7.2 Educational Specific Value Objects
-
-```java
-public class MonHoc {
-    public enum Type { HOA_HOC, VAT_LY, SINH_HOC, TOAN }
-    private final Type type;
-}
-
-public class LopHoc {
-    private final int khoi; // 10, 11, 12
-    private final String tenLop; // A1, B2, etc.
-}
-
-public class ThoiGianLamBai {
-    private final int phut;
-    // Validation: 15 <= phut <= 180
-}
-```
-
-## 8. Domain Rules & Invariants
-
-### 8.1 User Domain Rules
-
-- Một email chỉ có thể thuộc về một người dùng
-- Mật khẩu phải được mã hóa trước khi lưu trữ
-- Chỉ ADMIN có thể tạo tài khoản MANAGER
-- TEACHER chỉ có thể truy cập dữ liệu của học sinh mình quản lý
-
-### 8.2 Assessment Domain Rules
-
-- Một đề thi phải có ít nhất 10 câu hỏi
-- Tổng điểm của đề thi phải bằng 10.0
-- Câu hỏi trắc nghiệm phải có đúng 4 lựa chọn
-- Thời gian làm bài tối thiểu 15 phút, tối đa 180 phút
-
-### 8.3 Student Data Rules
-
-- Học sinh chỉ thuộc về một giáo viên
-- Mã số học sinh phải unique trong phạm vi một giáo viên
-- Kết quả học tập phải được mã hóa (PII protection)
-
-## 9. Anti-Corruption Layer
-
-### 9.1 External Service Adapters
-
-```java
-// Gemini AI Adapter
-public class GeminiAIAdapter implements DichVuTichHopAI {
-    private final GeminiClient geminiClient;
-    
-    @Override
-    public GiaoAn taoGiaoAnTuAI(YeuCauTaoGiaoAn yeuCau) {
-        // Convert domain objects to Gemini API format
-        // Call external service
-        // Convert response back to domain objects
-    }
-}
-
-// Google Vision OCR Adapter
-public class GoogleVisionAdapter implements DichVuXuLyOCR {
-    private final VisionClient visionClient;
-    
-    @Override
-    public KetQuaOCR nhanDangVanBan(AnhBaiLam anh) {
-        // Convert domain objects to Google Vision format
-        // Process OCR
-        // Return domain-specific result
-    }
-}
-```
-
-## 10. Domain Layer Architecture
-
-```
-Domain Layer
-├── Entities (Aggregate Roots)
-│   ├── NguoiDung
-│   ├── GiaoAn
-│   ├── DeThi
-│   ├── CauHoi
-│   └── HocSinh
-├── Value Objects
-│   ├── Email
-│   ├── TieuDe
-│   ├── Diem
-│   └── MucDoKho
-├── Domain Services
-│   ├── DichVuXacThuc
-│   ├── DichVuTaoGiaoAn
-│   └── DichVuOCR
-├── Domain Events
-│   ├── NguoiDungDaDangNhap
-│   └── BaiLamDaCham
-├── Repositories (Interfaces)
-│   ├── NguoiDungRepository
-│   ├── GiaoAnRepository
-│   └── CauHoiRepository
-└── Specifications
-    ├── CauHoiSpec
-    └── GiaoAnSpec
-```
-
-## 11. Ubiquitous Language
-
-### 11.1 Core Terms (Vietnamese)
-
-| Term | Definition |
-|------|------------|
-| Giáo án | Lesson plan - kế hoạch bài giảng chi tiết |
-| Đề thi | Exam - bộ câu hỏi để kiểm tra học sinh |
-| Câu hỏi | Question - đơn vị cơ bản trong ngân hàng câu hỏi |
-| Bài làm | Answer sheet - bài làm của học sinh |
-| Chấm điểm | Grading - quá trình đánh giá kết quả |
-| OCR | Optical Character Recognition - nhận dạng ký tự quang học |
-| Proficiency | Trình độ - mức độ hiểu biết của học sinh |
-
-### 11.2 Domain Verbs
-
-- `tạo` (create) - tạo mới entity
-- `cập nhật` (update) - thay đổi thông tin
-- `xóa` (delete) - loại bỏ entity
-- `chấm điểm` (grade) - đánh giá bài làm
-- `tạo ngẫu nhiên` (randomize) - tạo đề thi ngẫu nhiên
-- `nhận dạng` (recognize) - xử lý OCR
-- `phân tích` (analyze) - phân tích kết quả học tập
-
-## 12. Implementation Guidelines
-
-### 12.1 Naming Conventions
-
-- **Entities**: PascalCase, Vietnamese names (`NguoiDung`, `GiaoAn`)
-- **Value Objects**: PascalCase, descriptive (`TieuDe`, `MucDoKho`)
-- **Domain Services**: `DichVu` prefix (`DichVuXacThuc`)
-- **Repository Interfaces**: Entity name + `Repository`
-- **Domain Events**: Past tense, Vietnamese (`NguoiDungDaTao`)
-
-### 12.2 Package Structure
-
-```
-com.planbookai.domain
-├── nguoidung/           # User bounded context
-├── noidunggiaoduc/      # Educational content context  
-├── danhgia/             # Assessment context
-├── hocsinh/             # Student data context
-├── shared/              # Shared kernel
-│   ├── valueobjects/
-│   ├── events/
-│   └── exceptions/
-└── services/            # Domain services
-```
-
-### 12.3 Testing Strategy
-
-- **Unit Tests**: Test domain logic in isolation
-- **Domain Tests**: Test invariants and business rules
-- **Integration Tests**: Test repository implementations
-- **Contract Tests**: Test anti-corruption layers
-
-## 13. Evolution Strategy
-
-### 13.1 Phase 1 (MVP - Chemistry Focus)
-
-- Core user management
-- Basic lesson plan creation
-- Simple question bank
-- OCR-based grading
-
-### 13.2 Phase 2 (Expansion)
-
-- Multi-subject support
-- Advanced AI features
-- Student analytics
-- Performance optimization
-
-### 13.3 Phase 3 (Scale)
-
-- Multi-tenant architecture
-- Advanced reporting
-- Mobile support
-- Third-party integrations
-
----
-
-*Tài liệu này sẽ được cập nhật theo evolution của domain model trong quá trình development.*
+*Tài liệu này sẽ được cập nhật theo evolution của domain model trong quá trình development.* 
