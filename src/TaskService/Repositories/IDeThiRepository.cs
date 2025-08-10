@@ -9,18 +9,18 @@ namespace TaskService.Repositories
     public interface IDeThiRepository
     {
         // Lấy tất cả các đề thi
-        Task<IEnumerable<DeThi>> GetAllAsync();
+        Task<List<DeThi>> GetAllAsync();
 
         // Lấy một đề thi theo ID
-        Task<DeThi> GetByIdAsync(Guid id);
+        Task<DeThi?> GetByIdAsync(string id);
 
         // Thêm một đề thi mới
-        Task AddAsync(DeThi deThi);
+        Task<DeThi> CreateAsync(DeThi deThi);
 
         // Cập nhật thông tin một đề thi
-        Task UpdateAsync(DeThi deThi);
+        Task<DeThi> UpdateAsync(DeThi deThi);
 
         // Xóa một đề thi theo ID
-        Task DeleteAsync(Guid id);
+        Task DeleteAsync(string id);
     }
 }

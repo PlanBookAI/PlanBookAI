@@ -1,48 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using TaskService.Models.Entities;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace TaskService.Models.DTOs
 {
+    /// <summary>
+    /// DTO cho yêu cầu tạo đề thi ngẫu nhiên
+    /// </summary>
     public class YeuCauTaoDeThi
     {
-        // Thuộc tính
-        public String Id { get; set; }
-        public String GiaoVienId { get; set; }
-        public String MonHoc { get; set; }
+        [Required(ErrorMessage = "Tiêu đề đề thi là bắt buộc")]
+        [StringLength(200, ErrorMessage = "Tiêu đề không được vượt quá 200 ký tự")]
+        public string TieuDe { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Môn học là bắt buộc")]
+        public string MonHoc { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Độ khó là bắt buộc")]
+        public string DoKho { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Số lượng câu hỏi là bắt buộc")]
+        [Range(1, 100, ErrorMessage = "Số lượng câu hỏi phải từ 1 đến 100")]
         public int SoLuongCauHoi { get; set; }
-        public float TongDiem { get; set; }
+
+        [Required(ErrorMessage = "Thời gian làm bài là bắt buộc")]
+        [Range(15, 180, ErrorMessage = "Thời gian làm bài phải từ 15 đến 180 phút")]
         public int ThoiGianLam { get; set; }
 
-        // Có thể thêm thuộc tính cho mức độ khó của câu hỏi
-        public String DoKho { get; set; } // Ví dụ: "De", "TrungBinh", "Kho"
+        // Constructor để đảm bảo object có thể được tạo
+        public YeuCauTaoDeThi() { }
 
-        // Các phương thức (Methods)
-
-        /// <summary>
-        /// Tạo một đề thi mới từ yêu cầu này.
-        /// </summary>
-        /// <param name="tatCaCauHoi">Danh sách tất cả các câu hỏi có sẵn.</param>
-        /// <returns>Đối tượng DeThi được tạo.</returns>
-        public DeThi TaoDeThi(ICollection<CauHoi> tatCaCauHoi)
+        // Constructor với parameters
+        public YeuCauTaoDeThi(string tieuDe, string monHoc, string doKho, int soLuongCauHoi, int thoiGianLam)
         {
-            var deThi = new DeThi
-            {
-                id = Guid.NewGuid().ToString(),
-                tieuDe = "Đề thi tự động cho môn " + this.MonHoc,
-                monHoc = this.MonHoc,
-                thoiGianLam = this.ThoiGianLam,
-                tongDiem = this.TongDiem
-            };
-
-            // Lọc câu hỏi theo môn học và độ khó
-            var cauHoiPhuHop = tatCaCauHoi.Where(c => c.monHoc == this.MonHoc && c.doKho == this.DoKho).ToList();
-
-            // Tạo ngẫu nhiên câu hỏi cho đề thi
-            deThi.taoNgauNhien(cauHoiPhuHop, this.SoLuongCauHoi);
-
-            return deThi;
+            TieuDe = tieuDe;
+            MonHoc = monHoc;
+            DoKho = doKho;
+            SoLuongCauHoi = soLuongCauHoi;
+            ThoiGianLam = thoiGianLam;
         }
     }
 }

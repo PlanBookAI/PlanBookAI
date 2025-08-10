@@ -9,18 +9,21 @@ namespace TaskService.Repositories
     public interface ICauHoiRepository
     {
         // Lấy tất cả các câu hỏi
-        Task<IEnumerable<CauHoi>> GetAllAsync();
+        Task<List<CauHoi>> GetAllAsync();
 
         // Lấy một câu hỏi theo ID
-        Task<CauHoi> GetByIdAsync(Guid id);
+        Task<CauHoi?> GetByIdAsync(string id);
+
+        // Lấy câu hỏi theo môn học và độ khó
+        Task<List<CauHoi>> GetByMonHocAndDoKhoAsync(string monHoc, string doKho);
 
         // Thêm một câu hỏi mới
-        Task AddAsync(CauHoi cauHoi);
+        Task<CauHoi> CreateAsync(CauHoi cauHoi);
 
         // Cập nhật thông tin một câu hỏi
-        Task UpdateAsync(CauHoi cauHoi);
+        Task<CauHoi> UpdateAsync(CauHoi cauHoi);
 
         // Xóa một câu hỏi theo ID
-        Task DeleteAsync(Guid id);
+        Task DeleteAsync(string id);
     }
 }
