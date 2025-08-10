@@ -43,7 +43,7 @@ namespace TaskService.Controllers
         {
             try
             {
-                var cauHoi = await _cauHoiRepository.GetByIdAsync(Guid.Parse(id));
+                var cauHoi = await _cauHoiRepository.GetByIdAsync(id);
                 if (cauHoi == null)
                 {
                     return NotFound($"Không tìm thấy câu hỏi với ID: {id}");
@@ -126,7 +126,7 @@ namespace TaskService.Controllers
                 // Tạo ID mới
                 cauHoi.id = Guid.NewGuid().ToString();
                 
-                await _cauHoiRepository.AddAsync(cauHoi);
+                var createdCauHoi = await _cauHoiRepository.CreateAsync(cauHoi);
                 return CreatedAtAction(nameof(LayCauHoiTheoId), new { id = cauHoi.id }, cauHoi);
             }
             catch (Exception ex)
@@ -165,7 +165,7 @@ namespace TaskService.Controllers
         {
             try
             {
-                await _cauHoiRepository.DeleteAsync(Guid.Parse(id));
+                await _cauHoiRepository.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)

@@ -18,30 +18,39 @@ namespace TaskService.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<CauHoi>> GetAllAsync()
+        public async Task<List<CauHoi>> GetAllAsync()
         {
             return await _context.CauHois.ToListAsync();
         }
 
-        public async Task<CauHoi> GetByIdAsync(Guid id)
+        public async Task<CauHoi?> GetByIdAsync(string id)
         {
             return await _context.CauHois.FindAsync(id);
         }
 
-        public async Task AddAsync(CauHoi cauHoi)
+        public async Task<List<CauHoi>> GetByMonHocAndDoKhoAsync(string monHoc, string doKho)
+        {
+            return await _context.CauHois
+                .Where(c => c.monHoc == monHoc && c.doKho == doKho)
+                .ToListAsync();
+        }
+
+        public async Task<CauHoi> CreateAsync(CauHoi cauHoi)
         {
             await _context.CauHois.AddAsync(cauHoi);
             await _context.SaveChangesAsync();
+            return cauHoi;
         }
 
-        public async Task UpdateAsync(CauHoi cauHoi)
+        public async Task<CauHoi> UpdateAsync(CauHoi cauHoi)
         {
             // Đánh dấu trạng thái của entity là đã được chỉnh sửa
             _context.Entry(cauHoi).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            return cauHoi;
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(string id)
         {
             var cauHoi = await _context.CauHois.FindAsync(id);
             if (cauHoi != null)

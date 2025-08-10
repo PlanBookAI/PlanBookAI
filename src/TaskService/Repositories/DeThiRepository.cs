@@ -18,29 +18,31 @@ namespace TaskService.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<DeThi>> GetAllAsync()
+        public async Task<List<DeThi>> GetAllAsync()
         {
             return await _context.DeThis.ToListAsync();
         }
 
-        public async Task<DeThi> GetByIdAsync(Guid id)
+        public async Task<DeThi?> GetByIdAsync(string id)
         {
             return await _context.DeThis.FindAsync(id);
         }
 
-        public async Task AddAsync(DeThi deThi)
+        public async Task<DeThi> CreateAsync(DeThi deThi)
         {
             await _context.DeThis.AddAsync(deThi);
             await _context.SaveChangesAsync();
+            return deThi;
         }
 
-        public async Task UpdateAsync(DeThi deThi)
+        public async Task<DeThi> UpdateAsync(DeThi deThi)
         {
             _context.Entry(deThi).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            return deThi;
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(string id)
         {
             var deThi = await _context.DeThis.FindAsync(id);
             if (deThi != null)
