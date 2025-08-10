@@ -69,5 +69,9 @@ namespace PlanService.Models.Entities
 
         [ForeignKey("ChuDeId")]
         public virtual ChuDe? ChuDe { get; set; }
+
+        // Navigation properties cho mối quan hệ 1-N
+        public virtual ICollection<NoiDungGiaoDuc> NoiDungGiaoDucs { get; set; } = new List<NoiDungGiaoDuc>();
+        public virtual ICollection<MucTieu> MucTieus { get; set; } = new List<MucTieu>();
     }
 }
