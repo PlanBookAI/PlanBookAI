@@ -9,16 +9,16 @@ namespace PlanService.Data
     /// </summary>
     public class PlanDbContext : DbContext
     {
+        // Thêm DbSet cho các entity
+        public DbSet<GiaoAn> GiaoAns { get; set; }
+        public DbSet<MauGiaoAn> MauGiaoAns { get; set; }
+        public DbSet<NoiDungGiaoDuc> NoiDungGiaoDucs { get; set; }
+        public DbSet<MucTieu> MucTieus { get; set; }
+
         public PlanDbContext(DbContextOptions<PlanDbContext> options)
             : base(options)
         {
         }
-
-        // Định nghĩa các DbSet để ánh xạ các lớp entity với các bảng trong database.
-        public DbSet<GiaoAn> GiaoAns { get; set; }
-        public DbSet<NoiDungGiaoDuc> NoiDungGiaoDucs { get; set; }
-        public DbSet<MucTieu> MucTieus { get; set; }
-        public DbSet<MauGiaoAn> MauGiaoAns { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
