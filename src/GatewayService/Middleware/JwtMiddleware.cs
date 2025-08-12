@@ -17,15 +17,25 @@ namespace GatewayService.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            var token = ExtractTokenFromRequest(context.Request);
-
-            if (!string.IsNullOrEmpty(token))
+            // Kiểm tra endpoint có cần authentication không
+            if (RequiresAuthentication(context))
             {
-                await ProcessTokenAsync(context, token);
+                var token = ExtractTokenFromRequest(context.Request);
+
+                if (!string.IsNullOrEmpty(token))
+                {
+                    await ProcessTokenAsync(context, token);
+                }
+                else
+                {
+                    _logger.LogWarning("No token found for protected endpoint: {Path}", context.Request.Path);
+                    SetUnauthorizedResponse(context, "Token không được cung cấp");
+                    return; // Dừng xử lý nếu không có token
+                }
             }
             else
             {
-                _logger.LogDebug("No token found in request to {Path}", context.Request.Path);
+                _logger.LogDebug("Public endpoint, no authentication required: {Path}", context.Request.Path);
             }
 
             await _next(context);
@@ -110,7 +120,18 @@ namespace GatewayService.Middleware
         private static void SetUnauthorizedResponse(HttpContext context, string message)
         {
             context.Items["AuthenticationError"] = message;
-            // Không set response ở đây, để cho downstream middleware xử lý
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+            
+            var errorResponse = new
+            {
+                error = "Unauthorized",
+                message = message,
+                timestamp = DateTime.UtcNow
+            };
+            
+            var jsonResponse = System.Text.Json.JsonSerializer.Serialize(errorResponse);
+            context.Response.WriteAsync(jsonResponse).Wait();
         }
 
         /// <summary>

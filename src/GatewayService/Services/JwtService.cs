@@ -30,7 +30,8 @@ namespace GatewayService.Services
                 {
                     var userId = principal.FindFirst("userId")?.Value 
                                ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                               ?? principal.FindFirst("sub")?.Value;
+                               ?? principal.FindFirst("sub")?.Value
+                               ?? principal.FindFirst(ClaimTypes.Name)?.Value; // Thêm claim Name từ AuthService
 
                     _logger.LogInformation("Token validation successful for user: {UserId}", userId);
                     return Task.FromResult(userId);
