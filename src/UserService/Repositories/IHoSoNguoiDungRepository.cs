@@ -12,7 +12,7 @@ namespace UserService.Repositories
         Task<IEnumerable<HoSoNguoiDung>> GetAllAsync();
 
         // Lấy một hồ sơ người dùng theo ID
-        Task<HoSoNguoiDung> GetByIdAsync(string id);
+        Task<HoSoNguoiDung?> GetByIdAsync(string id);
 
         // Thêm một hồ sơ người dùng mới
         Task AddAsync(HoSoNguoiDung hoSo);

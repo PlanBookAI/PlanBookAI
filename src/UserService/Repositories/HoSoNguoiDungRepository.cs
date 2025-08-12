@@ -23,7 +23,7 @@ namespace UserService.Repositories
             return await _context.HoSoNguoiDungs.ToListAsync();
         }
 
-        public async Task<HoSoNguoiDung> GetByIdAsync(string id)
+        public async Task<HoSoNguoiDung?> GetByIdAsync(string id)
         {
             return await _context.HoSoNguoiDungs.FindAsync(id);
         }

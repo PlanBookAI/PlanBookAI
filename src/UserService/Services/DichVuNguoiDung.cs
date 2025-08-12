@@ -27,14 +27,28 @@ namespace UserService.Services
         /// <returns>Đối tượng PhanTrang chứa danh sách người dùng và thông tin phân trang.</returns>
         public async Task<IDichVuNguoiDung.PhanTrang<NguoiDung>> LayDanhSachNguoiDungAsync(int soTrang, int kichThuocTrang)
         {
-            var tatCaNguoiDung = await _hoSoNguoiDungRepository.GetAllAsync();
-            var nguoiDungPhanTrang = tatCaNguoiDung.Skip((soTrang - 1) * kichThuocTrang).Take(kichThuocTrang);
+            var tatCaHoSo = await _hoSoNguoiDungRepository.GetAllAsync();
+            var hoSoPhanTrang = tatCaHoSo.Skip((soTrang - 1) * kichThuocTrang).Take(kichThuocTrang);
+            
+            // Convert HoSoNguoiDung to NguoiDung
+            var nguoiDungPhanTrang = hoSoPhanTrang.Select(hoSo => new NguoiDung
+            {
+                Id = hoSo.UserId,
+                HoTen = hoSo.HoTen,
+                SoDienThoai = hoSo.SoDienThoai,
+                NgaySinh = hoSo.NgaySinh,
+                DiaChi = hoSo.DiaChi,
+                AnhDaiDienUrl = hoSo.AnhDaiDienUrl,
+                MoTaBanThan = hoSo.MoTaBanThan,
+                TaoLuc = hoSo.TaoLuc,
+                CapNhatLuc = hoSo.CapNhatLuc
+            });
 
             return new IDichVuNguoiDung.PhanTrang<NguoiDung>
             {
                 SoTrangHienTai = soTrang,
-                TongSoTrang = (int)Math.Ceiling((double)tatCaNguoiDung.Count() / kichThuocTrang),
-                TongSoMuc = tatCaNguoiDung.Count(),
+                TongSoTrang = (int)Math.Ceiling((double)tatCaHoSo.Count() / kichThuocTrang),
+                TongSoMuc = tatCaHoSo.Count(),
                 DuLieu = nguoiDungPhanTrang
             };
         }
@@ -44,9 +58,23 @@ namespace UserService.Services
         /// </summary>
         /// <param name="id">ID của người dùng.</param>
         /// <returns>Đối tượng NguoiDung.</returns>
-        public async Task<NguoiDung> LayChiTietNguoiDungAsync(string id)
+        public async Task<NguoiDung?> LayChiTietNguoiDungAsync(string id)
         {
-            return await _hoSoNguoiDungRepository.GetByIdAsync(id);
+            var hoSo = await _hoSoNguoiDungRepository.GetByIdAsync(id);
+            if (hoSo == null) return null;
+            
+            return new NguoiDung
+            {
+                Id = hoSo.UserId,
+                HoTen = hoSo.HoTen,
+                SoDienThoai = hoSo.SoDienThoai,
+                NgaySinh = hoSo.NgaySinh,
+                DiaChi = hoSo.DiaChi,
+                AnhDaiDienUrl = hoSo.AnhDaiDienUrl,
+                MoTaBanThan = hoSo.MoTaBanThan,
+                TaoLuc = hoSo.TaoLuc,
+                CapNhatLuc = hoSo.CapNhatLuc
+            };
         }
 
         /// <summary>

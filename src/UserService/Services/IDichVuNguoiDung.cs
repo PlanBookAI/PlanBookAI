@@ -12,7 +12,7 @@ namespace UserService.Services
         Task<PhanTrang<NguoiDung>> LayDanhSachNguoiDungAsync(int soTrang, int kichThuocTrang);
 
         // Lấy thông tin chi tiết của một người dùng theo ID
-        Task<NguoiDung> LayChiTietNguoiDungAsync(string id);
+        Task<NguoiDung?> LayChiTietNguoiDungAsync(string id);
 
         // Cập nhật thông tin người dùng
         Task CapNhatNguoiDungAsync(string id, NguoiDung nguoiDungCapNhat);
@@ -29,7 +29,7 @@ namespace UserService.Services
             public int SoTrangHienTai { get; set; }
             public int TongSoTrang { get; set; }
             public int TongSoMuc { get; set; }
-            public IEnumerable<T> DuLieu { get; set; }
+            public IEnumerable<T> DuLieu { get; set; } = new List<T>();
         }
     }
 }
