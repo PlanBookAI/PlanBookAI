@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UserService.Models.Entities;
+using UserService.Models;
 
 namespace UserService.Repositories
 {
