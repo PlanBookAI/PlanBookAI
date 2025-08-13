@@ -1,33 +1,40 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UserService.Models;
-using UserService.Repositories;
+using UserService.Models.Entities;
 
 namespace UserService.Data
 {
-    // Lớp UserDbContext kế thừa từ DbContext, dùng để tương tác với cơ sở dữ liệu
+    /// <summary>
+    /// Lớp UserDbContext quản lý việc truy cập cơ sở dữ liệu cho UserService.
+    /// Kết nối với schema 'users' trong PostgreSQL database.
+    /// </summary>
     public class UserDbContext : DbContext
     {
-        // Constructor để nhận các tùy chọn DbContext (ví dụ: chuỗi kết nối)
-        public UserDbContext(DbContextOptions<UserDbContext> options)
-            : base(options)
+        public UserDbContext(DbContextOptions<UserDbContext> options) : base(options)
         {
         }
 
-        // DbSets để ánh xạ các class thành các bảng trong cơ sở dữ liệu
-        public DbSet<NguoiDung> NguoiDungs { get; set; }
+        // DbSet ánh xạ các lớp entity với các bảng trong database
         public DbSet<HoSoNguoiDung> HoSoNguoiDungs { get; set; }
+        public DbSet<LichSuHoatDong> LichSuHoatDongs { get; set; }
 
-        // Cấu hình mô hình entity và mối quan hệ giữa các bảng
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Cấu hình mối quan hệ 1-1 giữa NguoiDung và HoSoNguoiDung
-            // Mỗi NguoiDung có một HoSoNguoiDung và ngược lại
-            modelBuilder.Entity<HoSoNguoiDung>()
-                .HasOne(h => h.NguoiDung)
-                .WithOne(n => n.HoSoNguoiDung)
-                .HasForeignKey<HoSoNguoiDung>(h => h.NguoiDungId);
-
             base.OnModelCreating(modelBuilder);
+
+            // Cấu hình cho Entity HoSoNguoiDung
+            modelBuilder.Entity<HoSoNguoiDung>(entity =>
+            {
+                // Primary key
+                entity.HasKey(h => h.UserId);
+            });
+
+            // Cấu hình cho Entity LichSuHoatDong  
+            modelBuilder.Entity<LichSuHoatDong>(entity =>
+            {
+                // Primary key
+                entity.HasKey(l => l.Id);
+            });
         }
     }
 }

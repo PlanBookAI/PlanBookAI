@@ -17,24 +17,24 @@ namespace AuthService.Repositories
             _context = context;
         }
 
-        public async Task<NguoiDung> GetByTenDangNhapAsync(string tenDangNhap)
+        public async Task<NguoiDung?> GetByIdAsync(Guid id)
         {
-            // Tải kèm thông tin VaiTro.
-            // Note: Entity hiện tại dùng Email thay vì TenDangNhap
-            return await _context.NguoiDungs.Include(nd => nd.VaiTro).FirstOrDefaultAsync(nd => nd.Email == tenDangNhap);
+            return await _context.NguoiDungs
+                .Include(nd => nd.VaiTro)
+                .FirstOrDefaultAsync(nd => nd.Id == id);
         }
 
-        public async Task<NguoiDung> GetByRefreshTokenAsync(string refreshToken)
+        public async Task<NguoiDung?> GetByEmailAsync(string email)
         {
-            // Tải kèm thông tin VaiTro.
-            // Note: Entity hiện tại không có RefreshToken, nên trả về null
-            return null;
+            return await _context.NguoiDungs
+                .Include(nd => nd.VaiTro)
+                .FirstOrDefaultAsync(nd => nd.Email == email);
         }
 
         public async Task AddAsync(NguoiDung nguoiDung)
         {
             await _context.NguoiDungs.AddAsync(nguoiDung);
-            await _context.SaveChangesAsync(); // Lưu thay đổi vào database.
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(NguoiDung nguoiDung)

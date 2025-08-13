@@ -9,9 +9,9 @@ namespace AuthService.Repositories
     /// </summary>
     public interface INguoiDungRepository
     {
-        Task<NguoiDung> GetByTenDangNhapAsync(string tenDangNhap); // Tìm người dùng theo tên đăng nhập.
-        Task<NguoiDung> GetByRefreshTokenAsync(string refreshToken); // Tìm người dùng theo refresh token.
-        Task AddAsync(NguoiDung nguoiDung); 
+        Task<NguoiDung?> GetByIdAsync(Guid id);
+        Task<NguoiDung?> GetByEmailAsync(string email);
+        Task AddAsync(NguoiDung nguoiDung);
         Task UpdateAsync(NguoiDung nguoiDung);
     }
 }

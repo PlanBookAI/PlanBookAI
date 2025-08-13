@@ -1,12 +1,15 @@
-using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using TaskService.Repositories;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using TaskService.Data;
 using TaskService.Middleware;
+using TaskService.Models.Entities;
+using TaskService.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +29,10 @@ builder.Services.AddControllers(options =>
     options.JsonSerializerOptions.AllowTrailingCommas = true;
     options.JsonSerializerOptions.ReadCommentHandling = JsonCommentHandling.Skip;
 });
+
+// Thêm Entity Framework DbContext
+builder.Services.AddDbContext<TaskDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add model validation
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -84,4 +91,45 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Thiết lập Migration - tạo database từ DbContext
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<TaskDbContext>();
+    context.Database.EnsureCreated();
+
+    // Tạo dữ liệu test
+    await TaoDuLieuTest(context);
+}
+
 app.Run();
+
+// Method tạo dữ liệu test
+async Task TaoDuLieuTest(TaskDbContext context)
+{
+    // Kiểm tra xem đã có dữ liệu test chưa
+    if (await context.CauHois.AnyAsync()) return;
+
+    // Tạo test questions
+    var testQuestions = new List<CauHoi>
+    {
+        new CauHoi
+        {
+            id = Guid.NewGuid().ToString(),
+            noiDung = "Nguyên tử có cấu trúc như thế nào?",
+            monHoc = "HoaHoc",
+            doKho = "TrungBinh",
+            dapAnDung = "A"
+        },
+        new CauHoi
+        {
+            id = Guid.NewGuid().ToString(),
+            noiDung = "Công thức hóa học của nước là gì?",
+            monHoc = "HoaHoc",
+            doKho = "De",
+            dapAnDung = "B"
+        }
+    };
+
+    await context.CauHois.AddRangeAsync(testQuestions);
+    await context.SaveChangesAsync();
+}
