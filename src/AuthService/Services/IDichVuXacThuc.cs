@@ -9,7 +9,7 @@ namespace AuthService.Services
     public interface IDichVuXacThuc
     {
         Task<PhanHoiXacThucDto> TaoToken(string email, string matKhau); // Tạo token truy cập và refresh token.
-        Task<PhanHoiXacThucDto> DangKy(string email, string matKhau); // Đăng ký tài khoản mới.
+        Task<PhanHoiXacThucDto> DangKy(string email, string matKhau, string hoTen, string vaiTro); // Đăng ký tài khoản mới.
         Task<PhanHoiXacThucDto> LamMoiToken(string refreshToken);
         string XacThucToken(string accessToken); // Xác thực token truy cập và trả về tên người dùng.
     }

@@ -1,67 +1,65 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TaskService.Models.Entities
 {
+    [Table("student_results", Schema = "students")]
     public class KetQua
     {
-        // Thuộc tính (Attributes)
-        public String id { get; set; }
-        public String hocSinhId { get; set; }
-        public String deThiId { get; set; }
-        public float diem { get; set; }
-        public int soCauDung { get; set; }
-        public String chiTietDapAn { get; set; }
-        public String baiLamId { get; set; } // Foreign key cho BaiLam
+        [Key]
+        [Column("id")]
+        public Guid Id { get; set; }
 
-        // Navigation properties cho Entity Framework Core
-        // Mỗi kết quả liên kết với một Học sinh
-        public virtual HocSinh HocSinh { get; set; }
-        // Mỗi kết quả liên kết với một Đề thi
-        public virtual DeThi DeThi { get; set; }
-        // Mỗi kết quả liên kết với một Bài làm (1:1)
-        public virtual BaiLam BaiLam { get; set; }
+        [Required]
+        [Column("student_id")]
+        public Guid HocSinhId { get; set; }
 
-        // Các phương thức (Methods)
+        [Required]
+        [Column("exam_id")]
+        public Guid DeThiId { get; set; }
 
-        /// <summary>
-        /// Tính toán điểm dựa trên số câu trả lời đúng và tổng điểm của đề thi.
-        /// </summary>
-        /// <param name="tongSoCau">Tổng số câu hỏi trong đề thi.</param>
-        /// <param name="tongDiemDeThi">Tổng điểm tối đa của đề thi.</param>
-        public void tinhDiem(int tongSoCau, float tongDiemDeThi)
-        {
-            if (tongSoCau > 0)
-            {
-                // Tính điểm theo tỷ lệ
-                this.diem = (float)this.soCauDung / tongSoCau * tongDiemDeThi;
-                Console.WriteLine($"Điểm của học sinh là: {this.diem}");
-            }
-            else
-            {
-                this.diem = 0;
-                Console.WriteLine("Đề thi không có câu hỏi nào. Điểm là 0.");
-            }
-        }
+        [Column("answer_sheet_id")]
+        public Guid BaiLamId { get; set; }
 
-        /// <summary>
-        /// Tạo một báo cáo tóm tắt kết quả của học sinh.
-        /// </summary>
-        /// <returns>Một chuỗi chứa báo cáo tóm tắt.</returns>
-        public string taobaoCao()
-        {
-            // Có thể sử dụng chiTietDapAn để tạo báo cáo chi tiết hơn
-            var baoCao = new System.Text.StringBuilder();
-            baoCao.AppendLine("--- Báo cáo kết quả ---");
-            baoCao.AppendLine($"ID Kết quả: {this.id}");
-            baoCao.AppendLine($"ID Học sinh: {this.hocSinhId}");
-            baoCao.AppendLine($"ID Đề thi: {this.deThiId}");
-            baoCao.AppendLine($"Điểm số: {this.diem}");
-            baoCao.AppendLine($"Số câu trả lời đúng: {this.soCauDung}");
-            baoCao.AppendLine("--- Kết thúc báo cáo ---");
+        [Column("score")]
+        public decimal Diem { get; set; }
 
-            Console.WriteLine(baoCao.ToString());
-            return baoCao.ToString();
-        }
+        [Column("max_score")]
+        public decimal DiemToiDa { get; set; }
+
+        [Column("percentage")]
+        public decimal TyLe { get; set; }
+
+        [Column("time_taken_minutes")]
+        public int ThoiGianLam { get; set; }
+
+        [Column("submitted_at")]
+        public DateTime NopLuc { get; set; }
+
+        [Column("graded_at")]
+        public DateTime? ChamLuc { get; set; }
+
+        [Column("grader_id")]
+        public Guid? NguoiChamId { get; set; }
+
+        [Column("feedback")]
+        public string? NhanXet { get; set; }
+
+        [Column("created_at")]
+        public DateTime TaoLuc { get; set; } = DateTime.UtcNow;
+
+        [Column("updated_at")]
+        public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        [ForeignKey("HocSinhId")]
+        public virtual HocSinh HocSinh { get; set; } = null!;
+
+        [ForeignKey("DeThiId")]
+        public virtual DeThi DeThi { get; set; } = null!;
+
+        [ForeignKey("BaiLamId")]
+        public virtual BaiLam BaiLam { get; set; } = null!;
     }
 }

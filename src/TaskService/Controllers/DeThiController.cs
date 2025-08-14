@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using TaskService.Models.Entities;
-using TaskService.Models.DTOs;
-using TaskService.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging; // Added for logging
-using System.Linq; // Added for Where and Select
+using TaskService.Models.DTOs;
+using TaskService.Models.Entities;
+using TaskService.Repositories;
 
 namespace TaskService.Controllers
 {
@@ -15,184 +13,106 @@ namespace TaskService.Controllers
     public class DeThiController : ControllerBase
     {
         private readonly IDeThiRepository _deThiRepository;
-        private readonly ICauHoiRepository _cauHoiRepository;
-        private readonly ILogger<DeThiController> _logger; // Added logger field
 
-        public DeThiController(IDeThiRepository deThiRepository, ICauHoiRepository cauHoiRepository, ILogger<DeThiController> logger) // Added logger to constructor
+        public DeThiController(IDeThiRepository deThiRepository)
         {
             _deThiRepository = deThiRepository;
-            _cauHoiRepository = cauHoiRepository;
-            _logger = logger; // Initialize logger
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả đề thi
-        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DeThi>>> LayDanhSachDeThi()
+        public async Task<ActionResult<IEnumerable<DeThi>>> GetAll()
         {
-            try
-            {
-                var danhSachDeThi = await _deThiRepository.GetAllAsync();
-                return Ok(danhSachDeThi);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi khi lấy danh sách đề thi: {ex.Message}");
-            }
+            var deThis = await _deThiRepository.GetAllAsync();
+            return Ok(deThis);
         }
 
-        /// <summary>
-        /// Lấy đề thi theo ID
-        /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<DeThi>> LayDeThiTheoId(string id)
+        public async Task<ActionResult<DeThi>> GetById(string id)
         {
-            try
+            var deThi = await _deThiRepository.GetByIdAsync(id);
+            if (deThi == null)
             {
-                var deThi = await _deThiRepository.GetByIdAsync(id);
-                if (deThi == null)
-                {
-                    return NotFound($"Không tìm thấy đề thi với ID: {id}");
-                }
-                return Ok(deThi);
+                return NotFound(new { Message = "Không tìm thấy đề thi" });
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi khi lấy đề thi: {ex.Message}");
-            }
+            return Ok(deThi);
         }
 
-        /// <summary>
-        /// Tạo đề thi mới
-        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<DeThi>> TaoDeThi([FromBody] DeThi deThi)
+        public async Task<ActionResult<DeThi>> Create([FromBody] YeuCauTaoDeThi yeuCau)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (deThi == null)
-                {
-                    return BadRequest("Dữ liệu đề thi không hợp lệ");
-                }
+                return BadRequest(ModelState);
+            }
 
-                // Tạo ID mới
-                deThi.id = Guid.NewGuid().ToString();
-                
-                var createdDeThi = await _deThiRepository.CreateAsync(deThi);
-                return CreatedAtAction(nameof(LayDeThiTheoId), new { id = createdDeThi.id }, createdDeThi);
-            }
-            catch (Exception ex)
+            var deThi = new DeThi
             {
-                return StatusCode(500, $"Lỗi khi tạo đề thi: {ex.Message}");
-            }
+                Id = Guid.NewGuid(),
+                TieuDe = yeuCau.TieuDe,
+                MonHoc = yeuCau.MonHoc,
+                KhoiLop = yeuCau.KhoiLop,
+                ThoiGianLamBai = yeuCau.ThoiGianLamBai,
+                HuongDan = yeuCau.HuongDan,
+                TrangThai = "draft",
+                NguoiTaoId = Guid.Parse(User.Identity?.Name ?? throw new InvalidOperationException("User not authenticated")),
+                TaoLuc = DateTime.UtcNow,
+                CapNhatLuc = DateTime.UtcNow
+            };
+
+            var createdDeThi = await _deThiRepository.CreateAsync(deThi);
+            return CreatedAtAction(nameof(GetById), new { id = createdDeThi.Id }, createdDeThi);
         }
 
-        /// <summary>
-        /// Tạo đề thi ngẫu nhiên từ ngân hàng câu hỏi
-        /// </summary>
-        [HttpPost("tao-ngau-nhien")]
-        public async Task<ActionResult<DeThi>> TaoDeThiNgauNhien([FromBody] YeuCauTaoDeThi yeuCau)
+        [HttpPost("{id}/nop-bai")]
+        public async Task<ActionResult<PhanHoiDeThi>> NopBai(string id, [FromBody] YeuCauNopBai yeuCau)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                // Log để debug
-                _logger.LogInformation("TaoDeThiNgauNhien called with yeuCau: {@YeuCau}", yeuCau);
-                _logger.LogInformation("ModelState.IsValid: {IsValid}", ModelState.IsValid);
-                
-                if (!ModelState.IsValid)
-                {
-                    var errors = ModelState
-                        .Where(x => x.Value.Errors.Count > 0)
-                        .Select(x => new { Field = x.Key, Errors = x.Value.Errors.Select(e => e.ErrorMessage) })
-                        .ToList();
-                    
-                    _logger.LogWarning("ModelState validation failed: {@Errors}", errors);
-                    return BadRequest(new { Message = "Validation failed", Errors = errors });
-                }
-
-                if (yeuCau == null)
-                {
-                    _logger.LogWarning("yeuCau is null");
-                    return BadRequest("Yêu cầu tạo đề thi không hợp lệ");
-                }
-
-                _logger.LogInformation("Processing request: TieuDe={TieuDe}, MonHoc={MonHoc}, DoKho={DoKho}, SoLuongCauHoi={SoLuongCauHoi}, ThoiGianLam={ThoiGianLam}", 
-                    yeuCau.TieuDe, yeuCau.MonHoc, yeuCau.DoKho, yeuCau.SoLuongCauHoi, yeuCau.ThoiGianLam);
-
-                // Lấy câu hỏi theo môn học và độ khó
-                var cauHoiTheoYeuCau = await _cauHoiRepository.GetByMonHocAndDoKhoAsync(yeuCau.MonHoc, yeuCau.DoKho);
-
-                _logger.LogInformation("Found {Count} questions matching MonHoc={MonHoc}, DoKho={DoKho}", 
-                    cauHoiTheoYeuCau.Count, yeuCau.MonHoc, yeuCau.DoKho);
-
-                if (cauHoiTheoYeuCau.Count < yeuCau.SoLuongCauHoi)
-                {
-                    return BadRequest($"Không đủ câu hỏi. Cần {yeuCau.SoLuongCauHoi} nhưng chỉ có {cauHoiTheoYeuCau.Count}");
-                }
-
-                // Tạo đề thi mới
-                var deThi = new DeThi
-                {
-                    id = Guid.NewGuid().ToString(),
-                    tieuDe = yeuCau.TieuDe,
-                    monHoc = yeuCau.MonHoc,
-                    thoiGianLam = yeuCau.ThoiGianLam,
-                    tongDiem = 10.0f
-                };
-
-                // Tạo ngẫu nhiên câu hỏi
-                deThi.taoNgauNhien(cauHoiTheoYeuCau, yeuCau.SoLuongCauHoi);
-
-                await _deThiRepository.CreateAsync(deThi);
-                _logger.LogInformation("Successfully created DeThi with ID: {Id}", deThi.id);
-                
-                return CreatedAtAction(nameof(LayDeThiTheoId), new { id = deThi.id }, deThi);
+                return BadRequest(ModelState);
             }
-            catch (Exception ex)
+
+            var deThi = await _deThiRepository.GetByIdAsync(id);
+            if (deThi == null)
             {
-                _logger.LogError(ex, "Error in TaoDeThiNgauNhien");
-                return StatusCode(500, $"Lỗi khi tạo đề thi: {ex.Message}");
+                return NotFound(new { Message = "Không tìm thấy đề thi" });
             }
+
+            // TODO: Implement nộp bài logic
+            throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Cập nhật đề thi
-        /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> CapNhatDeThi(string id, [FromBody] DeThi deThi)
+        public async Task<ActionResult<DeThi>> Update(string id, [FromBody] DeThi deThi)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (deThi == null || id != deThi.id)
-                {
-                    return BadRequest("Dữ liệu không hợp lệ");
-                }
+                return BadRequest(ModelState);
+            }
 
-                await _deThiRepository.UpdateAsync(deThi);
-                return NoContent();
-            }
-            catch (Exception ex)
+            var existingDeThi = await _deThiRepository.GetByIdAsync(id);
+            if (existingDeThi == null)
             {
-                return StatusCode(500, $"Lỗi khi cập nhật đề thi: {ex.Message}");
+                return NotFound(new { Message = "Không tìm thấy đề thi" });
             }
+
+            deThi.Id = existingDeThi.Id;
+            deThi.CapNhatLuc = DateTime.UtcNow;
+
+            var updatedDeThi = await _deThiRepository.UpdateAsync(deThi);
+            return Ok(updatedDeThi);
         }
 
-        /// <summary>
-        /// Xóa đề thi
-        /// </summary>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> XoaDeThi(string id)
+        public async Task<ActionResult> Delete(string id)
         {
-            try
+            var existingDeThi = await _deThiRepository.GetByIdAsync(id);
+            if (existingDeThi == null)
             {
-                await _deThiRepository.DeleteAsync(id);
-                return NoContent();
+                return NotFound(new { Message = "Không tìm thấy đề thi" });
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi khi xóa đề thi: {ex.Message}");
-            }
+
+            await _deThiRepository.DeleteAsync(id);
+            return NoContent();
         }
     }
 }

@@ -36,6 +36,6 @@ namespace UserService.Models
         public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
         
         // Navigation property
-        public virtual UserService.Repositories.HoSoNguoiDung? HoSoNguoiDung { get; set; }
+        public virtual UserService.Models.Entities.HoSoNguoiDung? HoSoNguoiDung { get; set; }
     }
 }

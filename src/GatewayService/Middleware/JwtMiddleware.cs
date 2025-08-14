@@ -24,13 +24,14 @@ namespace GatewayService.Middleware
 
                 if (!string.IsNullOrEmpty(token))
                 {
+                    _logger.LogDebug("Processing token for endpoint: {Path}", context.Request.Path);
                     await ProcessTokenAsync(context, token);
                 }
                 else
                 {
                     _logger.LogWarning("No token found for protected endpoint: {Path}", context.Request.Path);
-                    SetUnauthorizedResponse(context, "Token không được cung cấp");
-                    return; // Dừng xử lý nếu không có token
+                    context.Items["AuthenticationError"] = "Token không được cung cấp";
+                    // Không return sớm, vẫn forward request để downstream service xử lý
                 }
             }
             else
@@ -68,8 +69,8 @@ namespace GatewayService.Middleware
                 if (_jwtService.IsTokenExpired(token))
                 {
                     _logger.LogWarning("Expired token detected for request to {Path}", context.Request.Path);
-                    SetUnauthorizedResponse(context, "Token đã hết hạn");
-                    return;
+                    context.Items["AuthenticationError"] = "Token đã hết hạn";
+                    // Không return sớm, vẫn forward request để downstream service xử lý
                 }
 
                 // Validate token và lấy user ID
@@ -95,11 +96,25 @@ namespace GatewayService.Middleware
                     }
 
                     // Thêm headers cho downstream services
-                    context.Request.Headers["X-User-Id"] = userId;
-                    if (userClaims?.TryGetValue("role", out var userRole) == true)
+                    // Sử dụng Append thay vì set trực tiếp để tránh conflict với YARP
+                    if (!context.Request.Headers.ContainsKey("X-User-Id"))
                     {
-                        context.Request.Headers["X-User-Role"] = userRole;
+                        context.Request.Headers.Append("X-User-Id", userId);
                     }
+                    
+                    string? userRole = null;
+                    if (userClaims?.TryGetValue("role", out var roleValue) == true)
+                    {
+                        userRole = roleValue;
+                        if (!context.Request.Headers.ContainsKey("X-User-Role"))
+                        {
+                            context.Request.Headers.Append("X-User-Role", roleValue);
+                        }
+                    }
+                    
+                    // Log headers để debug
+                    _logger.LogInformation("Set headers: X-User-Id={UserId}, X-User-Role={UserRole}", 
+                                         userId, userRole ?? "N/A");
 
                     _logger.LogDebug("Token validation successful for user {UserId} accessing {Path}", 
                                    userId, context.Request.Path);
@@ -107,32 +122,19 @@ namespace GatewayService.Middleware
                 else
                 {
                     _logger.LogWarning("Invalid token for request to {Path}", context.Request.Path);
-                    SetUnauthorizedResponse(context, "Token không hợp lệ");
+                    context.Items["AuthenticationError"] = "Token không hợp lệ";
+                    // Không return sớm, vẫn forward request để downstream service xử lý
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing JWT token for request to {Path}", context.Request.Path);
-                SetUnauthorizedResponse(context, "Lỗi xác thực token");
+                context.Items["AuthenticationError"] = "Lỗi xác thực token";
+                // Không set response, vẫn forward request để downstream service xử lý
             }
         }
 
-        private static void SetUnauthorizedResponse(HttpContext context, string message)
-        {
-            context.Items["AuthenticationError"] = message;
-            context.Response.StatusCode = 401;
-            context.Response.ContentType = "application/json";
-            
-            var errorResponse = new
-            {
-                error = "Unauthorized",
-                message = message,
-                timestamp = DateTime.UtcNow
-            };
-            
-            var jsonResponse = System.Text.Json.JsonSerializer.Serialize(errorResponse);
-            context.Response.WriteAsync(jsonResponse).Wait();
-        }
+
 
         /// <summary>
         /// Kiểm tra endpoint có cần authentication không

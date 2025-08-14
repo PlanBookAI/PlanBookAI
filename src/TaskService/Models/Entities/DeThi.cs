@@ -1,92 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace TaskService.Models.Entities
 {
+    [Table("exams", Schema = "assessment")]
     public class DeThi
     {
-        // Thuộc tính (Attributes)
-        public String id { get; set; }
-        public String tieuDe { get; set; }
-        public String monHoc { get; set; }
-        public int thoiGianLam { get; set; }
-        public float tongDiem { get; set; }
+        [Key]
+        [Column("id")]
+        public Guid Id { get; set; }
 
-        // Navigation properties để liên kết với các câu hỏi trong đề thi
-        public virtual ICollection<CauHoi> CauHois { get; set; }
-        
-        // Navigation property cho relationship với BaiLam (1:N)
+        [Required]
+        [Column("title")]
+        public string TieuDe { get; set; } = string.Empty;
+
+        [Required]
+        [Column("subject")]
+        public string MonHoc { get; set; } = string.Empty;
+
+        [Column("grade_level")]
+        public int KhoiLop { get; set; }
+
+        [Column("duration_minutes")]
+        public int ThoiGianLamBai { get; set; }
+
+        [Column("total_points")]
+        public decimal DiemToiDa { get; set; } = 10.0M;
+
+        [Column("instructions")]
+        public string? HuongDan { get; set; }
+
+        [Column("status")]
+        public string TrangThai { get; set; } = "draft";
+
+        [Column("created_by")]
+        public Guid NguoiTaoId { get; set; }
+
+        [Column("created_at")]
+        public DateTime TaoLuc { get; set; } = DateTime.UtcNow;
+
+        [Column("updated_at")]
+        public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        public virtual ICollection<ExamQuestion> ExamQuestions { get; set; }
         public virtual ICollection<BaiLam> BaiLams { get; set; }
 
-        // Các phương thức (Methods)
-
-        /// <summary>
-        /// Thêm một câu hỏi vào đề thi.
-        /// </summary>
-        /// <param name="cauHoi">Câu hỏi cần thêm.</param>
-        public void themCauHoi(CauHoi cauHoi)
+        public DeThi()
         {
-            if (this.CauHois == null)
-            {
-                this.CauHois = new List<CauHoi>();
-            }
-            this.CauHois.Add(cauHoi);
-            Console.WriteLine($"Đã thêm câu hỏi '{cauHoi.noiDung}' vào đề thi.");
+            ExamQuestions = new List<ExamQuestion>();
+            BaiLams = new List<BaiLam>();
         }
 
-        /// <summary>
-        /// Tạo ngẫu nhiên một số câu hỏi từ một danh sách có sẵn.
-        /// </summary>
-        /// <param name="tatCaCauHoi">Danh sách tất cả các câu hỏi có thể.</param>
-        /// <param name="soLuongCauHoi">Số lượng câu hỏi cần tạo.</param>
-        public void taoNgauNhien(ICollection<CauHoi> tatCaCauHoi, int soLuongCauHoi)
+        // Methods
+        public decimal TinhDiemTrungBinh()
         {
-            // Kiểm tra số lượng câu hỏi có sẵn
-            if (tatCaCauHoi.Count < soLuongCauHoi)
-            {
-                Console.WriteLine("Số lượng câu hỏi cần tạo lớn hơn số lượng câu hỏi có sẵn.");
-                return;
-            }
-
-            // Chọn ngẫu nhiên các câu hỏi
-            var random = new Random();
-            var cauHoiNgauNhien = tatCaCauHoi.OrderBy(c => random.Next()).Take(soLuongCauHoi).ToList();
-
-            this.CauHois = cauHoiNgauNhien;
-            Console.WriteLine($"Đã tạo ngẫu nhiên {soLuongCauHoi} câu hỏi cho đề thi.");
+            if (!BaiLams.Any()) return 0;
+            return BaiLams.Average(bl => bl.KetQua?.Diem ?? 0);
         }
 
-        /// <summary>
-        /// Chấm điểm một bài làm và trả về kết quả.
-        /// </summary>
-        /// <param name="baiLam">Bài làm của học sinh.</param>
-        /// <returns>Đối tượng KetQua chứa thông tin điểm số.</returns>
-        public KetQua chamDiem(BaiLam baiLam)
+        public string LayThongTinTomTat()
         {
-            var ketQua = new KetQua();
-            ketQua.hocSinhId = baiLam.hocSinhId;
-            ketQua.deThiId = this.id;
-
-            // Logic chấm điểm chi tiết sẽ được thực hiện tại đây
-            // Giả định BaiLam chứa danh sách các đáp án của học sinh
-            // Và chúng ta so sánh với đáp án đúng của CauHois
-
-            ketQua.soCauDung = 0; // Thay thế bằng logic chấm điểm thực tế
-
-            // Tính điểm
-            if (this.CauHois != null && this.CauHois.Any())
-            {
-                float diemMoiCau = this.tongDiem / this.CauHois.Count;
-                ketQua.diem = ketQua.soCauDung * diemMoiCau;
-            }
-            else
-            {
-                ketQua.diem = 0;
-            }
-
-            Console.WriteLine($"Đã chấm điểm bài làm của học sinh '{baiLam.hocSinhId}'. Điểm số: {ketQua.diem}");
-            return ketQua;
+            return $"Đề thi: {TieuDe}\nMôn học: {MonHoc}\nKhối lớp: {KhoiLop}\nSố câu hỏi: {ExamQuestions.Count}\nThời gian: {ThoiGianLamBai} phút";
         }
     }
 }

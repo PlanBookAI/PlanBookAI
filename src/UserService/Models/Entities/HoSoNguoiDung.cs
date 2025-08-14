@@ -3,31 +3,28 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UserService.Models.Entities
 {
-
-    [Table("profiles", Schema = "users")]
+    [Table("user_profiles", Schema = "users")]
     public class HoSoNguoiDung
     {
         [Key]
         [Column("user_id")]
         public Guid UserId { get; set; } 
 
-        [Required]
-        [StringLength(255)]
-        [Column("full_name")]
-        public string HoTen { get; set; } = string.Empty;
-
         [StringLength(20)]
-        [Column("phone_number")]
+        [Column("phone")]
         public string? SoDienThoai { get; set; }
 
-        [Column("birth_date")]
-        public DateTime? NgaySinh { get; set; }
+        // HoTen không map với cột nào vì full_name nằm trong bảng users.users
+        [NotMapped]
+        public string? HoTen { get; set; }
 
-        [StringLength(500)]
         [Column("address")]
         public string? DiaChi { get; set; }
 
-        [StringLength(500)]
+        // NgaySinh không map với cột nào vì không có trong bảng user_profiles
+        [NotMapped]
+        public DateTime? NgaySinh { get; set; }
+
         [Column("avatar_url")]
         public string? AnhDaiDienUrl { get; set; }
 

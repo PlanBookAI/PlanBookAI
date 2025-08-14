@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using TaskService.Models.Entities;
-using TaskService.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TaskService.Models.Entities;
+using TaskService.Repositories;
 
 namespace TaskService.Controllers
 {
@@ -18,160 +18,80 @@ namespace TaskService.Controllers
             _cauHoiRepository = cauHoiRepository;
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả câu hỏi
-        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CauHoi>>> LayDanhSachCauHoi()
+        public async Task<ActionResult<IEnumerable<CauHoi>>> GetAll()
         {
-            try
-            {
-                var danhSachCauHoi = await _cauHoiRepository.GetAllAsync();
-                return Ok(danhSachCauHoi);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi khi lấy danh sách câu hỏi: {ex.Message}");
-            }
+            var cauHois = await _cauHoiRepository.GetAllAsync();
+            return Ok(cauHois);
         }
 
-        /// <summary>
-        /// Lấy câu hỏi theo ID
-        /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<CauHoi>> LayCauHoiTheoId(string id)
+        public async Task<ActionResult<CauHoi>> GetById(string id)
         {
-            try
+            var cauHoi = await _cauHoiRepository.GetByIdAsync(id);
+            if (cauHoi == null)
             {
-                var cauHoi = await _cauHoiRepository.GetByIdAsync(id);
-                if (cauHoi == null)
-                {
-                    return NotFound($"Không tìm thấy câu hỏi với ID: {id}");
-                }
-                return Ok(cauHoi);
+                return NotFound(new { Message = "Không tìm thấy câu hỏi" });
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi khi lấy câu hỏi: {ex.Message}");
-            }
+            return Ok(cauHoi);
         }
 
-        /// <summary>
-        /// Lấy câu hỏi theo môn học
-        /// </summary>
-        [HttpGet("mon-hoc/{monHoc}")]
-        public async Task<ActionResult<IEnumerable<CauHoi>>> LayCauHoiTheoMonHoc(string monHoc)
+        [HttpGet("mon-hoc/{monHoc}/do-kho/{doKho}")]
+        public async Task<ActionResult<IEnumerable<CauHoi>>> GetByMonHocAndDoKho(string monHoc, string doKho)
         {
-            try
-            {
-                var tatCaCauHoi = await _cauHoiRepository.GetAllAsync();
-                var cauHoiTheoMonHoc = new List<CauHoi>();
-
-                foreach (var cauHoi in tatCaCauHoi)
-                {
-                    if (cauHoi.monHoc.Equals(monHoc, StringComparison.OrdinalIgnoreCase))
-                    {
-                        cauHoiTheoMonHoc.Add(cauHoi);
-                    }
-                }
-
-                return Ok(cauHoiTheoMonHoc);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi khi lấy câu hỏi theo môn học: {ex.Message}");
-            }
+            var cauHois = await _cauHoiRepository.GetByMonHocAndDoKhoAsync(monHoc, doKho);
+            return Ok(cauHois);
         }
 
-        /// <summary>
-        /// Lấy câu hỏi theo độ khó
-        /// </summary>
-        [HttpGet("do-kho/{doKho}")]
-        public async Task<ActionResult<IEnumerable<CauHoi>>> LayCauHoiTheoDoKho(string doKho)
-        {
-            try
-            {
-                var tatCaCauHoi = await _cauHoiRepository.GetAllAsync();
-                var cauHoiTheoDoKho = new List<CauHoi>();
-
-                foreach (var cauHoi in tatCaCauHoi)
-                {
-                    if (cauHoi.doKho.Equals(doKho, StringComparison.OrdinalIgnoreCase))
-                    {
-                        cauHoiTheoDoKho.Add(cauHoi);
-                    }
-                }
-
-                return Ok(cauHoiTheoDoKho);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi khi lấy câu hỏi theo độ khó: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Tạo câu hỏi mới
-        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<CauHoi>> TaoCauHoi([FromBody] CauHoi cauHoi)
+        public async Task<ActionResult<CauHoi>> Create([FromBody] CauHoi cauHoi)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (cauHoi == null)
-                {
-                    return BadRequest("Dữ liệu câu hỏi không hợp lệ");
-                }
+                return BadRequest(ModelState);
+            }
 
-                // Tạo ID mới
-                cauHoi.id = Guid.NewGuid().ToString();
-                
-                var createdCauHoi = await _cauHoiRepository.CreateAsync(cauHoi);
-                return CreatedAtAction(nameof(LayCauHoiTheoId), new { id = cauHoi.id }, cauHoi);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi khi tạo câu hỏi: {ex.Message}");
-            }
+            cauHoi.Id = Guid.NewGuid();
+            cauHoi.TaoLuc = DateTime.UtcNow;
+            cauHoi.CapNhatLuc = DateTime.UtcNow;
+            cauHoi.IsActive = true;
+
+            var createdCauHoi = await _cauHoiRepository.CreateAsync(cauHoi);
+            return CreatedAtAction(nameof(GetById), new { id = createdCauHoi.Id }, createdCauHoi);
         }
 
-        /// <summary>
-        /// Cập nhật câu hỏi
-        /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> CapNhatCauHoi(string id, [FromBody] CauHoi cauHoi)
+        public async Task<ActionResult<CauHoi>> Update(string id, [FromBody] CauHoi cauHoi)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (cauHoi == null || id != cauHoi.id)
-                {
-                    return BadRequest("Dữ liệu không hợp lệ");
-                }
+                return BadRequest(ModelState);
+            }
 
-                await _cauHoiRepository.UpdateAsync(cauHoi);
-                return NoContent();
-            }
-            catch (Exception ex)
+            var existingCauHoi = await _cauHoiRepository.GetByIdAsync(id);
+            if (existingCauHoi == null)
             {
-                return StatusCode(500, $"Lỗi khi cập nhật câu hỏi: {ex.Message}");
+                return NotFound(new { Message = "Không tìm thấy câu hỏi" });
             }
+
+            cauHoi.Id = existingCauHoi.Id;
+            cauHoi.CapNhatLuc = DateTime.UtcNow;
+
+            var updatedCauHoi = await _cauHoiRepository.UpdateAsync(cauHoi);
+            return Ok(updatedCauHoi);
         }
 
-        /// <summary>
-        /// Xóa câu hỏi
-        /// </summary>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> XoaCauHoi(string id)
+        public async Task<ActionResult> Delete(string id)
         {
-            try
+            var existingCauHoi = await _cauHoiRepository.GetByIdAsync(id);
+            if (existingCauHoi == null)
             {
-                await _cauHoiRepository.DeleteAsync(id);
-                return NoContent();
+                return NotFound(new { Message = "Không tìm thấy câu hỏi" });
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi khi xóa câu hỏi: {ex.Message}");
-            }
+
+            await _cauHoiRepository.DeleteAsync(id);
+            return NoContent();
         }
     }
 }

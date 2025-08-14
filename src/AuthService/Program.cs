@@ -71,51 +71,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Thiết lập Migration - tạo database từ DbContext
+// Thiết lập Database Connection - sử dụng database thực
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    context.Database.EnsureCreated(); // Tạo database và tables
-
-    // Tạo dữ liệu test
-    await TaoDuLieuTest(context);
+    // Chỉ đảm bảo database connection, không tạo mock data
+    await context.Database.CanConnectAsync();
 }
 
 app.Run();
-
-// Method tạo dữ liệu test
-async Task TaoDuLieuTest(AuthDbContext context)
-{
-    // Kiểm tra xem đã có dữ liệu test chưa
-    if (await context.NguoiDungs.AnyAsync()) return;
-
-    // Tạo test users
-    var testUsers = new List<NguoiDung>
-    {
-        new NguoiDung
-        {
-            Id = Guid.NewGuid(),
-            Email = "admin@planbookai.dev",
-            HoTen = "Admin Test",
-            MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword("admin123"),
-            VaiTroId = 1, // ADMIN
-            LaHoatDong = true,
-            TaoLuc = DateTime.UtcNow,
-            CapNhatLuc = DateTime.UtcNow
-        },
-        new NguoiDung
-        {
-            Id = Guid.NewGuid(),
-            Email = "teacher@planbookai.dev",
-            HoTen = "Giáo Viên Test",
-            MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword("teacher123"),
-            VaiTroId = 4, // TEACHER
-            LaHoatDong = true,
-            TaoLuc = DateTime.UtcNow,
-            CapNhatLuc = DateTime.UtcNow
-        }
-    };
-
-    await context.NguoiDungs.AddRangeAsync(testUsers);
-    await context.SaveChangesAsync();
-}

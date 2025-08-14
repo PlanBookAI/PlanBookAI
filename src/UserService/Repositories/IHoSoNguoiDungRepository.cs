@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UserService.Models;
+using UserService.Models.Entities;
 
 namespace UserService.Repositories
 {
@@ -13,6 +13,9 @@ namespace UserService.Repositories
 
         // Lấy một hồ sơ người dùng theo ID
         Task<HoSoNguoiDung?> GetByIdAsync(string id);
+
+        // Lấy một hồ sơ người dùng theo email
+        Task<HoSoNguoiDung?> GetByEmailAsync(string email);
 
         // Thêm một hồ sơ người dùng mới
         Task AddAsync(HoSoNguoiDung hoSo);

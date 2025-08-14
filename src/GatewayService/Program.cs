@@ -196,11 +196,13 @@ app.UseRateLimiting(new GatewayService.Middleware.RateLimitingOptions
 });
 
 // Use JWT Middleware (before authorization)
-app.UseMiddleware<GatewayService.Middleware.JwtMiddleware>();
+app.UseJwtMiddleware();
 
 // Map Health Checks
 app.MapHealthChecks("/health");
 
+// Use Authentication và Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

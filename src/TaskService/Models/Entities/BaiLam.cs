@@ -1,30 +1,38 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TaskService.Models.Entities
 {
+    [Table("answer_sheets", Schema = "students")]
     public class BaiLam
     {
-        // Thuộc tính (Attributes)
-        public String id { get; set; }
-        public String hocSinhId { get; set; }
-        public String deThiId { get; set; }
-        public DateTime thoiGianNopBai { get; set; }
+        [Key]
+        [Column("id")]
+        public Guid Id { get; set; }
 
-        // Navigation properties để liên kết với các entities khác
-        public virtual HocSinh HocSinh { get; set; } // Mối quan hệ N-1 với HocSinh
-        public virtual DeThi DeThi { get; set; } // Mối quan hệ N-1 với DeThi
-        public virtual KetQua KetQua { get; set; } // Mối quan hệ 1-1 với KetQua
+        [Required]
+        [Column("student_id")]
+        public Guid HocSinhId { get; set; }
 
-        // Các phương thức (Methods)
+        [Required]
+        [Column("exam_id")]
+        public Guid DeThiId { get; set; }
 
-        /// <summary>
-        /// Ghi lại thời gian nộp bài của học sinh.
-        /// </summary>
-        public void ghiNhanThoiGianNopBai()
-        {
-            this.thoiGianNopBai = DateTime.Now;
-            Console.WriteLine($"Bài làm '{this.id}' của học sinh '{this.hocSinhId}' đã được nộp vào lúc {this.thoiGianNopBai}.");
-        }
+        [Required]
+        [Column("answers")]
+        public string DapAn { get; set; } = string.Empty;
+
+        [Column("submitted_at")]
+        public DateTime NopLuc { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        [ForeignKey("HocSinhId")]
+        public virtual HocSinh HocSinh { get; set; } = null!;
+
+        [ForeignKey("DeThiId")]
+        public virtual DeThi DeThi { get; set; } = null!;
+
+        public virtual KetQua KetQua { get; set; } = null!;
     }
 }

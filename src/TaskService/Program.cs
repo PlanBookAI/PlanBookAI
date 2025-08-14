@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Diagnostics;
 using TaskService.Data;
 using TaskService.Middleware;
 using TaskService.Models.Entities;
@@ -41,8 +43,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.InvalidModelStateResponseFactory = actionContext =>
     {
         var errors = actionContext.ModelState
-            .Where(x => x.Value.Errors.Count > 0)
-            .Select(x => new { Field = x.Key, Errors = x.Value.Errors.Select(e => e.ErrorMessage) })
+            .Where(x => x.Value?.Errors.Count > 0)
+            .Select(x => new { 
+                Field = x.Key, 
+                Errors = x.Value?.Errors.Select(e => e.ErrorMessage ?? "Unknown error") ?? Enumerable.Empty<string>() 
+            })
             .ToList();
 
         return new BadRequestObjectResult(new { Message = "Validation failed", Errors = errors });
@@ -63,9 +68,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Add repositories
-builder.Services.AddScoped<ICauHoiRepository, MockCauHoiRepository>();
-builder.Services.AddScoped<IDeThiRepository, MockDeThiRepository>();
+// Add repositories - sử dụng database thực
+builder.Services.AddScoped<ICauHoiRepository, CauHoiRepository>();
+builder.Services.AddScoped<IDeThiRepository, DeThiRepository>();
 
 var app = builder.Build();
 
@@ -91,45 +96,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Thiết lập Migration - tạo database từ DbContext
+// Thiết lập Database Connection - không tạo mock data
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<TaskDbContext>();
-    context.Database.EnsureCreated();
-
-    // Tạo dữ liệu test
-    await TaoDuLieuTest(context);
+    // Chỉ đảm bảo database connection, không tạo mock data
+    await context.Database.CanConnectAsync();
 }
 
 app.Run();
-
-// Method tạo dữ liệu test
-async Task TaoDuLieuTest(TaskDbContext context)
-{
-    // Kiểm tra xem đã có dữ liệu test chưa
-    if (await context.CauHois.AnyAsync()) return;
-
-    // Tạo test questions
-    var testQuestions = new List<CauHoi>
-    {
-        new CauHoi
-        {
-            id = Guid.NewGuid().ToString(),
-            noiDung = "Nguyên tử có cấu trúc như thế nào?",
-            monHoc = "HoaHoc",
-            doKho = "TrungBinh",
-            dapAnDung = "A"
-        },
-        new CauHoi
-        {
-            id = Guid.NewGuid().ToString(),
-            noiDung = "Công thức hóa học của nước là gì?",
-            monHoc = "HoaHoc",
-            doKho = "De",
-            dapAnDung = "B"
-        }
-    };
-
-    await context.CauHois.AddRangeAsync(testQuestions);
-    await context.SaveChangesAsync();
-}

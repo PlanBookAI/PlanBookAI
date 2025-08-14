@@ -28,12 +28,17 @@ namespace GatewayService.Services
 
                 if (validatedToken is JwtSecurityToken jwtToken)
                 {
+                    // Tìm userId từ các claim có thể có
                     var userId = principal.FindFirst("userId")?.Value 
                                ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
                                ?? principal.FindFirst("sub")?.Value
-                               ?? principal.FindFirst(ClaimTypes.Name)?.Value; // Thêm claim Name từ AuthService
+                               ?? principal.FindFirst(ClaimTypes.Name)?.Value; // Email từ AuthService
 
                     _logger.LogInformation("Token validation successful for user: {UserId}", userId);
+                    
+                    // Log tất cả claims để debug
+                    _logger.LogDebug("All claims: {Claims}", string.Join(", ", principal.Claims.Select(c => $"{c.Type}={c.Value}")));
+                    
                     return Task.FromResult(userId);
                 }
 
@@ -61,10 +66,17 @@ namespace GatewayService.Services
             try
             {
                 var jwtToken = _tokenHandler.ReadJwtToken(token);
-                return jwtToken.ValidTo < DateTime.UtcNow;
+                var now = DateTime.UtcNow;
+                var isValid = jwtToken.ValidTo > now;
+                
+                _logger.LogDebug("Token expiration check: ValidTo={ValidTo}, Now={Now}, IsValid={IsValid}", 
+                               jwtToken.ValidTo, now, isValid);
+                
+                return !isValid;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogWarning(ex, "Error checking token expiration");
                 return true; // Nếu không đọc được token thì coi như expired
             }
         }

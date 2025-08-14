@@ -25,13 +25,17 @@ namespace TaskService.Repositories
 
         public async Task<CauHoi?> GetByIdAsync(string id)
         {
-            return await _context.CauHois.FindAsync(id);
+            if (Guid.TryParse(id, out Guid guidId))
+            {
+                return await _context.CauHois.FindAsync(guidId);
+            }
+            return null;
         }
 
         public async Task<List<CauHoi>> GetByMonHocAndDoKhoAsync(string monHoc, string doKho)
         {
             return await _context.CauHois
-                .Where(c => c.monHoc == monHoc && c.doKho == doKho)
+                .Where(c => c.MonHoc == monHoc && c.DoKho == doKho)
                 .ToListAsync();
         }
 
@@ -52,11 +56,14 @@ namespace TaskService.Repositories
 
         public async Task DeleteAsync(string id)
         {
-            var cauHoi = await _context.CauHois.FindAsync(id);
-            if (cauHoi != null)
+            if (Guid.TryParse(id, out Guid guidId))
             {
-                _context.CauHois.Remove(cauHoi);
-                await _context.SaveChangesAsync();
+                var cauHoi = await _context.CauHois.FindAsync(guidId);
+                if (cauHoi != null)
+                {
+                    _context.CauHois.Remove(cauHoi);
+                    await _context.SaveChangesAsync();
+                }
             }
         }
     }

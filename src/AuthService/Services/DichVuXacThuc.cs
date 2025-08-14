@@ -21,68 +21,22 @@ namespace AuthService.Services
     {
         private readonly IConfiguration _config;
         private readonly byte[] _key;
+        private readonly INguoiDungRepository _nguoiDungRepository;
+        private readonly IVaiTroRepository _vaiTroRepository;
 
-        // Mock data cho testing
-        private readonly List<NguoiDung> _mockUsers = new List<NguoiDung>
-        {
-            new NguoiDung
-            {
-                Id = Guid.NewGuid(),
-                Email = "admin@test.com",
-                HoTen = "Admin User",
-                MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword("Password123"),
-                VaiTroId = 1,
-                LaHoatDong = true,
-                TaoLuc = DateTime.UtcNow,
-                CapNhatLuc = DateTime.UtcNow
-            },
-            new NguoiDung
-            {
-                Id = Guid.NewGuid(),
-                Email = "teacher@test.com",
-                HoTen = "Teacher User",
-                MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword("Password123"),
-                VaiTroId = 4,
-                LaHoatDong = true,
-                TaoLuc = DateTime.UtcNow,
-                CapNhatLuc = DateTime.UtcNow
-            }
-        };
-
-        private readonly List<VaiTro> _mockRoles = new List<VaiTro>
-        {
-            new VaiTro { Id = 1, Ten = "Admin" },
-            new VaiTro { Id = 2, Ten = "Manager" },
-            new VaiTro { Id = 3, Ten = "Staff" },
-            new VaiTro { Id = 4, Ten = "Teacher" }
-        };
-
-        public DichVuXacThuc(IConfiguration config)
+        public DichVuXacThuc(IConfiguration config, INguoiDungRepository nguoiDungRepository, IVaiTroRepository vaiTroRepository)
         {
             _config = config;
+            _nguoiDungRepository = nguoiDungRepository;
+            _vaiTroRepository = vaiTroRepository;
             // Lấy khóa bí mật từ file cấu hình (appsettings.json).
             _key = Encoding.ASCII.GetBytes(_config["JwtSettings:SecretKey"]);
         }
 
         public async Task<PhanHoiXacThucDto> TaoToken(string email, string matKhau)
         {
-            // Debug: In ra số lượng user trong mock data
-            Console.WriteLine($"Debug: Số lượng user trong mock data: {_mockUsers.Count}");
-            Console.WriteLine($"Debug: Đang tìm user với email: {email}");
-            
-            // Tìm người dùng trong mock data theo email
-            var nguoiDung = _mockUsers.FirstOrDefault(u => u.Email == email);
-
-            // Debug: In ra kết quả tìm kiếm
-            if (nguoiDung == null)
-            {
-                Console.WriteLine($"Debug: Không tìm thấy user với email: {email}");
-                Console.WriteLine($"Debug: Danh sách email có sẵn: {string.Join(", ", _mockUsers.Select(u => u.Email))}");
-            }
-            else
-            {
-                Console.WriteLine($"Debug: Tìm thấy user: {nguoiDung.Email}, VaiTroId: {nguoiDung.VaiTroId}");
-            }
+            // Tìm người dùng trong database theo email
+            var nguoiDung = await _nguoiDungRepository.GetByEmailAsync(email);
 
             // Xử lý lỗi: nếu không tìm thấy người dùng hoặc mật khẩu không đúng.
             if (nguoiDung == null || !BCrypt.Net.BCrypt.Verify(matKhau, nguoiDung.MatKhauMaHoa))
@@ -101,13 +55,20 @@ namespace AuthService.Services
             };
         }
 
-        public async Task<PhanHoiXacThucDto> DangKy(string email, string matKhau)
+        public async Task<PhanHoiXacThucDto> DangKy(string email, string matKhau, string hoTen, string vaiTro)
         {
-            // Kiểm tra email đã tồn tại chưa trong mock data
-            var nguoiDungTonTai = _mockUsers.FirstOrDefault(u => u.Email == email);
+            // Kiểm tra email đã tồn tại chưa trong database
+            var nguoiDungTonTai = await _nguoiDungRepository.GetByEmailAsync(email);
             if (nguoiDungTonTai != null)
             {
                 throw new InvalidOperationException("Email này đã được sử dụng.");
+            }
+
+            // Lấy role ID từ tên vai trò
+            var vaiTroEntity = await _vaiTroRepository.GetByTenVaiTroAsync(vaiTro);
+            if (vaiTroEntity == null)
+            {
+                throw new InvalidOperationException("Vai trò không hợp lệ.");
             }
 
             // Tạo người dùng mới
@@ -115,20 +76,16 @@ namespace AuthService.Services
             {
                 Id = Guid.NewGuid(),
                 Email = email,
-                HoTen = "Người dùng mới",
+                HoTen = hoTen,
                 MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword(matKhau),
-                VaiTroId = 4, // Mặc định là Teacher
+                VaiTroId = vaiTroEntity.Id,
                 LaHoatDong = true,
                 TaoLuc = DateTime.UtcNow,
                 CapNhatLuc = DateTime.UtcNow
             };
 
-            // Thêm vào mock data
-            _mockUsers.Add(nguoiDungMoi);
-            
-            // Debug: In ra thông tin sau khi thêm user
-            Console.WriteLine($"Debug: Đã thêm user mới: {nguoiDungMoi.Email}");
-            Console.WriteLine($"Debug: Tổng số user trong mock data sau khi thêm: {_mockUsers.Count}");
+            // Lưu vào database
+            await _nguoiDungRepository.AddAsync(nguoiDungMoi);
 
             // Tạo token cho người dùng mới
             var accessToken = TaoAccessToken(nguoiDungMoi);
@@ -183,13 +140,11 @@ namespace AuthService.Services
         /// </summary>
         private JwtSecurityToken TaoAccessToken(NguoiDung nguoiDung)
         {
-            var vaiTro = _mockRoles.FirstOrDefault(r => r.Id == nguoiDung.VaiTroId);
-            
             var claims = new[]
             {
                 // Thêm các claim (thông tin) vào token.
                 new Claim(ClaimTypes.Name, nguoiDung.Email),
-                new Claim(ClaimTypes.Role, vaiTro?.Ten ?? "User"),
+                new Claim(ClaimTypes.Role, nguoiDung.VaiTroId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

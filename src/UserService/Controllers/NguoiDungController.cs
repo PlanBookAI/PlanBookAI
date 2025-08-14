@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UserService.Models.DTOs;
 using UserService.Models.Entities;
+using System.Security.Claims;
+using UserService.Repositories;
 
 namespace UserService.Controllers
 {
@@ -10,30 +12,13 @@ namespace UserService.Controllers
     {
         private readonly ILogger<NguoiDungController> _logger;
 
-        // ---- MOCK DATABASE ----
-        // Trong thực tế, đây sẽ là DbContext được inject vào.
-        // ID này phải khớp với ID trong mock token để test.
-        private static readonly Guid mockTeacherId = new Guid("a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d6");
-        private static readonly List<HoSoNguoiDung> _mockHoSoDb = new List<HoSoNguoiDung>
-        {
-            new HoSoNguoiDung
-            {
-                UserId = mockTeacherId,
-                HoTen = "Giáo Viên Test",
-                SoDienThoai = "0987654321",
-                DiaChi = "123 Đường ABC, Quận 1, TPHCM",
-                NgaySinh = new DateTime(1990, 5, 15),
-                AnhDaiDienUrl = "https://example.com/avatar.jpg",
-                MoTaBanThan = "Giáo viên Hóa học với 10 năm kinh nghiệm.",
-                TaoLuc = DateTime.UtcNow.AddDays(-10),
-                CapNhatLuc = DateTime.UtcNow.AddDays(-1)
-            }
-        };
-        // ---- END MOCK DATABASE ----
+        // Sử dụng database thực
+        private readonly IHoSoNguoiDungRepository _hoSoRepository;
 
-        public NguoiDungController(ILogger<NguoiDungController> logger)
+        public NguoiDungController(ILogger<NguoiDungController> logger, IHoSoNguoiDungRepository hoSoRepository)
         {
             _logger = logger;
+            _hoSoRepository = hoSoRepository;
         }
 
         /// <summary>
@@ -41,27 +26,57 @@ namespace UserService.Controllers
         /// </summary>
         /// <returns>Thông tin chi tiết hồ sơ người dùng.</returns>
         [HttpGet("thong-tin")]
-        public IActionResult GetThongTin()
+        public async Task<IActionResult> GetThongTin()
         {
-            // Lấy thông tin từ header do Gateway chuyển tiếp
-            if (!Request.Headers.TryGetValue("X-User-Id", out var userIdStr) ||
-                !Guid.TryParse(userIdStr, out var userId))
+            // Lấy thông tin từ User.Identity đã được set bởi HeaderAuthenticationMiddleware
+            if (User?.Identity?.IsAuthenticated != true)
             {
-                _logger.LogWarning("GetThongTin: Không thể lấy User ID từ header.");
+                _logger.LogWarning("GetThongTin: User không được xác thực.");
                 return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
             }
 
-            Request.Headers.TryGetValue("X-User-Role", out var vaiTro);
-            Request.Headers.TryGetValue("X-User-Email", out var email); // Giả sử Gateway cũng gửi email
+            var userIdStr = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                _logger.LogWarning("GetThongTin: Không thể lấy User ID từ claims.");
+                return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
+            }
+            
+            // Tìm user trong database bằng email
+            var user = await _hoSoRepository.GetByEmailAsync(userIdStr);
+            if (user == null)
+            {
+                _logger.LogWarning("GetThongTin: Không tìm thấy user với email: {Email}", userIdStr);
+                return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
+            }
+            
+            var userId = user.UserId;
+
+            var vaiTro = User.FindFirst(ClaimTypes.Role)?.Value ?? "N/A";
+            var email = User.FindFirst(ClaimTypes.Name)?.Value ?? "N/A";
 
             _logger.LogInformation("Nhận yêu cầu lấy thông tin cho User ID: {UserId}", userId);
 
-            var hoSo = _mockHoSoDb.FirstOrDefault(p => p.UserId == userId);
+            var hoSo = await _hoSoRepository.GetByIdAsync(userId.ToString());
 
             if (hoSo == null)
             {
-                _logger.LogWarning("Không tìm thấy hồ sơ cho User ID: {UserId}", userId);
-                return NotFound(new { message = "Không tìm thấy hồ sơ người dùng." });
+                // Tạo profile mới cho admin user
+                hoSo = new HoSoNguoiDung
+                {
+                    UserId = userId,
+                    HoTen = "Admin User",
+                    SoDienThoai = "0123456789",
+                    DiaChi = "Admin Address",
+                    NgaySinh = new DateTime(1990, 1, 1),
+                    AnhDaiDienUrl = "https://example.com/admin-avatar.jpg",
+                    MoTaBanThan = "Administrator của hệ thống PlanbookAI.",
+                    TaoLuc = DateTime.UtcNow,
+                    CapNhatLuc = DateTime.UtcNow
+                };
+                
+                await _hoSoRepository.AddAsync(hoSo);
+                _logger.LogInformation("Đã tạo profile mới cho admin user: {UserId}", userId);
             }
 
             var dto = new ThongTinNguoiDungDto
@@ -87,23 +102,30 @@ namespace UserService.Controllers
         /// <param name="yeuCau">Dữ liệu cần cập nhật.</param>
         /// <returns>Kết quả cập nhật.</returns>
         [HttpPut("cap-nhat")]
-        public IActionResult CapNhatHoSo([FromBody] YeuCauCapNhatHoSo yeuCau)
+        public async Task<IActionResult> CapNhatHoSo([FromBody] YeuCauCapNhatHoSo yeuCau)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (!Request.Headers.TryGetValue("X-User-Id", out var userIdStr) ||
-                !Guid.TryParse(userIdStr, out var userId))
+            // Lấy thông tin từ User.Identity đã được set bởi HeaderAuthenticationMiddleware
+            if (User?.Identity?.IsAuthenticated != true)
             {
-                _logger.LogWarning("CapNhatHoSo: Không thể lấy User ID từ header.");
+                _logger.LogWarning("CapNhatHoSo: User không được xác thực.");
+                return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
+            }
+
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdStr, out var userId))
+            {
+                _logger.LogWarning("CapNhatHoSo: Không thể lấy User ID từ claims.");
                 return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
             }
 
             _logger.LogInformation("Nhận yêu cầu cập nhật hồ sơ cho User ID: {UserId}", userId);
 
-            var hoSo = _mockHoSoDb.FirstOrDefault(p => p.UserId == userId);
+            var hoSo = await _hoSoRepository.GetByIdAsync(userId.ToString());
             if (hoSo == null)
             {
                 _logger.LogWarning("Không tìm thấy hồ sơ để cập nhật cho User ID: {UserId}", userId);
@@ -119,7 +141,9 @@ namespace UserService.Controllers
             hoSo.MoTaBanThan = yeuCau.MoTaBanThan;
             hoSo.CapNhatLuc = DateTime.UtcNow;
 
-            // TODO: Ghi lại LichSuHoatDong
+            // Lưu vào database
+            await _hoSoRepository.UpdateAsync(hoSo);
+
             _logger.LogInformation("Đã cập nhật thành công hồ sơ cho User ID: {UserId}", userId);
 
             // Tạo response
@@ -137,8 +161,8 @@ namespace UserService.Controllers
                     AnhDaiDienUrl = hoSo.AnhDaiDienUrl,
                     MoTaBanThan = hoSo.MoTaBanThan,
                     CapNhatLuc = hoSo.CapNhatLuc,
-                    VaiTro = Request.Headers["X-User-Role"].ToString() ?? "N/A",
-                    Email = Request.Headers["X-User-Email"].ToString() ?? "N/A"
+                    VaiTro = User.FindFirst(ClaimTypes.Role)?.Value ?? "N/A",
+                    Email = User.FindFirst(ClaimTypes.Name)?.Value ?? "N/A"
                 }
             };
 
@@ -152,11 +176,17 @@ namespace UserService.Controllers
         /// <param name="kichThuocTrang">Kích thước của mỗi trang.</param>
         /// <returns>Danh sách người dùng có phân trang.</returns>
         [HttpGet("danh-sach")]
-        public IActionResult LayDanhSachNguoiDung(int soTrang = 1, int kichThuocTrang = 10)
+        public async Task<IActionResult> LayDanhSachNguoiDung(int soTrang = 1, int kichThuocTrang = 10)
         {
-            // Kiểm tra quyền Admin
-            if (!Request.Headers.TryGetValue("X-User-Role", out var vaiTro) || 
-                vaiTro.ToString() != "Admin")
+            // Kiểm tra quyền Admin từ User.Identity
+            if (User?.Identity?.IsAuthenticated != true)
+            {
+                _logger.LogWarning("LayDanhSachNguoiDung: User không được xác thực.");
+                return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
+            }
+
+            var vaiTro = User.FindFirst(ClaimTypes.Role)?.Value;
+            if (vaiTro != "ADMIN")
             {
                 _logger.LogWarning("LayDanhSachNguoiDung: Không có quyền Admin.");
                 return StatusCode(403, new { message = "Không có quyền truy cập. Chỉ Admin mới có thể sử dụng chức năng này." });
@@ -164,13 +194,13 @@ namespace UserService.Controllers
 
             _logger.LogInformation("Admin yêu cầu lấy danh sách người dùng - Trang: {SoTrang}, Kích thước: {KichThuoc}", soTrang, kichThuocTrang);
 
-            var tatCaNguoiDung = _mockHoSoDb;
+            var tatCaNguoiDung = await _hoSoRepository.GetAllAsync();
             var nguoiDungPhanTrang = tatCaNguoiDung
                 .Skip((soTrang - 1) * kichThuocTrang)
                 .Take(kichThuocTrang)
                 .ToList();
 
-            var tongSoMuc = tatCaNguoiDung.Count;
+            var tongSoMuc = tatCaNguoiDung.Count();
             var tongSoTrang = (int)Math.Ceiling((double)tongSoMuc / kichThuocTrang);
 
             var ketQua = new
@@ -199,11 +229,17 @@ namespace UserService.Controllers
         /// <param name="id">ID của người dùng.</param>
         /// <returns>Thông tin chi tiết người dùng.</returns>
         [HttpGet("{id}/chi-tiet")]
-        public IActionResult LayChiTietNguoiDung(string id)
+        public async Task<IActionResult> LayChiTietNguoiDung(string id)
         {
-            // Kiểm tra quyền Admin
-            if (!Request.Headers.TryGetValue("X-User-Role", out var vaiTro) || 
-                vaiTro.ToString() != "Admin")
+            // Kiểm tra quyền Admin từ User.Identity
+            if (User?.Identity?.IsAuthenticated != true)
+            {
+                _logger.LogWarning("LayChiTietNguoiDung: User không được xác thực.");
+                return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
+            }
+
+            var vaiTro = User.FindFirst(ClaimTypes.Role)?.Value;
+            if (vaiTro != "ADMIN")
             {
                 _logger.LogWarning("LayChiTietNguoiDung: Không có quyền Admin.");
                 return StatusCode(403, new { message = "Không có quyền truy cập. Chỉ Admin mới có thể sử dụng chức năng này." });
@@ -216,7 +252,7 @@ namespace UserService.Controllers
 
             _logger.LogInformation("Admin yêu cầu lấy chi tiết người dùng ID: {UserId}", userId);
 
-            var hoSo = _mockHoSoDb.FirstOrDefault(p => p.UserId == userId);
+            var hoSo = await _hoSoRepository.GetByIdAsync(id);
             if (hoSo == null)
             {
                 return NotFound(new { message = "Không tìm thấy người dùng." });
@@ -245,11 +281,17 @@ namespace UserService.Controllers
         /// <param name="yeuCau">Dữ liệu cần cập nhật.</param>
         /// <returns>Kết quả cập nhật.</returns>
         [HttpPut("{id}/cap-nhat")]
-        public IActionResult CapNhatNguoiDung(string id, [FromBody] YeuCauCapNhatHoSo yeuCau)
+        public async Task<IActionResult> CapNhatNguoiDung(string id, [FromBody] YeuCauCapNhatHoSo yeuCau)
         {
-            // Kiểm tra quyền Admin
-            if (!Request.Headers.TryGetValue("X-User-Role", out var vaiTro) || 
-                vaiTro.ToString() != "Admin")
+            // Kiểm tra quyền Admin từ User.Identity
+            if (User?.Identity?.IsAuthenticated != true)
+            {
+                _logger.LogWarning("CapNhatNguoiDung: User không được xác thực.");
+                return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
+            }
+
+            var vaiTro = User.FindFirst(ClaimTypes.Role)?.Value;
+            if (vaiTro != "ADMIN")
             {
                 _logger.LogWarning("CapNhatNguoiDung: Không có quyền Admin.");
                 return StatusCode(403, new { message = "Không có quyền truy cập. Chỉ Admin mới có thể sử dụng chức năng này." });
@@ -267,7 +309,7 @@ namespace UserService.Controllers
 
             _logger.LogInformation("Admin yêu cầu cập nhật người dùng ID: {UserId}", userId);
 
-            var hoSo = _mockHoSoDb.FirstOrDefault(p => p.UserId == userId);
+            var hoSo = await _hoSoRepository.GetByIdAsync(id);
             if (hoSo == null)
             {
                 return NotFound(new { message = "Không tìm thấy người dùng." });
@@ -281,6 +323,9 @@ namespace UserService.Controllers
             hoSo.AnhDaiDienUrl = yeuCau.AnhDaiDienUrl;
             hoSo.MoTaBanThan = yeuCau.MoTaBanThan;
             hoSo.CapNhatLuc = DateTime.UtcNow;
+
+            // Lưu vào database
+            await _hoSoRepository.UpdateAsync(hoSo);
 
             _logger.LogInformation("Admin đã cập nhật thành công người dùng ID: {UserId}", userId);
 
@@ -298,8 +343,8 @@ namespace UserService.Controllers
                     AnhDaiDienUrl = hoSo.AnhDaiDienUrl,
                     MoTaBanThan = hoSo.MoTaBanThan,
                     CapNhatLuc = hoSo.CapNhatLuc,
-                    VaiTro = "Admin",
-                    Email = "admin@system.com"
+                    VaiTro = vaiTro ?? "N/A",
+                    Email = User.FindFirst(ClaimTypes.Name)?.Value ?? "N/A"
                 }
             };
 
@@ -312,11 +357,17 @@ namespace UserService.Controllers
         /// <param name="id">ID của người dùng cần xóa.</param>
         /// <returns>Kết quả xóa.</returns>
         [HttpDelete("{id}")]
-        public IActionResult XoaNguoiDung(string id)
+        public async Task<IActionResult> XoaNguoiDung(string id)
         {
-            // Kiểm tra quyền Admin
-            if (!Request.Headers.TryGetValue("X-User-Role", out var vaiTro) || 
-                vaiTro.ToString() != "Admin")
+            // Kiểm tra quyền Admin từ User.Identity
+            if (User?.Identity?.IsAuthenticated != true)
+            {
+                _logger.LogWarning("XoaNguoiDung: User không được xác thực.");
+                return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
+            }
+
+            var vaiTro = User.FindFirst(ClaimTypes.Role)?.Value;
+            if (vaiTro != "ADMIN")
             {
                 _logger.LogWarning("XoaNguoiDung: Không có quyền Admin.");
                 return StatusCode(403, new { message = "Không có quyền truy cập. Chỉ Admin mới có thể sử dụng chức năng này." });
@@ -329,14 +380,14 @@ namespace UserService.Controllers
 
             _logger.LogInformation("Admin yêu cầu xóa người dùng ID: {UserId}", userId);
 
-            var hoSo = _mockHoSoDb.FirstOrDefault(p => p.UserId == userId);
+            var hoSo = await _hoSoRepository.GetByIdAsync(id);
             if (hoSo == null)
             {
                 return NotFound(new { message = "Không tìm thấy người dùng." });
             }
 
-            // Xóa người dùng khỏi mock database
-            _mockHoSoDb.Remove(hoSo);
+            // Xóa người dùng khỏi database
+            await _hoSoRepository.DeleteAsync(id);
 
             _logger.LogInformation("Admin đã xóa thành công người dùng ID: {UserId}", userId);
 

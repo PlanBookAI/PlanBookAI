@@ -53,13 +53,13 @@ namespace AuthService.Controllers
         /// <param name="dto">Thông tin đăng ký</param>
         /// <returns>Thông tin tài khoản đã tạo</returns>
         [HttpPost("dang-ky")]
-        public async Task<ActionResult<PhanHoiXacThucDto>> DangKy([FromBody] DangNhapDto dto)
+        public async Task<ActionResult<PhanHoiXacThucDto>> DangKy([FromBody] DangKyDto dto)
         {
             try
             {
                 _logger.LogInformation("Registration attempt for email: {Email}", dto.Email);
 
-                var phanHoi = await _dichVuXacThuc.DangKy(dto.Email, dto.MatKhau);
+                var phanHoi = await _dichVuXacThuc.DangKy(dto.Email, dto.MatKhau, dto.HoTen, dto.VaiTro);
 
                 _logger.LogInformation("Registration successful for user: {Email}", dto.Email);
                 return Ok(phanHoi);
