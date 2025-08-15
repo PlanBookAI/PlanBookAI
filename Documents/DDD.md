@@ -219,13 +219,222 @@ public class BaiLamDaCham : IDomainEvent
 ```csharp
 public interface IDichVuTichHopAI
 {
+    // Existing methods
     GiaoAn TaoGiaoAnTuAI(YeuCauTaoGiaoAn yeuCau);
     List<CauHoi> TaoNganHangCauHoi(TieuChiTaoCauHoi tieuChi);
     NoiDungGiaoAn CaiThienNoiDung(NoiDungGiaoAn noiDungGoc);
+    
+    // New PDF-based lesson plan generation flow
+    Task<PhienGiaoAnAI> TaoGiaoAnTuGiaoTrinhPDF(IFormFile pdfFile, YeuCauTaoGiaoAnTuPDF yeuCau);
+    Task<GiaoAnAI> ChinhSuaGiaoAnAI(Guid phienId, YeuCauChinhSuaGiaoAn yeuCau);
+    Task<GiaoAn> LuuGiaoAnCuoiCung(Guid phienId, YeuCauLuuGiaoAn yeuCau);
+}
+
+// New DTOs for PDF-based workflow
+public class YeuCauTaoGiaoAnTuPDF
+{
+    public string MonHoc { get; set; }
+    public int KhoiLop { get; set; }
+    public string ChuDe { get; set; }
+    public string MucTieu { get; set; }
+    public int ThoiGianDay { get; set; } // phút
+}
+
+public class PhienGiaoAnAI
+{
+    public Guid Id { get; set; }
+    public string DuongDanPDF { get; set; }
+    public string VanBanTrichXuat { get; set; }
+    public GiaoAnAI GiaoAnAIGenerated { get; set; }
+    public TrangThaiPhien TrangThai { get; set; }
+    public DateTime ThoiGianTao { get; set; }
+    public DateTime? ThoiGianHoanThanh { get; set; }
+}
+
+public class GiaoAnAI
+{
+    public string TieuDe { get; set; }
+    public string MucTieu { get; set; }
+    public string NoiDung { get; set; }
+    public string ChuChuan { get; set; }
+    public string ThietBiDayHoc { get; set; }
+    public string HinhThucToChuc { get; set; }
+    public string TienTrinhBaiGiang { get; set; }
+    public string CuCoBaiGiang { get; set; }
+    public string DanhGiaKetQua { get; set; }
+}
+
+public enum TrangThaiPhien
+{
+    DangXuLy,
+    DaHoanThanh,
+    DaLuu,
+    DaHuy
 }
 ```
 
-### 5.2 OCR Processing Services
+### 5.2 PDF Processing Services
+
+```csharp
+public interface IDichVuXuLyPDF
+{
+    Task<string> TrichXuatVanBanTuPDF(IFormFile pdfFile);
+    Task<string> TrichXuatVanBanTuPDFAsync(string duongDanFile);
+    Task<bool> KiemTraChatLuongPDF(IFormFile pdfFile);
+}
+
+public class DichVuXuLyPDF : IDichVuXuLyPDF
+{
+    private readonly ILogger<DichVuXuLyPDF> _logger;
+    
+    public async Task<string> TrichXuatVanBanTuPDF(IFormFile pdfFile)
+    {
+        // Implementation using iTextSharp or similar PDF library
+        // Extract text content from PDF
+        // Handle different PDF formats and quality
+        // Return extracted text
+    }
+    
+    public async Task<bool> KiemTraChatLuongPDF(IFormFile pdfFile)
+    {
+        // Check PDF quality for OCR processing
+        // Validate file format, size, and readability
+        // Return quality assessment
+    }
+}
+```
+
+### 5.3 Lesson Plan AI Generation Service
+
+```csharp
+public interface IDichVuTaoGiaoAnAI
+{
+    Task<GiaoAnAI> TaoGiaoAnTuVanBanGiaoTrinh(string vanBanGiaoTrinh, YeuCauTaoGiaoAnTuPDF yeuCau);
+    Task<GiaoAnAI> ChinhSuaGiaoAnTheoYeuCau(GiaoAnAI giaoAnGoc, string yeuCauChinhSua);
+    Task<GiaoAnAI> TaoGiaoAnTheoMau(GiaoAnAI giaoAnGoc, MauGiaoAn mau);
+}
+
+public class DichVuTaoGiaoAnAI : IDichVuTaoGiaoAnAI
+{
+    private readonly IGeminiAIClient _geminiClient;
+    private readonly ILogger<DichVuTaoGiaoAnAI> _logger;
+    
+    public async Task<GiaoAnAI> TaoGiaoAnTuVanBanGiaoTrinh(string vanBanGiaoTrinh, YeuCauTaoGiaoAnTuPDF yeuCau)
+    {
+        var prompt = XayDungPromptTaoGiaoAn(vanBanGiaoTrinh, yeuCau);
+        
+        try
+        {
+            var phanHoi = await _geminiClient.TaoNoiDungAsync(prompt);
+            return XuLyPhanHoiAI(phanHoi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi khi tạo giáo án từ AI");
+            throw new AIServiceException("Không thể tạo giáo án từ AI", ex);
+        }
+    }
+    
+    private string XayDungPromptTaoGiaoAn(string vanBanGiaoTrinh, YeuCauTaoGiaoAnTuPDF yeuCau)
+    {
+        return $"""
+            Dựa trên giáo trình sau đây, hãy tạo một giáo án hoàn chỉnh:
+            
+            GIÁO TRÌNH:
+            {vanBanGiaoTrinh}
+            
+            YÊU CẦU:
+            - Môn học: {yeuCau.MonHoc}
+            - Khối lớp: {yeuCau.KhoiLop}
+            - Chủ đề: {yeuCau.ChuDe}
+            - Mục tiêu: {yeuCau.MucTieu}
+            - Thời gian dạy: {yeuCau.ThoiGianDay} phút
+            
+            CẤU TRÚC GIÁO ÁN:
+            1. Tiêu đề bài giảng
+            2. Mục tiêu bài học
+            3. Chuẩn kiến thức, kỹ năng
+            4. Thiết bị dạy học
+            5. Hình thức tổ chức
+            6. Tiến trình bài giảng
+            7. Củng cố bài giảng
+            8. Đánh giá kết quả
+            
+            Yêu cầu:
+            - Ngôn ngữ: Tiếng Việt
+            - Theo chương trình giáo dục Việt Nam
+            - Phù hợp với khối lớp {yeuCau.KhoiLop}
+            - Thời gian phù hợp với {yeuCau.ThoiGianDay} phút
+            - Nội dung chi tiết, dễ hiểu
+            """;
+    }
+    
+    private GiaoAnAI XuLyPhanHoiAI(string phanHoiAI)
+    {
+        // Parse AI response and structure into GiaoAnAI object
+        // Handle different response formats
+        // Extract structured information
+        return new GiaoAnAI
+        {
+            // Parse and populate fields from AI response
+        };
+    }
+}
+```
+
+### 5.4 Session Management Service
+
+```csharp
+public interface IDichVuQuanLyPhienGiaoAn
+{
+    Task<PhienGiaoAnAI> TaoPhienMoi(IFormFile pdfFile, YeuCauTaoGiaoAnTuPDF yeuCau);
+    Task<PhienGiaoAnAI> LayPhienTheoId(Guid phienId);
+    Task<bool> CapNhatTrangThaiPhien(Guid phienId, TrangThaiPhien trangThaiMoi);
+    Task<bool> XoaPhien(Guid phienId);
+}
+
+public class DichVuQuanLyPhienGiaoAn : IDichVuQuanLyPhienGiaoAn
+{
+    private readonly IPhienGiaoAnRepository _phienRepository;
+    private readonly IDichVuXuLyPDF _pdfService;
+    private readonly IDichVuTaoGiaoAnAI _aiService;
+    private readonly IFileStorageService _fileStorage;
+    
+    public async Task<PhienGiaoAnAI> TaoPhienMoi(IFormFile pdfFile, YeuCauTaoGiaoAnTuPDF yeuCau)
+    {
+        // 1. Validate PDF file
+        if (!await _pdfService.KiemTraChatLuongPDF(pdfFile))
+        {
+            throw new ValidationException("PDF không đủ chất lượng để xử lý");
+        }
+        
+        // 2. Upload PDF to storage
+        var duongDanPDF = await _fileStorage.LuuFileAsync(pdfFile, "giao-trinh");
+        
+        // 3. Extract text from PDF
+        var vanBanTrichXuat = await _pdfService.TrichXuatVanBanTuPDF(pdfFile);
+        
+        // 4. Generate lesson plan using AI
+        var giaoAnAI = await _aiService.TaoGiaoAnTuVanBanGiaoTrinh(vanBanTrichXuat, yeuCau);
+        
+        // 5. Create session
+        var phien = new PhienGiaoAnAI
+        {
+            Id = Guid.NewGuid(),
+            DuongDanPDF = duongDanPDF,
+            VanBanTrichXuat = vanBanTrichXuat,
+            GiaoAnAIGenerated = giaoAnAI,
+            TrangThai = TrangThaiPhien.DangXuLy,
+            ThoiGianTao = DateTime.UtcNow
+        };
+        
+        await _phienRepository.LuuAsync(phien);
+        return phien;
+    }
+}
+```
+
+### 5.5 OCR Processing Services
 
 ```csharp
 public interface IDichVuXuLyOCR
@@ -265,6 +474,15 @@ public interface IHocSinhRepository
     Task<HocSinh?> GetByIdAsync(HocSinhId id);
     Task<List<HocSinh>> GetByGiaoVienIdAsync(NguoiDungId giaoVienId);
     Task SaveAsync(HocSinh hocSinh);
+}
+
+// New repository for AI session management
+public interface IPhienGiaoAnRepository
+{
+    Task<PhienGiaoAnAI?> GetByIdAsync(Guid phienId);
+    Task<List<PhienGiaoAnAI>> GetByGiaoVienIdAsync(NguoiDungId giaoVienId);
+    Task SaveAsync(PhienGiaoAnAI phien);
+    Task<bool> DeleteAsync(Guid phienId);
 }
 ```
 
@@ -342,6 +560,13 @@ public class ThoiGianLamBai
 - Mã số học sinh phải unique trong phạm vi một giáo viên
 - Kết quả học tập phải được mã hóa (PII protection)
 
+### 8.4 Lesson Plan AI Generation Rules
+
+- PDF phải có chất lượng đủ để trích xuất văn bản
+- Session timeout sau 24 giờ nếu không hoàn thành
+- Chỉ giáo viên có thể chỉnh sửa giáo án AI-generated
+- Giáo án cuối cùng phải được lưu với đầy đủ thông tin bắt buộc
+
 ## 9. Anti-Corruption Layer
 
 ### 9.1 External Service Adapters
@@ -372,6 +597,18 @@ public class GoogleVisionAdapter : IDichVuXuLyOCR
         // Return domain-specific result
     }
 }
+
+// File Storage Adapter
+public class FileStorageAdapter : IFileStorageService
+{
+    private readonly IAmazonS3 _s3Client;
+    
+    public async Task<string> LuuFileAsync(IFormFile file, string folder)
+    {
+        // Upload file to S3 or Azure Blob
+        // Return file path/URL
+    }
+}
 ```
 
 ## 10. Domain Layer Architecture
@@ -383,7 +620,8 @@ Domain Layer
 │   ├── GiaoAn
 │   ├── DeThi
 │   ├── CauHoi
-│   └── HocSinh
+│   ├── HocSinh
+│   └── PhienGiaoAnAI (NEW)
 ├── Value Objects
 │   ├── Email
 │   ├── TieuDe
@@ -392,14 +630,22 @@ Domain Layer
 ├── Domain Services
 │   ├── DichVuXacThuc
 │   ├── DichVuTaoGiaoAn
+│   ├── DichVuXuLyPDF (NEW)
+│   ├── DichVuTaoGiaoAnAI (NEW)
+│   ├── DichVuQuanLyPhienGiaoAn (NEW)
 │   └── DichVuOCR
 ├── Domain Events
 │   ├── NguoiDungDaDangNhap
-│   └── BaiLamDaCham
+│   ├── BaiLamDaCham
+│   ├── PhienGiaoAnAIDaTao (NEW)
+│   ├── GiaoAnAIDaHoanThanh (NEW)
+│   └── GiaoAnDaDuocLuu (NEW)
 ├── Repositories (Interfaces)
 │   ├── INguoiDungRepository
 │   ├── IGiaoAnRepository
-│   └── ICauHoiRepository
+│   ├── ICauHoiRepository
+│   ├── IHocSinhRepository
+│   └── IPhienGiaoAnRepository (NEW)
 └── Specifications
     ├── CauHoiSpec
     └── GiaoAnSpec
@@ -418,6 +664,8 @@ Domain Layer
 | Chấm điểm | Grading - quá trình đánh giá kết quả |
 | OCR | Optical Character Recognition - nhận dạng ký tự quang học |
 | Proficiency | Trình độ - mức độ hiểu biết của học sinh |
+| **PhienGiaoAnAI** | **AI Lesson Plan Session - phiên làm việc tạo giáo án bằng AI** |
+| **GiaoTrinhPDF** | **Curriculum PDF - file giáo trình dạng PDF** |
 
 ### 11.2 Domain Verbs
 
@@ -428,16 +676,20 @@ Domain Layer
 - `tạo ngẫu nhiên` (randomize) - tạo đề thi ngẫu nhiên
 - `nhận dạng` (recognize) - xử lý OCR
 - `phân tích` (analyze) - phân tích kết quả học tập
+- **`upload`** - **tải lên file PDF giáo trình**
+- **`trich xuat`** - **trích xuất văn bản từ PDF**
+- **`tao giao an AI`** - **tạo giáo án bằng AI**
+- **`chinh sua`** - **chỉnh sửa giáo án AI-generated**
 
 ## 12. Implementation Guidelines
 
 ### 12.1 Naming Conventions
 
-- **Entities**: PascalCase, Vietnamese names (`NguoiDung`, `GiaoAn`)
+- **Entities**: PascalCase, Vietnamese names (`NguoiDung`, `GiaoAn`, `PhienGiaoAnAI`)
 - **Value Objects**: PascalCase, descriptive (`TieuDe`, `MucDoKho`)
-- **Domain Services**: `DichVu` prefix (`DichVuXacThuc`)
+- **Domain Services**: `DichVu` prefix (`DichVuXacThuc`, `DichVuXuLyPDF`)
 - **Repository Interfaces**: `I` + Entity name + `Repository`
-- **Domain Events**: Past tense, Vietnamese (`NguoiDungDaTao`)
+- **Domain Events**: Past tense, Vietnamese (`NguoiDungDaTao`, `PhienGiaoAnAIDaTao`)
 
 ### 12.2 Package Structure
 
@@ -445,6 +697,9 @@ Domain Layer
 PlanbookAI.Domain
 ├── NguoiDung/           # User bounded context
 ├── NoiDungGiaoDuc/      # Educational content context  
+│   ├── GiaoAn/          # Lesson plans
+│   ├── PhienGiaoAnAI/   # AI session management (NEW)
+│   └── PDFProcessing/   # PDF handling (NEW)
 ├── DanhGia/             # Assessment context
 ├── HocSinh/             # Student data context
 ├── Shared/              # Shared kernel
@@ -452,6 +707,9 @@ PlanbookAI.Domain
 │   ├── Events/
 │   └── Exceptions/
 └── Services/            # Domain services
+    ├── AI/              # AI integration services
+    ├── PDF/             # PDF processing services
+    └── OCR/             # OCR services
 ```
 
 ### 12.3 Testing Strategy
@@ -460,6 +718,8 @@ PlanbookAI.Domain
 - **Domain Tests**: Test invariants and business rules
 - **Integration Tests**: Test repository implementations
 - **Contract Tests**: Test anti-corruption layers
+- **AI Service Tests**: Mock AI responses for testing
+- **PDF Processing Tests**: Test with sample PDF files
 
 ## 13. Evolution Strategy
 
@@ -469,6 +729,7 @@ PlanbookAI.Domain
 - Basic lesson plan creation
 - Simple question bank
 - OCR-based grading
+- **PDF-based AI lesson plan generation (NEW)**
 
 ### 13.2 Phase 2 (Expansion)
 
@@ -476,6 +737,8 @@ PlanbookAI.Domain
 - Advanced AI features
 - Student analytics
 - Performance optimization
+- **Advanced PDF processing features**
+- **AI lesson plan templates**
 
 ### 13.3 Phase 3 (Scale)
 
@@ -483,6 +746,8 @@ PlanbookAI.Domain
 - Advanced reporting
 - Mobile support
 - Third-party integrations
+- **Multi-language support for AI generation**
+- **Advanced AI models integration**
 
 ---
 
