@@ -68,7 +68,7 @@ namespace UserService.Controllers
                     HoTen = "Admin User",
                     SoDienThoai = "0123456789",
                     DiaChi = "Admin Address",
-                    NgaySinh = new DateTime(1990, 1, 1),
+                    NgaySinh = DateTime.SpecifyKind(new DateTime(1990, 1, 1), DateTimeKind.Utc),
                     AnhDaiDienUrl = "https://example.com/admin-avatar.jpg",
                     MoTaBanThan = "Administrator của hệ thống PlanbookAI.",
                     TaoLuc = DateTime.UtcNow,
@@ -116,15 +116,24 @@ namespace UserService.Controllers
                 return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
             }
 
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!Guid.TryParse(userIdStr, out var userId))
+            var userEmail = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userEmail))
             {
-                _logger.LogWarning("CapNhatHoSo: Không thể lấy User ID từ claims.");
+                _logger.LogWarning("CapNhatHoSo: Không thể lấy User Email từ claims.");
                 return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
             }
 
-            _logger.LogInformation("Nhận yêu cầu cập nhật hồ sơ cho User ID: {UserId}", userId);
+            _logger.LogInformation("Nhận yêu cầu cập nhật hồ sơ cho User Email: {UserEmail}", userEmail);
 
+            // Tìm user trong database bằng email
+            var user = await _hoSoRepository.GetByEmailAsync(userEmail);
+            if (user == null)
+            {
+                _logger.LogWarning("CapNhatHoSo: Không tìm thấy user với email: {UserEmail}", userEmail);
+                return Unauthorized(new { message = "Thông tin xác thực không hợp lệ." });
+            }
+
+            var userId = user.UserId;
             var hoSo = await _hoSoRepository.GetByIdAsync(userId.ToString());
             if (hoSo == null)
             {
@@ -135,7 +144,11 @@ namespace UserService.Controllers
             // Cập nhật dữ liệu từ DTO vào entity
             hoSo.HoTen = yeuCau.HoTen;
             hoSo.SoDienThoai = yeuCau.SoDienThoai;
-            hoSo.NgaySinh = yeuCau.NgaySinh;
+            hoSo.NgaySinh = yeuCau.NgaySinh.HasValue ? 
+                (yeuCau.NgaySinh.Value.Kind == DateTimeKind.Unspecified ? 
+                    DateTime.SpecifyKind(yeuCau.NgaySinh.Value, DateTimeKind.Utc) : 
+                    yeuCau.NgaySinh.Value.ToUniversalTime()) : 
+                hoSo.NgaySinh;
             hoSo.DiaChi = yeuCau.DiaChi;
             hoSo.AnhDaiDienUrl = yeuCau.AnhDaiDienUrl;
             hoSo.MoTaBanThan = yeuCau.MoTaBanThan;
@@ -186,7 +199,7 @@ namespace UserService.Controllers
             }
 
             var vaiTro = User.FindFirst(ClaimTypes.Role)?.Value;
-            if (vaiTro != "ADMIN")
+            if (vaiTro != "1")
             {
                 _logger.LogWarning("LayDanhSachNguoiDung: Không có quyền Admin.");
                 return StatusCode(403, new { message = "Không có quyền truy cập. Chỉ Admin mới có thể sử dụng chức năng này." });
@@ -239,7 +252,7 @@ namespace UserService.Controllers
             }
 
             var vaiTro = User.FindFirst(ClaimTypes.Role)?.Value;
-            if (vaiTro != "ADMIN")
+            if (vaiTro != "1")
             {
                 _logger.LogWarning("LayChiTietNguoiDung: Không có quyền Admin.");
                 return StatusCode(403, new { message = "Không có quyền truy cập. Chỉ Admin mới có thể sử dụng chức năng này." });
@@ -291,7 +304,7 @@ namespace UserService.Controllers
             }
 
             var vaiTro = User.FindFirst(ClaimTypes.Role)?.Value;
-            if (vaiTro != "ADMIN")
+            if (vaiTro != "1")
             {
                 _logger.LogWarning("CapNhatNguoiDung: Không có quyền Admin.");
                 return StatusCode(403, new { message = "Không có quyền truy cập. Chỉ Admin mới có thể sử dụng chức năng này." });
@@ -318,7 +331,11 @@ namespace UserService.Controllers
             // Cập nhật dữ liệu
             hoSo.HoTen = yeuCau.HoTen;
             hoSo.SoDienThoai = yeuCau.SoDienThoai;
-            hoSo.NgaySinh = yeuCau.NgaySinh;
+            hoSo.NgaySinh = yeuCau.NgaySinh.HasValue ? 
+                (yeuCau.NgaySinh.Value.Kind == DateTimeKind.Unspecified ? 
+                    DateTime.SpecifyKind(yeuCau.NgaySinh.Value, DateTimeKind.Utc) : 
+                    yeuCau.NgaySinh.Value.ToUniversalTime()) : 
+                hoSo.NgaySinh;
             hoSo.DiaChi = yeuCau.DiaChi;
             hoSo.AnhDaiDienUrl = yeuCau.AnhDaiDienUrl;
             hoSo.MoTaBanThan = yeuCau.MoTaBanThan;
@@ -367,7 +384,7 @@ namespace UserService.Controllers
             }
 
             var vaiTro = User.FindFirst(ClaimTypes.Role)?.Value;
-            if (vaiTro != "ADMIN")
+            if (vaiTro != "1")
             {
                 _logger.LogWarning("XoaNguoiDung: Không có quyền Admin.");
                 return StatusCode(403, new { message = "Không có quyền truy cập. Chỉ Admin mới có thể sử dụng chức năng này." });

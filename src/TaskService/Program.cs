@@ -90,6 +90,9 @@ app.UseHttpsRedirection();
 // Add custom logging middleware
 app.UseMiddleware<RequestLoggingMiddleware>();
 
+// Add header authentication middleware
+app.UseMiddleware<HeaderAuthenticationMiddleware>();
+
 app.UseRouting(); // Đảm bảo UseRouting() được gọi
 
 app.UseAuthorization();

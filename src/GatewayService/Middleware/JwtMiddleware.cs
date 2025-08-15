@@ -103,7 +103,9 @@ namespace GatewayService.Middleware
                     }
                     
                     string? userRole = null;
-                    if (userClaims?.TryGetValue("role", out var roleValue) == true)
+                    // Tìm role từ các claim có thể có
+                    if (userClaims?.TryGetValue("role", out var roleValue) == true ||
+                        userClaims?.TryGetValue("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", out roleValue) == true)
                     {
                         userRole = roleValue;
                         if (!context.Request.Headers.ContainsKey("X-User-Role"))

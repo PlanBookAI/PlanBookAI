@@ -54,7 +54,7 @@ namespace TaskService.Controllers
                 ThoiGianLamBai = yeuCau.ThoiGianLamBai,
                 HuongDan = yeuCau.HuongDan,
                 TrangThai = "draft",
-                NguoiTaoId = Guid.Parse(User.Identity?.Name ?? throw new InvalidOperationException("User not authenticated")),
+                NguoiTaoId = Guid.Parse(User.FindFirst("UserId")?.Value ?? throw new InvalidOperationException("User not authenticated")),
                 TaoLuc = DateTime.UtcNow,
                 CapNhatLuc = DateTime.UtcNow
             };

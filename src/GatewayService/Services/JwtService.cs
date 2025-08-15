@@ -28,8 +28,9 @@ namespace GatewayService.Services
 
                 if (validatedToken is JwtSecurityToken jwtToken)
                 {
-                    // Tìm userId từ các claim có thể có
-                    var userId = principal.FindFirst("userId")?.Value 
+                    // Tìm userId từ các claim có thể có - ưu tiên UserId GUID
+                    var userId = principal.FindFirst("UserId")?.Value 
+                               ?? principal.FindFirst("userId")?.Value 
                                ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
                                ?? principal.FindFirst("sub")?.Value
                                ?? principal.FindFirst(ClaimTypes.Name)?.Value; // Email từ AuthService
@@ -109,16 +110,23 @@ namespace GatewayService.Services
             var issuer = jwtSettings["Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
             var audience = jwtSettings["Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
 
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey))
+            {
+                KeyId = "PlanbookAI-Key-2024"
+            };
+
             return new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                IssuerSigningKey = signingKey,
                 ValidateIssuer = true,
                 ValidIssuer = issuer,
                 ValidateAudience = true,
                 ValidAudience = audience,
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero // Không cho phép thời gian lệch
+                ClockSkew = TimeSpan.FromMinutes(5), // Cho phép lệch 5 phút
+                RequireSignedTokens = true,
+                ValidateTokenReplay = false
             };
         }
     }

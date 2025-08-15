@@ -34,7 +34,8 @@ namespace UserService.Middleware
                     {
                         new Claim(ClaimTypes.NameIdentifier, userId), // userId là email
                         new Claim(ClaimTypes.Name, userEmail ?? userId),
-                        new Claim("UserId", userId) // Thêm claim riêng cho UserId
+                        new Claim("UserId", userId), // Thêm claim riêng cho UserId
+                        new Claim(ClaimTypes.Email, userId) // Thêm email claim
                     };
 
                     if (!string.IsNullOrEmpty(userRole))

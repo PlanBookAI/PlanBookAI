@@ -144,16 +144,23 @@ namespace AuthService.Services
             {
                 // Thêm các claim (thông tin) vào token.
                 new Claim(ClaimTypes.Name, nguoiDung.Email),
+                new Claim(ClaimTypes.NameIdentifier, nguoiDung.Email), // Email for identification
+                new Claim("UserId", nguoiDung.Id.ToString()), // Actual GUID for database operations
                 new Claim(ClaimTypes.Role, nguoiDung.VaiTroId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var signingKey = new SymmetricSecurityKey(_key)
+            {
+                KeyId = "PlanbookAI-Key-2024"
             };
 
             var token = new JwtSecurityToken(
                 issuer: _config["JwtSettings:Issuer"],
                 audience: _config["JwtSettings:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(15), // Thời gian hết hạn của token.
-                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256)
+                expires: DateTime.UtcNow.AddHours(24), // Thời gian hết hạn của token.
+                signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
             );
 
             return token;

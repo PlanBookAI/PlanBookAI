@@ -86,8 +86,16 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
-    // Chỉ đảm bảo database connection, không tạo test data
-    await context.Database.CanConnectAsync();
+    try
+    {
+        // Tạo database và schema nếu chưa tồn tại
+        await context.Database.EnsureCreatedAsync();
+        Console.WriteLine("UserService: Database schema created successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"UserService: Database setup error: {ex.Message}");
+    }
 }
 
 app.Run();
