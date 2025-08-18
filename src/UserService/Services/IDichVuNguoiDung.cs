@@ -1,36 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using UserService.Models;
+using UserService.Models.DTOs;
 
-namespace UserService.Services
+namespace UserService.Services;
+
+public interface IDichVuNguoiDung
 {
-    // Giao diện định nghĩa các dịch vụ quản lý người dùng
-    public interface IDichVuNguoiDung
-    {
-        // Lấy danh sách tất cả người dùng, có hỗ trợ phân trang
-        Task<PhanTrang<NguoiDung>> LayDanhSachNguoiDungAsync(int soTrang, int kichThuocTrang);
-
-        // Lấy thông tin chi tiết của một người dùng theo ID
-        Task<NguoiDung?> LayChiTietNguoiDungAsync(string id);
-
-        // Cập nhật thông tin người dùng
-        Task CapNhatNguoiDungAsync(string id, NguoiDung nguoiDungCapNhat);
-
-        // Xóa một người dùng
-        Task XoaNguoiDungAsync(string id);
-
-        // Tải lên ảnh hồ sơ cho người dùng
-        Task<bool> TaiAnhHoSoAsync(string id, IFormFile file);
-
-        // Một class giả định cho phân trang
-        public class PhanTrang<T>
-        {
-            public int SoTrangHienTai { get; set; }
-            public int TongSoTrang { get; set; }
-            public int TongSoMuc { get; set; }
-            public IEnumerable<T> DuLieu { get; set; } = new List<T>();
-        }
-    }
+    // Profile management
+    Task<PhanHoiHoSo> LayHoSoAsync(Guid userId);
+    Task<PhanHoiHoSo> CapNhatHoSoAsync(Guid userId, YeuCauCapNhatHoSo yeuCau);
+    
+    // Admin functions
+    Task<PhanHoiDanhSachNguoiDung> LayDanhSachNguoiDungAsync(Guid adminId);
+    Task<PhanHoiHoSo> LayThongTinNguoiDungAsync(Guid adminId, Guid userId);
+    Task<PhanHoiHoSo> XoaNguoiDungAsync(Guid adminId, Guid userId);
+    Task<PhanHoiHoSo> KhoiPhucNguoiDungAsync(Guid adminId, Guid userId);
+    
+    // User management
+    Task<bool> KiemTraNguoiDungTonTaiAsync(Guid userId);
+    Task<bool> KiemTraEmailTonTaiAsync(string email);
 }
-

@@ -2,9 +2,10 @@ using UserService.Models.DTOs;
 
 namespace UserService.Models.DTOs;
 
-public class PhanHoiHoSo
+public class PhanHoiDanhSachNguoiDung
 {
     public bool ThanhCong { get; set; }
     public string ThongBao { get; set; } = string.Empty;
-    public ThongTinHoSoDto? DuLieu { get; set; }
+    public List<ThongTinNguoiDungDto>? DanhSach { get; set; }
+    public int TongSo { get; set; }
 }

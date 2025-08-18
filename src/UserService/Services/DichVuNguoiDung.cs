@@ -1,154 +1,253 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using UserService.Models;
+using AutoMapper;
+using UserService.Models.DTOs;
+using UserService.Models.Entities;
 using UserService.Repositories;
 
-namespace UserService.Services
+namespace UserService.Services;
+
+public class DichVuNguoiDung : IDichVuNguoiDung
 {
-    // Lớp triển khai dịch vụ quản lý người dùng
-    public class DichVuNguoiDung : IDichVuNguoiDung
+    private readonly INguoiDungRepository _nguoiDungRepository;
+    private readonly IVaiTroRepository _vaiTroRepository;
+    private readonly IMapper _mapper;
+
+    public DichVuNguoiDung(
+        INguoiDungRepository nguoiDungRepository,
+        IVaiTroRepository vaiTroRepository,
+        IMapper mapper)
     {
-        private readonly IHoSoNguoiDungRepository _hoSoNguoiDungRepository;
+        _nguoiDungRepository = nguoiDungRepository;
+        _vaiTroRepository = vaiTroRepository;
+        _mapper = mapper;
+    }
 
-        // Dependency Injection của repository
-        public DichVuNguoiDung(IHoSoNguoiDungRepository hoSoNguoiDungRepository)
+    public async Task<PhanHoiHoSo> LayHoSoAsync(Guid userId)
+    {
+        try
         {
-            _hoSoNguoiDungRepository = hoSoNguoiDungRepository;
-        }
-
-        /// <summary>
-        /// Lấy danh sách tất cả người dùng, có hỗ trợ phân trang.
-        /// </summary>
-        /// <param name="soTrang">Số trang hiện tại.</param>
-        /// <param name="kichThuocTrang">Kích thước của mỗi trang.</param>
-        /// <returns>Đối tượng PhanTrang chứa danh sách người dùng và thông tin phân trang.</returns>
-        public async Task<IDichVuNguoiDung.PhanTrang<NguoiDung>> LayDanhSachNguoiDungAsync(int soTrang, int kichThuocTrang)
-        {
-            var tatCaHoSo = await _hoSoNguoiDungRepository.GetAllAsync();
-            var hoSoPhanTrang = tatCaHoSo.Skip((soTrang - 1) * kichThuocTrang).Take(kichThuocTrang);
-            
-            // Convert HoSoNguoiDung to NguoiDung
-            var nguoiDungPhanTrang = hoSoPhanTrang.Select(hoSo => new NguoiDung
-            {
-                Id = hoSo.UserId,
-                HoTen = hoSo.HoTen,
-                SoDienThoai = hoSo.SoDienThoai,
-                NgaySinh = hoSo.NgaySinh,
-                DiaChi = hoSo.DiaChi,
-                AnhDaiDienUrl = hoSo.AnhDaiDienUrl,
-                MoTaBanThan = hoSo.MoTaBanThan,
-                TaoLuc = hoSo.TaoLuc,
-                CapNhatLuc = hoSo.CapNhatLuc
-            });
-
-            return new IDichVuNguoiDung.PhanTrang<NguoiDung>
-            {
-                SoTrangHienTai = soTrang,
-                TongSoTrang = (int)Math.Ceiling((double)tatCaHoSo.Count() / kichThuocTrang),
-                TongSoMuc = tatCaHoSo.Count(),
-                DuLieu = nguoiDungPhanTrang
-            };
-        }
-
-        /// <summary>
-        /// Lấy thông tin chi tiết của một người dùng theo ID.
-        /// </summary>
-        /// <param name="id">ID của người dùng.</param>
-        /// <returns>Đối tượng NguoiDung.</returns>
-        public async Task<NguoiDung?> LayChiTietNguoiDungAsync(string id)
-        {
-            var hoSo = await _hoSoNguoiDungRepository.GetByIdAsync(id);
-            if (hoSo == null) return null;
-            
-            return new NguoiDung
-            {
-                Id = hoSo.UserId,
-                HoTen = hoSo.HoTen,
-                SoDienThoai = hoSo.SoDienThoai,
-                NgaySinh = hoSo.NgaySinh,
-                DiaChi = hoSo.DiaChi,
-                AnhDaiDienUrl = hoSo.AnhDaiDienUrl,
-                MoTaBanThan = hoSo.MoTaBanThan,
-                TaoLuc = hoSo.TaoLuc,
-                CapNhatLuc = hoSo.CapNhatLuc
-            };
-        }
-
-        /// <summary>
-        /// Cập nhật thông tin người dùng.
-        /// </summary>
-        /// <param name="id">ID của người dùng cần cập nhật.</param>
-        /// <param name="nguoiDungCapNhat">Đối tượng NguoiDung với thông tin mới.</param>
-        public async Task CapNhatNguoiDungAsync(string id, NguoiDung nguoiDungCapNhat)
-        {
-            // Kiểm tra tính hợp lệ của dữ liệu trước khi cập nhật
-            if (nguoiDungCapNhat == null || string.IsNullOrEmpty(nguoiDungCapNhat.HoTen))
-            {
-                throw new ArgumentException("Dữ liệu người dùng không hợp lệ.");
-            }
-
-            // Tìm người dùng hiện tại và cập nhật thông tin
-            var nguoiDungHienTai = await _hoSoNguoiDungRepository.GetByIdAsync(id);
-            if (nguoiDungHienTai == null)
-            {
-                throw new KeyNotFoundException($"Không tìm thấy người dùng với ID: {id}");
-            }
-
-            nguoiDungHienTai.HoTen = nguoiDungCapNhat.HoTen;
-            // Thêm các thuộc tính khác cần cập nhật tại đây
-
-            await _hoSoNguoiDungRepository.UpdateAsync(nguoiDungHienTai);
-        }
-
-        /// <summary>
-        /// Xóa một người dùng.
-        /// </summary>
-        /// <param name="id">ID của người dùng cần xóa.</param>
-        public async Task XoaNguoiDungAsync(string id)
-        {
-            var nguoiDung = await _hoSoNguoiDungRepository.GetByIdAsync(id);
+            var nguoiDung = await _nguoiDungRepository.GetByIdAsync(userId);
             if (nguoiDung == null)
             {
-                throw new KeyNotFoundException($"Không tìm thấy người dùng với ID: {id}");
+                return new PhanHoiHoSo
+                {
+                    ThanhCong = false,
+                    ThongBao = "Không tìm thấy người dùng"
+                };
             }
-            await _hoSoNguoiDungRepository.DeleteAsync(id);
-        }
 
-        /// <summary>
-        /// Tải lên ảnh hồ sơ cho người dùng.
-        /// </summary>
-        /// <param name="id">ID của người dùng.</param>
-        /// <param name="file">Tệp ảnh cần tải lên.</param>
-        /// <returns>True nếu tải thành công, ngược lại là False.</returns>
-        public async Task<bool> TaiAnhHoSoAsync(string id, IFormFile file)
-        {
-            if (file == null || file.Length == 0)
+            var hoSoDto = _mapper.Map<ThongTinHoSoDto>(nguoiDung);
+            return new PhanHoiHoSo
             {
-                return false;
-            }
+                ThanhCong = true,
+                ThongBao = "Lấy hồ sơ thành công",
+                DuLieu = hoSoDto
+            };
+        }
+        catch (Exception ex)
+        {
+            return new PhanHoiHoSo
+            {
+                ThanhCong = false,
+                ThongBao = $"Lỗi khi lấy hồ sơ: {ex.Message}"
+            };
+        }
+    }
 
-            // Đây là logic giả lập. Trong thực tế, bạn sẽ cần:
-            // 1. Lưu tệp vào một thư mục trên server hoặc dịch vụ lưu trữ đám mây (ví dụ: Azure Blob Storage, AWS S3).
-            // 2. Cập nhật đường dẫn ảnh mới vào thuộc tính của người dùng trong cơ sở dữ liệu.
-
-            var nguoiDung = await _hoSoNguoiDungRepository.GetByIdAsync(id);
+    public async Task<PhanHoiHoSo> CapNhatHoSoAsync(Guid userId, YeuCauCapNhatHoSo yeuCau)
+    {
+        try
+        {
+            var nguoiDung = await _nguoiDungRepository.GetByIdAsync(userId);
             if (nguoiDung == null)
             {
-                return false;
+                return new PhanHoiHoSo { ThanhCong = false, ThongBao = "Người dùng không tồn tại" };
             }
 
-            // Giả lập lưu file và cập nhật đường dẫn ảnh
-            string tenTep = $"{id}_{file.FileName}";
-            string duongDanLuuTru = $"uploads/avatars/{tenTep}";
+            // Cập nhật hoặc tạo mới profile
+            if (nguoiDung.HoSoNguoiDung == null)
+            {
+                // Tạo mới profile
+                nguoiDung.HoSoNguoiDung = new HoSoNguoiDung
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    HoTen = yeuCau.HoTen,
+                    SoDienThoai = yeuCau.SoDienThoai,
+                    DiaChi = yeuCau.DiaChi,
+                    MoTaBanThan = yeuCau.MoTaBanThan,
+                    AnhDaiDienUrl = yeuCau.AnhDaiDienUrl,
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+                    UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc)
+                };
+            }
+            else
+            {
+                // Cập nhật profile hiện có
+                nguoiDung.HoSoNguoiDung.HoTen = yeuCau.HoTen;
+                nguoiDung.HoSoNguoiDung.SoDienThoai = yeuCau.SoDienThoai;
+                nguoiDung.HoSoNguoiDung.DiaChi = yeuCau.DiaChi;
+                nguoiDung.HoSoNguoiDung.MoTaBanThan = yeuCau.MoTaBanThan;
+                nguoiDung.HoSoNguoiDung.AnhDaiDienUrl = yeuCau.AnhDaiDienUrl;
+                nguoiDung.HoSoNguoiDung.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            }
 
-            // Cập nhật đường dẫn ảnh vào database
-            // nguoiDung.AnhHoSo = duongDanLuuTru;
-            // await _hoSoNguoiDungRepository.UpdateAsync(nguoiDung);
+            // Cập nhật thời gian cập nhật của user
+            nguoiDung.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
 
-            return true;
+            await _nguoiDungRepository.UpdateAsync(nguoiDung);
+
+            var hoSoDto = _mapper.Map<ThongTinHoSoDto>(nguoiDung);
+            return new PhanHoiHoSo
+            {
+                ThanhCong = true,
+                ThongBao = "Cập nhật hồ sơ thành công",
+                DuLieu = hoSoDto
+            };
         }
+        catch (Exception ex)
+        {
+            return new PhanHoiHoSo
+            {
+                ThanhCong = false,
+                ThongBao = $"Lỗi khi cập nhật hồ sơ: {ex.Message}"
+            };
+        }
+    }
+
+    public async Task<PhanHoiDanhSachNguoiDung> LayDanhSachNguoiDungAsync(Guid adminId)
+    {
+        try
+        {
+            var nguoiDungList = await _nguoiDungRepository.GetAllExceptAsync(adminId);
+            var danhSachDto = nguoiDungList.Select(n => _mapper.Map<ThongTinNguoiDungDto>(n)).ToList();
+
+            return new PhanHoiDanhSachNguoiDung
+            {
+                ThanhCong = true,
+                ThongBao = "Lấy danh sách người dùng thành công",
+                DanhSach = danhSachDto,
+                TongSo = danhSachDto.Count
+            };
+        }
+        catch (Exception ex)
+        {
+            return new PhanHoiDanhSachNguoiDung
+            {
+                ThanhCong = false,
+                ThongBao = $"Lỗi khi lấy danh sách: {ex.Message}"
+            };
+        }
+    }
+
+    public async Task<PhanHoiHoSo> LayThongTinNguoiDungAsync(Guid adminId, Guid userId)
+    {
+        try
+        {
+            var nguoiDung = await _nguoiDungRepository.GetByIdAsync(userId);
+            if (nguoiDung == null)
+            {
+                return new PhanHoiHoSo
+                {
+                    ThanhCong = false,
+                    ThongBao = "Không tìm thấy người dùng"
+                };
+            }
+
+            var hoSoDto = _mapper.Map<ThongTinHoSoDto>(nguoiDung);
+            return new PhanHoiHoSo
+            {
+                ThanhCong = true,
+                ThongBao = "Lấy thông tin người dùng thành công",
+                DuLieu = hoSoDto
+            };
+        }
+        catch (Exception ex)
+        {
+            return new PhanHoiHoSo
+            {
+                ThanhCong = false,
+                ThongBao = $"Lỗi khi lấy thông tin: {ex.Message}"
+            };
+        }
+    }
+
+    public async Task<PhanHoiHoSo> XoaNguoiDungAsync(Guid adminId, Guid userId)
+    {
+        try
+        {
+            if (adminId == userId)
+            {
+                return new PhanHoiHoSo
+                {
+                    ThanhCong = false,
+                    ThongBao = "Không thể xóa chính mình"
+                };
+            }
+
+            var success = await _nguoiDungRepository.SoftDeleteAsync(userId);
+            if (!success)
+            {
+                return new PhanHoiHoSo
+                {
+                    ThanhCong = false,
+                    ThongBao = "Không tìm thấy người dùng để xóa"
+                };
+            }
+
+            return new PhanHoiHoSo
+            {
+                ThanhCong = true,
+                ThongBao = "Xóa người dùng thành công"
+            };
+        }
+        catch (Exception ex)
+        {
+            return new PhanHoiHoSo
+            {
+                ThanhCong = false,
+                ThongBao = $"Lỗi khi xóa người dùng: {ex.Message}"
+            };
+        }
+    }
+
+    public async Task<PhanHoiHoSo> KhoiPhucNguoiDungAsync(Guid adminId, Guid userId)
+    {
+        try
+        {
+            var success = await _nguoiDungRepository.RestoreAsync(userId);
+            if (!success)
+            {
+                return new PhanHoiHoSo
+                {
+                    ThanhCong = false,
+                    ThongBao = "Không tìm thấy người dùng để khôi phục"
+                };
+            }
+
+            return new PhanHoiHoSo
+            {
+                ThanhCong = true,
+                ThongBao = "Khôi phục người dùng thành công"
+            };
+        }
+        catch (Exception ex)
+        {
+            return new PhanHoiHoSo
+            {
+                ThanhCong = false,
+                ThongBao = $"Lỗi khi khôi phục người dùng: {ex.Message}"
+            };
+        }
+    }
+
+    public async Task<bool> KiemTraNguoiDungTonTaiAsync(Guid userId)
+    {
+        return await _nguoiDungRepository.ExistsAsync(userId);
+    }
+
+    public async Task<bool> KiemTraEmailTonTaiAsync(string email)
+    {
+        var nguoiDung = await _nguoiDungRepository.GetByEmailAsync(email);
+        return nguoiDung != null;
     }
 }

@@ -1,102 +1,64 @@
-﻿using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using UserService.Data;
 using UserService.Services;
 using UserService.Repositories;
-using UserService.Middleware;
-// BỎ dòng: using UserService.Models.Entities; để tránh conflict
+using FluentValidation;
+using UserService.Models.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Thêm các dịch vụ vào container
+// Add services to the container
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-// Thêm Entity Framework DbContext
+// Add DbContext
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Thêm các dịch vụ nghiệp vụ
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
+// FluentValidation DI (manual validation, không bật auto-validation)
+builder.Services.AddValidatorsFromAssemblyContaining<YeuCauCapNhatHoSoValidator>(ServiceLifetime.Transient);
+
+// Add Repositories
+builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();
+builder.Services.AddScoped<IVaiTroRepository, VaiTroRepository>();
+builder.Services.AddScoped<ILichSuDangNhapRepository, LichSuDangNhapRepository>();
+
+// Add Services
 builder.Services.AddScoped<IDichVuNguoiDung, DichVuNguoiDung>();
+builder.Services.AddScoped<IDichVuLichSuDangNhap, DichVuLichSuDangNhap>();
 
-// Thêm các Repository
-builder.Services.AddScoped<IHoSoNguoiDungRepository, HoSoNguoiDungRepository>();
-
-// Thêm Swagger/OpenAPI
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+// Add CORS
+builder.Services.AddCors(options =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "UserService API",
-        Version = "v1",
-        Description = "API documentation for User Management Service"
-    });
-    
-    // Thêm JWT authentication support
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-    
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
+	options.AddPolicy("AllowAll", policy =>
+	{
+		policy.AllowAnyOrigin()
+			  .AllowAnyMethod()
+			  .AllowAnyHeader();
+	});
 });
 
 var app = builder.Build();
 
-// Cấu hình pipeline xử lý HTTP request
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserService API V1");
-        c.RoutePrefix = "swagger";
-    });
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 
-// Sử dụng HeaderAuthenticationMiddleware để đọc headers từ Gateway
-app.UseHeaderAuthentication();
-
-// Thêm authentication middleware
-app.UseAuthentication();
+// Không cần authentication middleware - Gateway sẽ xử lý
 app.UseAuthorization();
-
 app.MapControllers();
 
-// Thiết lập Database Connection - sử dụng database thực
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
-    try
-    {
-        // Tạo database và schema nếu chưa tồn tại
-        await context.Database.EnsureCreatedAsync();
-        Console.WriteLine("UserService: Database schema created successfully");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"UserService: Database setup error: {ex.Message}");
-    }
-}
+// Health check endpoint
+app.MapGet("/health", () => "UserService is running!");
 
 app.Run();
-
