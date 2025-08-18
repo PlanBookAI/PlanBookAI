@@ -1,45 +1,76 @@
+using Microsoft.EntityFrameworkCore;
 using AuthService.Data;
 using AuthService.Models.Entities;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
-namespace AuthService.Repositories
+namespace AuthService.Repositories;
+
+public class NguoiDungRepository : INguoiDungRepository
 {
-    /// <summary>
-    /// Triển khai INguoiDungRepository bằng Entity Framework Core.
-    /// </summary>
-    public class NguoiDungRepository : INguoiDungRepository
+    private readonly AuthDbContext _context;
+
+    public NguoiDungRepository(AuthDbContext context)
     {
-        private readonly AuthDbContext _context;
+        _context = context;
+    }
 
-        public NguoiDungRepository(AuthDbContext context)
-        {
-            _context = context;
-        }
+    public async Task<NguoiDung?> GetByIdAsync(Guid id)
+    {
+        return await _context.NguoiDungs
+            .Include(n => n.VaiTro)
+            .FirstOrDefaultAsync(n => n.Id == id);
+    }
 
-        public async Task<NguoiDung?> GetByIdAsync(Guid id)
-        {
-            return await _context.NguoiDungs
-                .Include(nd => nd.VaiTro)
-                .FirstOrDefaultAsync(nd => nd.Id == id);
-        }
+    public async Task<NguoiDung?> GetByEmailAsync(string email)
+    {
+        return await _context.NguoiDungs
+            .Include(n => n.VaiTro)
+            .FirstOrDefaultAsync(n => n.Email == email);
+    }
 
-        public async Task<NguoiDung?> GetByEmailAsync(string email)
-        {
-            return await _context.NguoiDungs
-                .Include(nd => nd.VaiTro)
-                .FirstOrDefaultAsync(nd => nd.Email == email);
-        }
+    public async Task<IEnumerable<NguoiDung>> GetAllAsync()
+    {
+        return await _context.NguoiDungs
+            .Include(n => n.VaiTro)
+            .Where(n => n.HoatDong)
+            .ToListAsync();
+    }
 
-        public async Task AddAsync(NguoiDung nguoiDung)
+    public async Task<NguoiDung> CreateAsync(NguoiDung nguoiDung)
+    {
+        _context.NguoiDungs.Add(nguoiDung);
+        await _context.SaveChangesAsync();
+        return nguoiDung;
+    }
+
+    public async Task<NguoiDung> UpdateAsync(NguoiDung nguoiDung)
+    {
+        _context.NguoiDungs.Update(nguoiDung);
+        await _context.SaveChangesAsync();
+        return nguoiDung;
+    }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        var nguoiDung = await GetByIdAsync(id);
+        if (nguoiDung != null)
         {
-            await _context.NguoiDungs.AddAsync(nguoiDung);
+            nguoiDung.HoatDong = false;
             await _context.SaveChangesAsync();
         }
+    }
 
-        public async Task UpdateAsync(NguoiDung nguoiDung)
+    public async Task<bool> EmailExistsAsync(string email)
+    {
+        return await _context.NguoiDungs
+            .AnyAsync(n => n.Email == email);
+    }
+
+    public async Task UpdateLastLoginAsync(Guid id)
+    {
+        var nguoiDung = await GetByIdAsync(id);
+        if (nguoiDung != null)
         {
-            _context.NguoiDungs.Update(nguoiDung);
+            nguoiDung.LanDangNhapCuoi = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
     }

@@ -1,13 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AuthService.Models.DTOs
+namespace AuthService.Models.DTOs;
+
+public class LamMoiTokenDto
 {
-    /// <summary>
-    /// DTO cho yêu cầu làm mới token
-    /// </summary>
-    public class LamMoiTokenDto
-    {
-        [Required(ErrorMessage = "Refresh token là bắt buộc")]
-        public string RefreshToken { get; set; } = string.Empty;
-    }
+    [Required(ErrorMessage = "Refresh token là bắt buộc")]
+    public string RefreshToken { get; set; } = string.Empty;
 }

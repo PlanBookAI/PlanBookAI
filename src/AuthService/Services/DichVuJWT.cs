@@ -1,194 +1,114 @@
-﻿using AuthService.Models.Entities;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using AuthService.Models.Entities;
 
-namespace AuthService.Services
+namespace AuthService.Services;
+
+public class DichVuJWT : IDichVuJWT
 {
-    public class DichVuJWT : IDichVuJWT
+    private readonly IConfiguration _configuration;
+
+    public DichVuJWT(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
-        private readonly ILogger<DichVuJWT> _logger;
+        _configuration = configuration;
+    }
 
-        public DichVuJWT(IConfiguration configuration, ILogger<DichVuJWT> logger)
+    public string TaoToken(NguoiDung nguoiDung)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:SecretKey"]!);
+        
+        var claims = new List<Claim>
         {
-            _configuration = configuration;
-            _logger = logger;
-        }
+            new(ClaimTypes.NameIdentifier, nguoiDung.Id.ToString()),
+            new(ClaimTypes.Email, nguoiDung.Email),
+            new(ClaimTypes.Role, nguoiDung.VaiTro.Ten),
+            new("VaiTroId", nguoiDung.VaiTroId.ToString())
+        };
 
-        public string TaoAccessToken(NguoiDung nguoiDung, VaiTro vaiTro)
+        var tokenDescriptor = new SecurityTokenDescriptor
         {
-            try
-            {
-                var jwtSettings = _configuration.GetSection("JwtSettings");
-                var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not configured");
-                var issuer = jwtSettings["Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
-                var audience = jwtSettings["Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
-                var expiryHours = int.Parse(jwtSettings["ExpiryInHours"] ?? "24");
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddMinutes(
+                int.Parse(_configuration["JwtSettings:ExpirationMinutes"] ?? "60")
+            ),
+            Issuer = _configuration["JwtSettings:Issuer"],
+            Audience = _configuration["JwtSettings:Audience"],
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key), 
+                SecurityAlgorithms.HmacSha256Signature
+            )
+        };
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-                var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
 
-                var claims = new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, nguoiDung.Id.ToString()),
-                    new Claim("userId", nguoiDung.Id.ToString()),
-                    new Claim(ClaimTypes.Email, nguoiDung.Email),
-                    new Claim(ClaimTypes.Name, nguoiDung.HoTen),
-                    new Claim(ClaimTypes.Role, vaiTro.Ten),
-                    new Claim("roleId", vaiTro.Id.ToString()),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
-                };
+    public string TaoRefreshToken()
+    {
+        var randomNumber = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
+    }
 
-                var token = new JwtSecurityToken(
-                    issuer: issuer,
-                    audience: audience,
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddHours(expiryHours),
-                    signingCredentials: credentials
-                );
+    public bool XacThucToken(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+            return false;
 
-                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:SecretKey"]!);
 
-                _logger.LogInformation("Access token created for user {UserId}", nguoiDung.Id);
-                return tokenString;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating access token for user {UserId}", nguoiDung.Id);
-                throw;
-            }
-        }
-
-        public string TaoRefreshToken(Guid nguoiDungId, bool ghiNho = false)
+        try
         {
-            try
+            tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
-                var randomBytes = new byte[32];
-                using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
-                rng.GetBytes(randomBytes);
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = _configuration["JwtSettings:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = _configuration["JwtSettings:Audience"],
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            }, out SecurityToken validatedToken);
 
-                var refreshToken = Convert.ToBase64String(randomBytes);
-
-                _logger.LogInformation("Refresh token created for user {UserId}, RememberMe: {RememberMe}", nguoiDungId, ghiNho);
-                return refreshToken;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating refresh token for user {UserId}", nguoiDungId);
-                throw;
-            }
+            return true;
         }
-
-        public Guid? ValidateToken(string token)
+        catch
         {
-            try
-            {
-                var jwtSettings = _configuration.GetSection("JwtSettings");
-                var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not configured");
-                var issuer = jwtSettings["Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
-                var audience = jwtSettings["Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
-
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-                var tokenHandler = new JwtSecurityTokenHandler();
-
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = key,
-                    ValidateIssuer = true,
-                    ValidIssuer = issuer,
-                    ValidateAudience = true,
-                    ValidAudience = audience,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
-
-                var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
-                var userIdClaim = principal.FindFirst("userId")?.Value ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (Guid.TryParse(userIdClaim, out Guid userId))
-                {
-                    _logger.LogDebug("Token validation successful for user {UserId}", userId);
-                    return userId;
-                }
-
-                _logger.LogWarning("Invalid user ID in token");
-                return null;
-            }
-            catch (SecurityTokenExpiredException)
-            {
-                _logger.LogWarning("Token validation failed: Token expired");
-                return null;
-            }
-            catch (SecurityTokenException ex)
-            {
-                _logger.LogWarning("Token validation failed: {Message}", ex.Message);
-                return null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unexpected error during token validation");
-                return null;
-            }
+            return false;
         }
+    }
 
-        public Guid? LayUserIdTuToken(string token)
-        {
-            try
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jsonToken = tokenHandler.ReadJwtToken(token);
+    public Guid LayNguoiDungIdTuToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var jwtToken = tokenHandler.ReadJwtToken(token);
+        
+        var userIdClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+        return userIdClaim != null ? Guid.Parse(userIdClaim.Value) : Guid.Empty;
+    }
 
-                var userIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type == "userId")?.Value
-                               ?? jsonToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+    public string LayEmailTuToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var jwtToken = tokenHandler.ReadJwtToken(token);
+        
+        var emailClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email);
+        return emailClaim?.Value ?? string.Empty;
+    }
 
-                if (Guid.TryParse(userIdClaim, out Guid userId))
-                {
-                    return userId;
-                }
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error extracting user ID from token");
-                return null;
-            }
-        }
-
-        public bool KiemTraTokenHetHan(string token)
-        {
-            try
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jsonToken = tokenHandler.ReadJwtToken(token);
-
-                return jsonToken.ValidTo < DateTime.UtcNow;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error checking token expiration");
-                return true; // Assume expired if can't read
-            }
-        }
-
-        public DateTime? LayThoiGianHetHan(string token)
-        {
-            try
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jsonToken = tokenHandler.ReadJwtToken(token);
-
-                return jsonToken.ValidTo;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error extracting token expiration time");
-                return null;
-            }
-        }
+    public int LayVaiTroIdTuToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var jwtToken = tokenHandler.ReadJwtToken(token);
+        
+        var vaiTroIdClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "VaiTroId");
+        return vaiTroIdClaim != null ? int.Parse(vaiTroIdClaim.Value) : 0;
     }
 }

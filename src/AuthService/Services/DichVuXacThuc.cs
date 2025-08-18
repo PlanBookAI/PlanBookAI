@@ -1,182 +1,220 @@
+using BCrypt.Net;
+using Microsoft.EntityFrameworkCore;
 using AuthService.Models.DTOs;
 using AuthService.Models.Entities;
 using AuthService.Repositories;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Generic; // Added for List
+using AuthService.Data;
 
-namespace AuthService.Services
+namespace AuthService.Services;
+
+public class DichVuXacThuc : IDichVuXacThuc
 {
-    /// <summary>
-    /// Lớp triển khai IDichVuXacThuc, chứa toàn bộ logic về JWT.
-    /// </summary>
-    public class DichVuXacThuc : IDichVuXacThuc
+    private readonly INguoiDungRepository _nguoiDungRepository;
+    private readonly IVaiTroRepository _vaiTroRepository;
+    private readonly IDichVuJWT _dichVuJWT;
+    private readonly AuthDbContext _context;
+
+    public DichVuXacThuc(
+        INguoiDungRepository nguoiDungRepository,
+        IVaiTroRepository vaiTroRepository,
+        IDichVuJWT dichVuJWT,
+        AuthDbContext context)
     {
-        private readonly IConfiguration _config;
-        private readonly byte[] _key;
-        private readonly INguoiDungRepository _nguoiDungRepository;
-        private readonly IVaiTroRepository _vaiTroRepository;
+        _nguoiDungRepository = nguoiDungRepository;
+        _vaiTroRepository = vaiTroRepository;
+        _dichVuJWT = dichVuJWT;
+        _context = context;
+    }
 
-        public DichVuXacThuc(IConfiguration config, INguoiDungRepository nguoiDungRepository, IVaiTroRepository vaiTroRepository)
+    public async Task<PhanHoiDangNhap> DangNhapAsync(YeuCauDangNhap yeuCau)
+    {
+        try
         {
-            _config = config;
-            _nguoiDungRepository = nguoiDungRepository;
-            _vaiTroRepository = vaiTroRepository;
-            // Lấy khóa bí mật từ file cấu hình (appsettings.json).
-            _key = Encoding.ASCII.GetBytes(_config["JwtSettings:SecretKey"]);
-        }
-
-        public async Task<PhanHoiXacThucDto> TaoToken(string email, string matKhau)
-        {
-            // Tìm người dùng trong database theo email
-            var nguoiDung = await _nguoiDungRepository.GetByEmailAsync(email);
-
-            // Xử lý lỗi: nếu không tìm thấy người dùng hoặc mật khẩu không đúng.
-            if (nguoiDung == null || !BCrypt.Net.BCrypt.Verify(matKhau, nguoiDung.MatKhauMaHoa))
+            var nguoiDung = await _nguoiDungRepository.GetByEmailAsync(yeuCau.Email);
+            if (nguoiDung == null)
             {
-                throw new UnauthorizedAccessException("Thông tin đăng nhập không hợp lệ.");
+                return new PhanHoiDangNhap
+                {
+                    ThanhCong = false,
+                    ThongBao = "Email hoặc mật khẩu không đúng"
+                };
             }
 
-            // Tạo access token và refresh token.
-            var accessToken = TaoAccessToken(nguoiDung);
-            var refreshToken = TaoRefreshToken();
-
-            return new PhanHoiXacThucDto
+            if (!nguoiDung.HoatDong)
             {
-                AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
-                RefreshToken = refreshToken
+                return new PhanHoiDangNhap
+                {
+                    ThanhCong = false,
+                    ThongBao = "Tài khoản đã bị khóa"
+                };
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(yeuCau.MatKhau, nguoiDung.MatKhauMaHoa))
+            {
+                return new PhanHoiDangNhap
+                {
+                    ThanhCong = false,
+                    ThongBao = "Email hoặc mật khẩu không đúng"
+                };
+            }
+
+            // Cập nhật lần đăng nhập cuối
+            await _nguoiDungRepository.UpdateLastLoginAsync(nguoiDung.Id);
+
+            // Tạo token và refresh token
+            var token = _dichVuJWT.TaoToken(nguoiDung);
+            var refreshToken = _dichVuJWT.TaoRefreshToken();
+
+            // Lưu session
+            var phienDangNhap = new PhienDangNhap
+            {
+                NguoiDungId = nguoiDung.Id,
+                Token = refreshToken,
+                HetHanLuc = DateTime.UtcNow.AddDays(7)
+            };
+
+            _context.PhienDangNhaps.Add(phienDangNhap);
+            await _context.SaveChangesAsync();
+
+            return new PhanHoiDangNhap
+            {
+                ThanhCong = true,
+                ThongBao = "Đăng nhập thành công",
+                Token = token,
+                RefreshToken = refreshToken,
+                HetHanLuc = DateTime.UtcNow.AddMinutes(60),
+                ThongTinNguoiDung = new ThongTinNguoiDung
+                {
+                    Id = nguoiDung.Id,
+                    Email = nguoiDung.Email,
+                    HoTen = nguoiDung.Email, // Sẽ cập nhật sau khi có user profile
+                    TenVaiTro = nguoiDung.VaiTro.Ten,
+                    VaiTroId = nguoiDung.VaiTroId
+                }
             };
         }
-
-        public async Task<PhanHoiXacThucDto> DangKy(string email, string matKhau, string hoTen, string vaiTro)
+        catch (Exception ex)
         {
-            // Kiểm tra email đã tồn tại chưa trong database
-            var nguoiDungTonTai = await _nguoiDungRepository.GetByEmailAsync(email);
-            if (nguoiDungTonTai != null)
+            return new PhanHoiDangNhap
             {
-                throw new InvalidOperationException("Email này đã được sử dụng.");
+                ThanhCong = false,
+                ThongBao = $"Lỗi đăng nhập: {ex.Message}"
+            };
+        }
+    }
+
+    public async Task<PhanHoiDangKy> DangKyAsync(YeuCauDangKy yeuCau)
+    {
+        try
+        {
+            // Kiểm tra email đã tồn tại
+            if (await _nguoiDungRepository.EmailExistsAsync(yeuCau.Email))
+            {
+                return new PhanHoiDangKy
+                {
+                    ThanhCong = false,
+                    ThongBao = "Email đã được sử dụng"
+                };
             }
 
-            // Lấy role ID từ tên vai trò
-            var vaiTroEntity = await _vaiTroRepository.GetByTenVaiTroAsync(vaiTro);
-            if (vaiTroEntity == null)
+            // Kiểm tra vai trò hợp lệ
+            var vaiTro = await _vaiTroRepository.GetByIdAsync(yeuCau.VaiTroId);
+            if (vaiTro == null)
             {
-                throw new InvalidOperationException("Vai trò không hợp lệ.");
+                return new PhanHoiDangKy
+                {
+                    ThanhCong = false,
+                    ThongBao = "Vai trò không hợp lệ"
+                };
             }
+
+            // Mã hóa mật khẩu
+            var matKhauMaHoa = BCrypt.Net.BCrypt.HashPassword(yeuCau.MatKhau);
 
             // Tạo người dùng mới
-            var nguoiDungMoi = new NguoiDung
+            var nguoiDung = new NguoiDung
             {
-                Id = Guid.NewGuid(),
-                Email = email,
-                HoTen = hoTen,
-                MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword(matKhau),
-                VaiTroId = vaiTroEntity.Id,
-                LaHoatDong = true,
-                TaoLuc = DateTime.UtcNow,
-                CapNhatLuc = DateTime.UtcNow
+                Email = yeuCau.Email,
+                MatKhauMaHoa = matKhauMaHoa,
+                VaiTroId = yeuCau.VaiTroId,
+                HoatDong = true
             };
 
-            // Lưu vào database
-            await _nguoiDungRepository.AddAsync(nguoiDungMoi);
+            var nguoiDungMoi = await _nguoiDungRepository.CreateAsync(nguoiDung);
 
-            // Tạo token cho người dùng mới
-            var accessToken = TaoAccessToken(nguoiDungMoi);
-            var refreshToken = TaoRefreshToken();
+            return new PhanHoiDangKy
+            {
+                ThanhCong = true,
+                ThongBao = "Đăng ký thành công",
+                NguoiDungId = nguoiDungMoi.Id
+            };
+        }
+        catch (Exception ex)
+        {
+            return new PhanHoiDangKy
+            {
+                ThanhCong = false,
+                ThongBao = $"Lỗi đăng ký: {ex.Message}"
+            };
+        }
+    }
+
+    public async Task<PhanHoiXacThucDto> LamMoiTokenAsync(string refreshToken)
+    {
+        try
+        {
+            var phienDangNhap = await _context.PhienDangNhaps
+                .Include(p => p.NguoiDung)
+                .ThenInclude(n => n.VaiTro)
+                .FirstOrDefaultAsync(p => p.Token == refreshToken && p.HetHanLuc > DateTime.UtcNow);
+
+            if (phienDangNhap == null)
+            {
+                return new PhanHoiXacThucDto
+                {
+                    ThanhCong = false,
+                    ThongBao = "Refresh token không hợp lệ hoặc đã hết hạn"
+                };
+            }
+
+            var tokenMoi = _dichVuJWT.TaoToken(phienDangNhap.NguoiDung);
 
             return new PhanHoiXacThucDto
             {
-                AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
-                RefreshToken = refreshToken
+                ThanhCong = true,
+                ThongBao = "Làm mới token thành công",
+                Token = tokenMoi,
+                HetHanLuc = DateTime.UtcNow.AddMinutes(60)
             };
         }
-
-        public async Task<PhanHoiXacThucDto> LamMoiToken(string refreshToken)
+        catch (Exception ex)
         {
-            // Note: Entity hiện tại không có RefreshToken, nên trả về lỗi
-            throw new UnauthorizedAccessException("Chức năng làm mới token chưa được hỗ trợ.");
-        }
-
-        public string XacThucToken(string accessToken)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var validationParameters = new TokenValidationParameters
+            return new PhanHoiXacThucDto
             {
-                // Cấu hình các tham số để xác thực token.
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = _config["JwtSettings:Issuer"],
-                ValidAudience = _config["JwtSettings:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(_key)
+                ThanhCong = false,
+                ThongBao = $"Lỗi làm mới token: {ex.Message}"
             };
+        }
+    }
 
-            try
+    public async Task<bool> DangXuatAsync(string token)
+    {
+        try
+        {
+            var phienDangNhap = await _context.PhienDangNhaps
+                .FirstOrDefaultAsync(p => p.Token == token);
+
+            if (phienDangNhap != null)
             {
-                // Thử xác thực token.
-                tokenHandler.ValidateToken(accessToken, validationParameters, out SecurityToken validatedToken);
-                var jwtToken = validatedToken as JwtSecurityToken;
-
-                // Trích xuất email người dùng từ token.
-                return jwtToken?.Claims?.FirstOrDefault(claim => claim.Type == ClaimTypes.Name)?.Value;
+                _context.PhienDangNhaps.Remove(phienDangNhap);
+                await _context.SaveChangesAsync();
             }
-            catch
-            {
-                // Trả về null nếu token không hợp lệ.
-                return null;
-            }
+
+            return true;
         }
-
-        /// <summary>
-        /// Phương thức nội bộ để tạo access token.
-        /// </summary>
-        private JwtSecurityToken TaoAccessToken(NguoiDung nguoiDung)
+        catch
         {
-            var claims = new[]
-            {
-                // Thêm các claim (thông tin) vào token.
-                new Claim(ClaimTypes.Name, nguoiDung.Email),
-                new Claim(ClaimTypes.NameIdentifier, nguoiDung.Email), // Email for identification
-                new Claim("UserId", nguoiDung.Id.ToString()), // Actual GUID for database operations
-                new Claim(ClaimTypes.Role, nguoiDung.VaiTroId.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var signingKey = new SymmetricSecurityKey(_key)
-            {
-                KeyId = "PlanbookAI-Key-2024"
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: _config["JwtSettings:Issuer"],
-                audience: _config["JwtSettings:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(24), // Thời gian hết hạn của token.
-                signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
-            );
-
-            return token;
-        }
-
-        /// <summary>
-        /// Phương thức nội bộ để tạo refresh token ngẫu nhiên.
-        /// </summary>
-        private string TaoRefreshToken()
-        {
-            var randomNumber = new byte[32];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomNumber);
-                return Convert.ToBase64String(randomNumber);
-            }
+            return false;
         }
     }
 }
