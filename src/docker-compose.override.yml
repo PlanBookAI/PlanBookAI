@@ -5,7 +5,12 @@ services:
       - ASPNETCORE_HTTP_PORTS=8081
     ports:
       - "8081:8081"
-
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      
   gatewayservice:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -20,17 +25,17 @@ services:
     ports:
       - "8083:8083"
 
-  taskservice:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8084
-    ports:
-      - "8084:8084"
-
   userservice:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8082
     ports:
       - "8082:8082"
+
+  examservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8084
+    ports:
+      - "8084:8084"
 

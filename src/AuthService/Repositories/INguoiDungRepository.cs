@@ -1,17 +1,15 @@
 using AuthService.Models.Entities;
-using System;
-using System.Threading.Tasks;
 
-namespace AuthService.Repositories
+namespace AuthService.Repositories;
+
+public interface INguoiDungRepository
 {
-    /// <summary>
-    /// Interface định nghĩa các phương thức để thao tác với dữ liệu người dùng.
-    /// </summary>
-    public interface INguoiDungRepository
-    {
-        Task<NguoiDung?> GetByIdAsync(Guid id);
-        Task<NguoiDung?> GetByEmailAsync(string email);
-        Task AddAsync(NguoiDung nguoiDung);
-        Task UpdateAsync(NguoiDung nguoiDung);
-    }
+    Task<NguoiDung?> GetByIdAsync(Guid id);
+    Task<NguoiDung?> GetByEmailAsync(string email);
+    Task<IEnumerable<NguoiDung>> GetAllAsync();
+    Task<NguoiDung> CreateAsync(NguoiDung nguoiDung);
+    Task<NguoiDung> UpdateAsync(NguoiDung nguoiDung);
+    Task DeleteAsync(Guid id);
+    Task<bool> EmailExistsAsync(string email);
+    Task UpdateLastLoginAsync(Guid id);
 }

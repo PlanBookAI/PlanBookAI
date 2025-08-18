@@ -2,33 +2,40 @@ services:
   authservice:
     image: ${DOCKER_REGISTRY-}authservice
     build:
-      context: .
-      dockerfile: AuthService/Dockerfile
+      context: AuthService
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
 
   gatewayservice:
     image: ${DOCKER_REGISTRY-}gatewayservice
     build:
-      context: .
-      dockerfile: GatewayService/Dockerfile
-
+      context: GatewayService
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
 
   planservice:
     image: ${DOCKER_REGISTRY-}planservice
     build:
-      context: .
-      dockerfile: PlanService/Dockerfile
-
-
-  taskservice:
-    image: ${DOCKER_REGISTRY-}taskservice
-    build:
-      context: .
-      dockerfile: TaskService/Dockerfile
-
+      context: PlanService
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
 
   userservice:
     image: ${DOCKER_REGISTRY-}userservice
     build:
-      context: .
-      dockerfile: UserService/Dockerfile
+      context: UserService
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+
+  examservice:
+    image: ${DOCKER_REGISTRY-}examservice
+    build:
+      context: ExamService
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
 

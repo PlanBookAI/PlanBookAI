@@ -4,16 +4,16 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 8084
+EXPOSE 8082
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["UserService/UserService.csproj", "UserService/"]
-RUN dotnet restore "./UserService/UserService.csproj"
+COPY ["UserService.csproj", "."]
+RUN dotnet restore "./UserService.csproj"
 COPY . .
-WORKDIR "/src/UserService"
+WORKDIR "/src/."
 RUN dotnet build "./UserService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage

@@ -1,13 +1,13 @@
 using AuthService.Models.Entities;
-using System.Threading.Tasks;
 
-namespace AuthService.Repositories
+namespace AuthService.Repositories;
+
+public interface IVaiTroRepository
 {
-    /// <summary>
-    /// Interface định nghĩa các phương thức để thao tác với dữ liệu vai trò.
-    /// </summary>
-    public interface IVaiTroRepository
-    {
-        Task<VaiTro> GetByTenVaiTroAsync(string tenVaiTro); // Tìm vai trò theo tên.
-    }
+    Task<VaiTro?> GetByIdAsync(int id);
+    Task<VaiTro?> GetByNameAsync(string ten);
+    Task<IEnumerable<VaiTro>> GetAllAsync();
+    Task<VaiTro> CreateAsync(VaiTro vaiTro);
+    Task<VaiTro> UpdateAsync(VaiTro vaiTro);
+    Task DeleteAsync(int id);
 }

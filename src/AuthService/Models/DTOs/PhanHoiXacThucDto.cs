@@ -1,13 +1,9 @@
-using System;
+namespace AuthService.Models.DTOs;
 
-namespace AuthService.Models.DTOs
+public class PhanHoiXacThucDto
 {
-    /// <summary>
-    /// DTO cho phản hồi xác thực
-    /// </summary>
-    public class PhanHoiXacThucDto
-    {
-        public string AccessToken { get; set; } = string.Empty;
-        public string RefreshToken { get; set; } = string.Empty;
-    }
+    public bool ThanhCong { get; set; }
+    public string ThongBao { get; set; } = string.Empty;
+    public string? Token { get; set; }
+    public DateTime? HetHanLuc { get; set; }
 }

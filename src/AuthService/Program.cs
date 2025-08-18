@@ -1,82 +1,61 @@
+using Microsoft.EntityFrameworkCore;
 using AuthService.Data;
-using AuthService.Models.Entities;
 using AuthService.Repositories;
 using AuthService.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Thêm các dịch vụ vào container
+// Add services to the container.
 builder.Services.AddControllers();
 
-// Thêm Entity Framework DbContext
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Database Configuration
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Thêm JWT Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-            ValidAudience = builder.Configuration["JwtSettings:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
-        };
-    });
+// Repository Registration
+builder.Services.AddScoped<IVaiTroRepository, VaiTroRepository>();
+builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();
 
-// Thêm các dịch vụ nghiệp vụ
+// Service Registration
+builder.Services.AddScoped<IDichVuJWT, DichVuJWT>();
 builder.Services.AddScoped<IDichVuXacThuc, DichVuXacThuc>();
 
-// Thêm các Repository
-builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();
-builder.Services.AddScoped<IVaiTroRepository, VaiTroRepository>();
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
 
-// Thêm Swagger/OpenAPI
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+// CORS
+builder.Services.AddCors(options =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
+    options.AddPolicy("AllowAll", policy =>
     {
-        Title = "AuthService API",
-        Version = "v1",
-        Description = "API documentation for Authentication Service"
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
 var app = builder.Build();
 
-// Cấu hình pipeline xử lý HTTP request
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AuthService API V1");
-        c.RoutePrefix = "swagger";
-    });
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
+
+app.UseCors("AllowAll");
+
 app.UseAuthorization();
+
 app.MapControllers();
 
-// Thiết lập Database Connection - sử dụng database thực
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    // Chỉ đảm bảo database connection, không tạo mock data
-    await context.Database.CanConnectAsync();
-}
+// Health check endpoint
+app.MapGet("/health", () => new { Status = "Healthy", Service = "AuthService" });
 
 app.Run();
