@@ -384,8 +384,23 @@ foreach ($table in $tablesWithUpdatedAt) {
     Execute-SQL $triggerSQL "Create trigger $triggerName"
 }
 
+# Seed default roles
 Write-Host ""
-Write-Host "STEP 6: VERIFICATION" -ForegroundColor Yellow
+Write-Host "STEP 6: SEED DATA" -ForegroundColor Yellow
+Write-Host "=================" -ForegroundColor Yellow
+
+$seedRolesSql = @"
+INSERT INTO users.roles (id, name, description, is_active, created_at, updated_at) VALUES
+(1, 'ADMIN', 'Quản trị viên hệ thống', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'MANAGER', 'Quản lý nội dung và người dùng', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 'STAFF', 'Nhân viên tạo nội dung mẫu', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 'TEACHER', 'Giáo viên sử dụng hệ thống', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT (id) DO NOTHING;
+"@
+Execute-SQL $seedRolesSql "Seed default roles"
+
+Write-Host ""
+Write-Host "STEP 7: VERIFICATION" -ForegroundColor Yellow
 Write-Host "===================" -ForegroundColor Yellow
 
 # Verify migration
