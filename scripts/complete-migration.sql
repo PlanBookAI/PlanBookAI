@@ -564,3 +564,116 @@ BEGIN
     RAISE NOTICE 'Database ready for development!';
     RAISE NOTICE '========================================';
 END $$;
+
+-- =====================================================
+-- PLANBOOKAI DATABASE - PHẦN 13: USER SERVICE SCHEMA
+-- =====================================================
+
+-- Cập nhật bảng users để hỗ trợ soft delete
+ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL;
+ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;
+
+-- Bảng OTP cho các chức năng xác thực (sẽ dùng chung với notification service)
+CREATE TABLE users.otp_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    otp_code VARCHAR(6) NOT NULL,
+    purpose VARCHAR(50) NOT NULL CHECK (purpose IN ('PASSWORD_RESET', 'EMAIL_VERIFICATION', 'PHONE_VERIFICATION')),
+    expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    attempts INTEGER DEFAULT 0,
+    max_attempts INTEGER DEFAULT 3,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bảng lịch sử thay đổi mật khẩu
+CREATE TABLE users.password_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    changed_at TIMESTAMP NOT NULL,
+    changed_by UUID REFERENCES auth.users(id),
+    reason VARCHAR(100) DEFAULT 'USER_CHANGE',
+    ip_address INET,
+    user_agent TEXT
+);
+
+-- Bảng quản lý phiên đăng nhập (session management)
+CREATE TABLE users.user_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    session_token VARCHAR(500) NOT NULL UNIQUE,
+    device_info JSONB,
+    ip_address INET,
+    user_agent TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    expires_at TIMESTAMP NOT NULL,
+    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tạo indexes cho UserService
+CREATE INDEX idx_users_otp_codes_user ON users.otp_codes(user_id);
+CREATE INDEX idx_users_otp_codes_purpose ON users.otp_codes(purpose);
+CREATE INDEX idx_users_otp_codes_expires ON users.otp_codes(expires_at);
+CREATE INDEX idx_users_password_history_user ON users.password_history(user_id);
+CREATE INDEX idx_users_user_sessions_user ON users.user_sessions(user_id);
+CREATE INDEX idx_users_user_sessions_token ON users.user_sessions(session_token);
+CREATE INDEX idx_users_user_sessions_active ON users.user_sessions(is_active);
+
+-- Tạo trigger để tự động cập nhật updated_at cho bảng users
+CREATE TRIGGER trigger_updated_at_auth_users_soft_delete 
+    BEFORE UPDATE ON auth.users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================================================
+-- PLANBOOKAI DATABASE - PHẦN 14: FINAL VERIFICATION
+-- =====================================================
+
+-- Kiểm tra số lượng schemas
+SELECT 'Schemas created:' as info, COUNT(*) as count 
+FROM information_schema.schemata 
+WHERE schema_name IN ('auth', 'users', 'assessment', 'content', 'students', 'files', 'notifications', 'logging');
+
+-- Kiểm tra số lượng tables
+SELECT 'Tables created:' as info, COUNT(*) as count 
+FROM information_schema.tables 
+WHERE table_schema IN ('auth', 'users', 'assessment', 'content', 'students', 'files', 'notifications', 'logging');
+
+-- Kiểm tra seed data
+SELECT 'Roles seeded:' as info, COUNT(*) as count FROM auth.roles;
+SELECT 'Users seeded:' as info, COUNT(*) as count FROM auth.users;
+SELECT 'User profiles seeded:' as info, COUNT(*) as count FROM users.user_profiles;
+SELECT 'Topics seeded:' as info, COUNT(*) as count FROM content.chu_de;
+SELECT 'Questions seeded:' as info, COUNT(*) as count FROM assessment.questions;
+
+-- Kiểm tra UserService schema
+SELECT 'OTP codes table:' as info, COUNT(*) as count FROM users.otp_codes;
+SELECT 'Password history table:' as info, COUNT(*) as count FROM users.password_history;
+SELECT 'User sessions table:' as info, COUNT(*) as count FROM users.user_sessions;
+
+-- Hiển thị thông tin đăng nhập test
+SELECT 
+    'TEST ACCOUNTS:' as info,
+    u.email,
+    r.name as role,
+    up.full_name,
+    u.is_deleted,
+    u.deleted_at
+FROM auth.users u
+JOIN auth.roles r ON u.role_id = r.id
+JOIN users.user_profiles up ON u.id = up.user_id
+ORDER BY r.id;
+
+-- Thông báo hoàn thành
+DO $$
+BEGIN
+    RAISE NOTICE '========================================';
+    RAISE NOTICE 'PLANBOOKAI DATABASE CREATED SUCCESSFULLY!';
+    RAISE NOTICE '========================================';
+    RAISE NOTICE 'Total schemas: 8';
+    RAISE NOTICE 'Total tables: 23+';
+    RAISE NOTICE 'Seed data: Complete';
+    RAISE NOTICE 'UserService schema: Added';
+    RAISE NOTICE 'Test accounts created';
+    RAISE NOTICE 'Database ready for development!';
+    RAISE NOTICE '========================================';
+END $$;

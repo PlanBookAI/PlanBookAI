@@ -210,6 +210,92 @@ Write-Host "[INFO] Topics: $topicsCountSafe/3" -ForegroundColor Cyan
 Write-Host "[INFO] Questions: $questionsCountSafe/2" -ForegroundColor Cyan
 
 Write-Host ""
+Write-Host "STEP 8.5: UPDATE USER SERVICE SCHEMA" -ForegroundColor Yellow
+Write-Host "=====================================" -ForegroundColor Yellow
+
+# Update auth.users table for soft delete
+Write-Host "[INFO] Adding soft delete columns to auth.users..." -ForegroundColor Cyan
+$softDeleteResult = Execute-SQL "ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL;" "Add deleted_at column"
+if ($softDeleteResult) {
+    $softDeleteResult2 = Execute-SQL "ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;" "Add is_deleted column"
+}
+
+# Create OTP codes table
+Write-Host "[INFO] Creating OTP codes table..." -ForegroundColor Cyan
+$otpTableResult = Execute-SQL @"
+CREATE TABLE IF NOT EXISTS users.otp_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    otp_code VARCHAR(6) NOT NULL,
+    purpose VARCHAR(50) NOT NULL CHECK (purpose IN ('PASSWORD_RESET', 'EMAIL_VERIFICATION', 'PHONE_VERIFICATION')),
+    expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    attempts INTEGER DEFAULT 0,
+    max_attempts INTEGER DEFAULT 3,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"@ "Create OTP codes table"
+
+# Create password history table
+Write-Host "[INFO] Creating password history table..." -ForegroundColor Cyan
+$passwordHistoryResult = Execute-SQL @"
+CREATE TABLE IF NOT EXISTS users.password_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    changed_at TIMESTAMP NOT NULL,
+    changed_by UUID REFERENCES auth.users(id),
+    reason VARCHAR(100) DEFAULT 'USER_CHANGE',
+    ip_address INET,
+    user_agent TEXT
+);
+"@ "Create password history table"
+
+# Create user sessions table
+Write-Host "[INFO] Creating user sessions table..." -ForegroundColor Cyan
+$userSessionsResult = Execute-SQL @"
+CREATE TABLE IF NOT EXISTS users.user_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    session_token VARCHAR(500) NOT NULL UNIQUE,
+    device_info JSONB,
+    ip_address INET,
+    user_agent TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    expires_at TIMESTAMP NOT NULL,
+    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"@ "Create user sessions table"
+
+# Create indexes
+Write-Host "[INFO] Creating indexes for UserService..." -ForegroundColor Cyan
+Execute-SQL "CREATE INDEX IF NOT EXISTS idx_users_otp_codes_user ON users.otp_codes(user_id);" "Create OTP user index"
+Execute-SQL "CREATE INDEX IF NOT EXISTS idx_users_otp_codes_purpose ON users.otp_codes(purpose);" "Create OTP purpose index"
+Execute-SQL "CREATE INDEX IF NOT EXISTS idx_users_otp_codes_expires ON users.otp_codes(expires_at);" "Create OTP expires index"
+Execute-SQL "CREATE INDEX IF NOT EXISTS idx_users_password_history_user ON users.password_history(user_id);" "Create password history index"
+Execute-SQL "CREATE INDEX IF NOT EXISTS idx_users_user_sessions_user ON users.user_sessions(user_id);" "Create user sessions index"
+Execute-SQL "CREATE INDEX IF NOT EXISTS idx_users_user_sessions_token ON users.user_sessions(session_token);" "Create session token index"
+Execute-SQL "CREATE INDEX IF NOT EXISTS idx_users_user_sessions_active ON users.user_sessions(is_active);" "Create active sessions index"
+
+# Create trigger for updated_at
+Write-Host "[INFO] Creating updated_at trigger..." -ForegroundColor Cyan
+
+# Create function first
+$functionSql = "CREATE OR REPLACE FUNCTION update_updated_at_column() RETURNS TRIGGER AS `$`$ BEGIN NEW.updated_at = CURRENT_TIMESTAMP; RETURN NEW; END; `$`$ language 'plpgsql';"
+Execute-SQL $functionSql "Create update_updated_at function"
+
+# Create trigger
+$triggerSql = "DROP TRIGGER IF EXISTS trigger_updated_at_auth_users_soft_delete ON auth.users; CREATE TRIGGER trigger_updated_at_auth_users_soft_delete BEFORE UPDATE ON auth.users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();"
+Execute-SQL $triggerSql "Create updated_at trigger"
+
+Write-Host "[OK] UserService schema update completed!" -ForegroundColor Green
+
+# Update table count after creating UserService schema
+Write-Host "[INFO] Updating table count after UserService schema creation..." -ForegroundColor Cyan
+$tableCount = docker exec planbookai-postgres-dev psql -U $DB_USER -d $DB_NAME -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema IN ('auth', 'users', 'assessment', 'content', 'students', 'files', 'notifications', 'logging');" 2>$null
+Write-Host "[INFO] Updated table count: $($tableCount.Trim())/25+" -ForegroundColor Cyan
+
+Write-Host ""
 Write-Host "STEP 9: DISPLAY TEST ACCOUNTS" -ForegroundColor Yellow
 Write-Host "=============================" -ForegroundColor Yellow
 
@@ -254,16 +340,17 @@ $rolesCountSafe = if ($rolesCount) { $rolesCount.Trim() } else { "0" }
 $usersCountSafe = if ($usersCount) { $usersCount.Trim() } else { "0" }
 
 # Evaluate results
-if ($schemaCountSafe -eq "8" -and $tableCountSafe -ge "20" -and $rolesCountSafe -eq "4" -and $usersCountSafe -eq "2") {
+if ($schemaCountSafe -eq "8" -and $tableCountSafe -ge "25" -and $rolesCountSafe -eq "4" -and $usersCountSafe -eq "2") {
     Write-Host ""
     Write-Host "🎉 SUCCESS! DATABASE MIGRATION COMPLETED!" -ForegroundColor Green
     Write-Host "==========================================" -ForegroundColor Green
     Write-Host ""
     Write-Host "✅ Database Structure:" -ForegroundColor Green
     Write-Host "  - 8 Schemas: auth, users, assessment, content, students, files, notifications, logging" -ForegroundColor White
-    Write-Host "  - 20+ Tables with full relationships" -ForegroundColor White
+    Write-Host "  - 25+ Tables with full relationships" -ForegroundColor White
     Write-Host "  - All indexes and constraints created" -ForegroundColor White
     Write-Host "  - Auto-update triggers implemented" -ForegroundColor White
+    Write-Host "  - UserService schema: OTP, password history, user sessions" -ForegroundColor White
     Write-Host ""
     Write-Host "✅ Seed Data:" -ForegroundColor Green
     Write-Host "  - 4 Roles: ADMIN, MANAGER, STAFF, TEACHER" -ForegroundColor White
@@ -281,10 +368,10 @@ if ($schemaCountSafe -eq "8" -and $tableCountSafe -ge "20" -and $rolesCountSafe 
     Write-Host "❌ [ERROR] Migration incomplete. Please check logs above." -ForegroundColor Red
     Write-Host ""
     Write-Host "📊 Migration Summary:" -ForegroundColor Yellow
-    Write-Host "  - Schemas: $schemaCountSafe/8" -ForegroundColor White
-    Write-Host "  - Tables: $tableCountSafe/20+" -ForegroundColor White
-    Write-Host "  - Roles: $rolesCountSafe/4" -ForegroundColor White
-    Write-Host "  - Users: $usersCountSafe/2" -ForegroundColor White
+Write-Host "  - Schemas: $schemaCountSafe/8" -ForegroundColor White
+Write-Host "  - Tables: $tableCountSafe/25+" -ForegroundColor White
+Write-Host "  - Roles: $rolesCountSafe/4" -ForegroundColor White
+Write-Host "  - Users: $usersCountSafe/2" -ForegroundColor White
     Write-Host ""
     Write-Host "Press any key to continue..." -ForegroundColor Cyan
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
