@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using UserService.Models.DTOs;
 using UserService.Services;
+using UserService.Extensions;
 using FluentValidation;
 
 namespace UserService.Controllers;
@@ -84,20 +85,94 @@ public class NguoiDungController : ControllerBase
 
 	// GET: api/v1/nguoi-dung/danh-sach
 	[HttpGet("danh-sach")]
-	public ActionResult<PhanHoiDanhSachNguoiDung> LayDanhSachNguoiDung()
+	public async Task<ActionResult<PhanHoiDanhSachNguoiDung>> LayDanhSachNguoiDung()
 	{
-		// TODO: Gateway sẽ xác thực và truyền thông tin user qua header hoặc context
-		// Hiện tại chưa có authentication nên trả về 401
-		return Unauthorized(new { thanhCong = false, thongBao = "Chưa có xác thực" });
+		try
+		{
+			// Debug: Log tất cả thông tin authentication
+			_logger.LogInformation("LayDanhSachNguoiDung: Bắt đầu xử lý request");
+			_logger.LogInformation("LayDanhSachNguoiDung: IsAuthenticated = {IsAuthenticated}", HttpContext.IsAuthenticated());
+			_logger.LogInformation("LayDanhSachNguoiDung: UserId = {UserId}", HttpContext.GetUserId());
+			_logger.LogInformation("LayDanhSachNguoiDung: UserRole = {UserRole}", HttpContext.GetUserRole());
+			_logger.LogInformation("LayDanhSachNguoiDung: UserEmail = {UserEmail}", HttpContext.GetUserEmail());
+
+			// Kiểm tra authentication
+			if (!HttpContext.IsAuthenticated())
+			{
+				_logger.LogWarning("LayDanhSachNguoiDung: Không có xác thực");
+				return Unauthorized(new { thanhCong = false, thongBao = "Không có xác thực" });
+			}
+
+			// Kiểm tra quyền ADMIN
+			if (!HttpContext.IsAdmin())
+			{
+				_logger.LogWarning("LayDanhSachNguoiDung: Không có quyền ADMIN, UserRole: {UserRole}", HttpContext.GetUserId());
+				return Unauthorized(new { thanhCong = false, thongBao = "Không có quyền ADMIN" });
+			}
+
+			var adminId = Guid.Parse(HttpContext.GetUserId()!);
+			_logger.LogInformation("LayDanhSachNguoiDung: Admin {AdminId} yêu cầu xem danh sách người dùng", adminId);
+
+			var ketQua = await _dichVuNguoiDung.LayDanhSachNguoiDungAsync(adminId);
+			if (!ketQua.ThanhCong)
+			{
+				_logger.LogWarning("LayDanhSachNguoiDung: Service trả về lỗi");
+				return BadRequest(ketQua);
+			}
+
+			_logger.LogInformation("LayDanhSachNguoiDung: Thành công, trả về {Count} người dùng", 
+								 ketQua.DanhSach?.Count ?? 0);
+			return Ok(ketQua);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "LayDanhSachNguoiDung: Exception {Message}", ex.Message);
+			return StatusCode(500, new { thanhCong = false, thongBao = "Lỗi server" });
+		}
 	}
 
 	// GET: api/v1/nguoi-dung/{userId}
 	[HttpGet("{userId:guid}")]
-	public ActionResult<PhanHoiHoSo> LayThongTinNguoiDung(Guid userId)
+	public async Task<ActionResult<PhanHoiHoSo>> LayThongTinNguoiDung(Guid userId)
 	{
-		// TODO: Gateway sẽ xác thực và truyền thông tin user qua header hoặc context
-		// Hiện tại chưa có authentication nên trả về 401
-		return Unauthorized(new { thanhCong = false, thongBao = "Chưa có xác thực" });
+		try
+		{
+			// Kiểm tra authentication
+			if (!HttpContext.IsAuthenticated())
+			{
+				_logger.LogWarning("LayThongTinNguoiDung: Không có xác thực");
+				return Unauthorized(new { thanhCong = false, thongBao = "Không có xác thực" });
+			}
+
+			// Kiểm tra quyền ADMIN hoặc chính user đó
+			var currentUserId = Guid.Parse(HttpContext.GetUserId()!);
+			var currentUserRole = HttpContext.GetUserRole();
+
+			if (!HttpContext.IsAdmin() && currentUserId != userId)
+			{
+				_logger.LogWarning("LayThongTinNguoiDung: Không có quyền xem thông tin user khác, UserRole: {UserRole}, CurrentUserId: {CurrentUserId}, RequestedUserId: {RequestedUserId}", 
+								 currentUserRole, currentUserId, userId);
+				return Unauthorized(new { thanhCong = false, thongBao = "Không có quyền xem thông tin user khác" });
+			}
+
+			_logger.LogInformation("LayThongTinNguoiDung: User {CurrentUserId} yêu cầu xem thông tin user {RequestedUserId}", 
+								 currentUserId, userId);
+
+			var ketQua = await _dichVuNguoiDung.LayThongTinNguoiDungAsync(currentUserId, userId);
+			if (!ketQua.ThanhCong)
+			{
+				_logger.LogWarning("LayThongTinNguoiDung: Service trả về lỗi");
+				return BadRequest(ketQua);
+			}
+
+			_logger.LogInformation("LayThongTinNguoiDung: Thành công");
+			return Ok(ketQua);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "LayThongTinNguoiDung: Exception {Message}", ex.Message);
+			return StatusCode(500, new { thanhCong = false, thongBao = "Lỗi server" });
+		}
 	}
 
 	// DELETE: api/v1/nguoi-dung/{userId}

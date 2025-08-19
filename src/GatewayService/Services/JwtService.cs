@@ -28,8 +28,9 @@ namespace GatewayService.Services
 
                 if (validatedToken is JwtSecurityToken jwtToken)
                 {
-                    // Tìm userId từ các claim có thể có - ưu tiên UserId GUID
-                    var userId = principal.FindFirst("UserId")?.Value 
+                    // Tìm userId từ các claim có thể có - ưu tiên nameid từ AuthService
+                    var userId = principal.FindFirst("nameid")?.Value 
+                               ?? principal.FindFirst("UserId")?.Value 
                                ?? principal.FindFirst("userId")?.Value 
                                ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
                                ?? principal.FindFirst("sub")?.Value
@@ -110,7 +111,7 @@ namespace GatewayService.Services
             var issuer = jwtSettings["Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
             var audience = jwtSettings["Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
 
-            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey))
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
             {
                 KeyId = "PlanbookAI-Key-2024"
             };

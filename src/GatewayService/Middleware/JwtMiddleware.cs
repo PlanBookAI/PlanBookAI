@@ -114,9 +114,21 @@ namespace GatewayService.Middleware
                         }
                     }
                     
+                    // THÊM X-User-Email header
+                    string? userEmail = null;
+                    if (userClaims?.TryGetValue("email", out var emailValue) == true ||
+                        userClaims?.TryGetValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", out emailValue) == true)
+                    {
+                        userEmail = emailValue;
+                        if (!context.Request.Headers.ContainsKey("X-User-Email"))
+                        {
+                            context.Request.Headers.Append("X-User-Email", emailValue);
+                        }
+                    }
+                    
                     // Log headers để debug
-                    _logger.LogInformation("Set headers: X-User-Id={UserId}, X-User-Role={UserRole}", 
-                                         userId, userRole ?? "N/A");
+                    _logger.LogInformation("Set headers: X-User-Id={UserId}, X-User-Role={UserRole}, X-User-Email={UserEmail}", 
+                                         userId, userRole ?? "N/A", userEmail ?? "N/A");
 
                     _logger.LogDebug("Token validation successful for user {UserId} accessing {Path}", 
                                    userId, context.Request.Path);
@@ -135,8 +147,6 @@ namespace GatewayService.Middleware
                 // Không set response, vẫn forward request để downstream service xử lý
             }
         }
-
-
 
         /// <summary>
         /// Kiểm tra endpoint có cần authentication không
