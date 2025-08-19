@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using UserService.Data;
 using UserService.Services;
 using UserService.Repositories;
+using UserService.Middleware;
 using FluentValidation;
 using UserService.Models.Validators;
 
@@ -53,6 +54,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+
+// Sử dụng HeaderAuthenticationMiddleware để đọc headers từ Gateway
+app.UseHeaderAuthentication();
 
 // Không cần authentication middleware - Gateway sẽ xử lý
 app.UseAuthorization();
