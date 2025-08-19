@@ -39,3 +39,59 @@ services:
     ports:
       - "8084:8084"
 
+  classroomservice:
+    image: ${DOCKER_REGISTRY-}classroomservice
+    build:
+      context: ClassroomService
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+
+  filestorageservice:
+    image: ${DOCKER_REGISTRY-}filestorageservice
+    build:
+      context: FileStorageService
+      dockerfile: Dockerfile
+    ports:
+      - "8086:8086"
+
+  notificationservice:
+    image: ${DOCKER_REGISTRY-}notificationservice
+    build:
+      context: NotificationService
+      dockerfile: Dockerfile
+    ports:
+      - "8087:8087"
+
+  ocrservice:
+    image: ${DOCKER_REGISTRY-}ocrservice
+    build:
+      context: OCRService
+      dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+
+  studentgradingservice:
+    image: ${DOCKER_REGISTRY-}studentgradingservice
+    build:
+      context: StudentGradingService
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+
+  aiplanservice:
+    image: ${DOCKER_REGISTRY-}aiplanservice
+    build:
+      context: AIPlanService
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+
+  logservice:
+    image: ${DOCKER_REGISTRY-}logservice
+    build:
+      context: LogService
+      dockerfile: Dockerfile
+    ports:
+      - "8091:8091"
+

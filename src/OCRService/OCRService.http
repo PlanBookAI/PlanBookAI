@@ -1,0 +1,6 @@
+@OCRService_HostAddress = http://localhost:5282
+
+GET {{OCRService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

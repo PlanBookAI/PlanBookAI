@@ -9,7 +9,12 @@
         "planservice": "StartDebugging",
         "taskservice": "StartDebugging",
         "userservice": "StartDebugging",
-        "examservice": "StartDebugging"
+        "examservice": "StartDebugging",
+        "classroomservice": "StartDebugging",
+        "filestorageservice": "StartDebugging",
+        "notificationservice": "StartDebugging",
+        "ocrservice": "StartDebugging",
+        "studentgradingservice": "StartDebugging"
       }
     }
   }
