@@ -48,7 +48,7 @@ function Execute-SQL {
     Write-Host "[INFO] $Description..." -ForegroundColor Cyan
     
     try {
-        $result = docker exec planbookai-postgres-dev psql -U $DB_USER -d $Database -c "$SqlCommand" 2>&1
+        $result = docker exec planbookai-postgres-dev psql -v ON_ERROR_STOP=1 -U $DB_USER -d $Database -c "$SqlCommand" 2>&1
         if ($LASTEXITCODE -eq 0) {
             Write-Host "[OK] $Description completed successfully" -ForegroundColor Green
             return $true
@@ -155,23 +155,22 @@ $totalCount = 0
 foreach ($command in $sqlCommands) {
     $command = $command.Trim()
     if ($command -eq "") { continue }
-    
-    # Skip header and comments
-    if ($command -match "^-- PLANBOOKAI DATABASE" -or $command -match "^-- Tạo database" -or $command -match "^-- Kết nối vào database") {
-        continue
-    }
-    
-    # Skip verification section
-    if ($command -match "VERIFICATION" -or $command -match "Kiểm tra số lượng") {
-        continue
-    }
-    
+
+    # Skip verification sections entirely
+    if ($command -match "VERIFICATION" -or $command -match "Kiểm tra số lượng") { continue }
+
+    # Remove header comment lines (but keep the SQL body)
+    $lines = $command -split "`r?`n"
+    $lines = $lines | Where-Object { $_ -notmatch "^\s*--\s*PLANBOOKAI DATABASE" -and $_ -notmatch "^\s*--\s*Tạo database" -and $_ -notmatch "^\s*--\s*Kết nối vào database" }
+
+    # Remove psql meta-commands and CREATE DATABASE (handled earlier)
+    $lines = $lines | Where-Object { $_ -notmatch "^\s*\\c\b" -and $_ -notmatch "(?i)^\s*CREATE\s+DATABASE\b" }
+
+    $commandClean = ($lines -join "`n").Trim()
+    if ($commandClean -eq "") { continue }
+
     $totalCount++
-    
-    # Execute each command
-    if (Execute-SQL $command "Execute SQL command #$totalCount") {
-        $successCount++
-    }
+    if (Execute-SQL $commandClean "Execute SQL command #$totalCount") { $successCount++ }
 }
 
 Write-Host ""
@@ -234,7 +233,8 @@ CREATE TABLE IF NOT EXISTS users.otp_codes (
     max_attempts INTEGER DEFAULT 3,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-"@ "Create OTP codes table"
+"@
+"Create OTP codes table"
 
 # Create password history table
 Write-Host "[INFO] Creating password history table..." -ForegroundColor Cyan
@@ -248,7 +248,8 @@ CREATE TABLE IF NOT EXISTS users.password_history (
     ip_address INET,
     user_agent TEXT
 );
-"@ "Create password history table"
+"@
+"Create password history table"
 
 # Create user sessions table
 Write-Host "[INFO] Creating user sessions table..." -ForegroundColor Cyan
@@ -265,7 +266,8 @@ CREATE TABLE IF NOT EXISTS users.user_sessions (
     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-"@ "Create user sessions table"
+"@
+"Create user sessions table"
 
 # Create indexes
 Write-Host "[INFO] Creating indexes for UserService..." -ForegroundColor Cyan
@@ -388,4 +390,6 @@ Write-Host "4. Check all API endpoints" -ForegroundColor White
 Write-Host ""
 Write-Host "Press any key to continue..." -ForegroundColor Cyan
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+
+# Ensure all blocks are closed
 }
