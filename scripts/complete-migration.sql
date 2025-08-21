@@ -19,14 +19,14 @@ CREATE SCHEMA IF NOT EXISTS notifications;
 CREATE SCHEMA IF NOT EXISTS logging;
 
 -- Cấp quyền cho schemas
-GRANT ALL PRIVILEGES ON SCHEMA auth TO postgres;
-GRANT ALL PRIVILEGES ON SCHEMA users TO postgres;
-GRANT ALL PRIVILEGES ON SCHEMA assessment TO postgres;
-GRANT ALL PRIVILEGES ON SCHEMA content TO postgres;
-GRANT ALL PRIVILEGES ON SCHEMA students TO postgres;
-GRANT ALL PRIVILEGES ON SCHEMA files TO postgres;
-GRANT ALL PRIVILEGES ON SCHEMA notifications TO postgres;
-GRANT ALL PRIVILEGES ON SCHEMA logging TO postgres;
+GRANT ALL PRIVILEGES ON SCHEMA auth TO test;
+GRANT ALL PRIVILEGES ON SCHEMA users TO test;
+GRANT ALL PRIVILEGES ON SCHEMA assessment TO test;
+GRANT ALL PRIVILEGES ON SCHEMA content TO test;
+GRANT ALL PRIVILEGES ON SCHEMA students TO test;
+GRANT ALL PRIVILEGES ON SCHEMA files TO test;
+GRANT ALL PRIVILEGES ON SCHEMA notifications TO test;
+GRANT ALL PRIVILEGES ON SCHEMA logging TO test;
 
 -- Tạo extension cần thiết (PostgreSQL 17 có sẵn gen_random_uuid())
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -63,6 +63,50 @@ CREATE TABLE auth.sessions (
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     token VARCHAR(500) NOT NULL UNIQUE,
     expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bảng xác minh email (theo dump)
+CREATE TABLE auth.email_verifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id),
+    verification_token VARCHAR(255) NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    is_verified BOOLEAN DEFAULT false,
+    verified_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bảng đặt lại mật khẩu (OTP) (theo dump)
+CREATE TABLE auth.password_resets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id),
+    otp VARCHAR(6) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    is_used BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Lịch sử mật khẩu (schema auth) (theo dump)
+CREATE TABLE auth.password_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id),
+    password_hash VARCHAR(255) NOT NULL,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    changed_by UUID
+);
+
+-- Bảng phiên người dùng (schema auth) (theo dump)
+CREATE TABLE auth.user_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id),
+    session_token VARCHAR(255) NOT NULL UNIQUE,
+    ip_address INET,
+    user_agent TEXT,
+    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -37,6 +37,24 @@ Write-Host "Port: $DB_PORT" -ForegroundColor Cyan
 Write-Host "Database: $DB_NAME" -ForegroundColor Cyan
 Write-Host "User: $DB_USER" -ForegroundColor Cyan
 
+# Helper: tạm dừng chờ người dùng trong cả môi trường Console và không Console
+function Pause-ForUser {
+    param([string]$Message = "Press any key to continue...")
+    # Thử RawUI (ConsoleHost)
+    try {
+        if ($Host -and $Host.UI -and $Host.UI.RawUI -and $Host.Name -eq 'ConsoleHost') {
+            Write-Host $Message -ForegroundColor Cyan
+            [void]$Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+            return
+        }
+    } catch {}
+    # Fallback: Read-Host (nhấn Enter)
+    try {
+        [void](Read-Host -Prompt ($Message + ' (nhấn Enter)'))
+        return
+    } catch {}
+}
+
 # Function to execute SQL command
 function Execute-SQL {
     param(
@@ -146,13 +164,122 @@ Write-Host "[INFO] Reading SQL migration file: $sqlFile" -ForegroundColor Cyan
 # Read SQL file content
 $sqlContent = Get-Content $sqlFile -Raw
 
+# Create critical AUTH tables first to satisfy FKs (skip later duplicates)
+Write-Host "[INFO] Creating core AUTH tables first..." -ForegroundColor Yellow
+
+$createAuthRoles = @"
+CREATE TABLE IF NOT EXISTS auth.roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"@
+Execute-SQL $createAuthRoles "Create auth.roles (core)"
+
+$createAuthUsers = @"
+CREATE TABLE IF NOT EXISTS auth.users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role_id INTEGER NOT NULL REFERENCES auth.roles(id),
+    is_active BOOLEAN DEFAULT true,
+    last_login TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"@
+Execute-SQL $createAuthUsers "Create auth.users (core)"
+
+$createAuthSessions = @"
+CREATE TABLE IF NOT EXISTS auth.sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    token VARCHAR(500) NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"@
+Execute-SQL $createAuthSessions "Create auth.sessions (core)"
+
+# Additional AUTH tables from dump
+$createAuthEmailVerifications = @"
+CREATE TABLE IF NOT EXISTS auth.email_verifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id),
+    verification_token VARCHAR(255) NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    is_verified BOOLEAN DEFAULT false,
+    verified_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"@
+Execute-SQL $createAuthEmailVerifications "Create auth.email_verifications (core)"
+
+$createAuthPasswordResets = @"
+CREATE TABLE IF NOT EXISTS auth.password_resets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id),
+    otp VARCHAR(6) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    is_used BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"@
+Execute-SQL $createAuthPasswordResets "Create auth.password_resets (core)"
+
+$createAuthPasswordHistory = @"
+CREATE TABLE IF NOT EXISTS auth.password_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id),
+    password_hash VARCHAR(255) NOT NULL,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    changed_by UUID
+);
+"@
+Execute-SQL $createAuthPasswordHistory "Create auth.password_history (core)"
+
+$createAuthUserSessions = @"
+CREATE TABLE IF NOT EXISTS auth.user_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id),
+    session_token VARCHAR(255) NOT NULL UNIQUE,
+    ip_address INET,
+    user_agent TEXT,
+    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"@
+Execute-SQL $createAuthUserSessions "Create auth.user_sessions (core)"
+
 # Split SQL content into separate commands
 $sqlCommands = $sqlContent -split "-- =====================================================" | Where-Object { $_.Trim() -ne "" }
+
+# Ưu tiên chạy khối tạo bảng AUTH trước (auth.roles, auth.users, auth.sessions)
+$authPriority = @()
+$others = @()
+foreach ($block in $sqlCommands) {
+    if ($block -match "CREATE\s+TABLE\s+auth\.users" -or $block -match "CREATE\s+TABLE\s+auth\.roles" -or $block -match "CREATE\s+TABLE\s+auth\.sessions") {
+        $authPriority += $block
+    } else {
+        $others += $block
+    }
+}
+$orderedCommands = @()
+$orderedCommands += $authPriority
+# Exclude any subsequent AUTH table blocks to avoid duplicates
+$othersFiltered = $others | Where-Object { $_ -notmatch "CREATE\s+TABLE\s+auth\." }
+$orderedCommands += $othersFiltered
 
 $successCount = 0
 $totalCount = 0
 
-foreach ($command in $sqlCommands) {
+foreach ($command in $orderedCommands) {
     $command = $command.Trim()
     if ($command -eq "") { continue }
 
@@ -367,29 +494,15 @@ if ($schemaCountSafe -eq "8" -and $tableCountSafe -ge "25" -and $rolesCountSafe 
     Write-Host "🚀 Database ready for development!" -ForegroundColor Green
 } else {
     Write-Host ""
-    Write-Host "❌ [ERROR] Migration incomplete. Please check logs above." -ForegroundColor Red
+    Write-Host "[ERROR] Migration incomplete. Please check logs above." -ForegroundColor Red
     Write-Host ""
-    Write-Host "📊 Migration Summary:" -ForegroundColor Yellow
-Write-Host "  - Schemas: $schemaCountSafe/8" -ForegroundColor White
-Write-Host "  - Tables: $tableCountSafe/25+" -ForegroundColor White
-Write-Host "  - Roles: $rolesCountSafe/4" -ForegroundColor White
-Write-Host "  - Users: $usersCountSafe/2" -ForegroundColor White
-    Write-Host ""
-    Write-Host "Press any key to continue..." -ForegroundColor Cyan
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    Write-Host "Migration Summary:" -ForegroundColor Yellow
+    Write-Host ("  - Schemas: {0}/8" -f $schemaCountSafe) -ForegroundColor White
+    Write-Host ("  - Tables: {0}/25+" -f $tableCountSafe) -ForegroundColor White
+    Write-Host ("  - Roles: {0}/4" -f $rolesCountSafe) -ForegroundColor White
+    Write-Host ("  - Users: {0}/2" -f $usersCountSafe) -ForegroundColor White
+    Pause-ForUser "Press any key to continue..."
     exit 1
 }
-
-Write-Host ""
-Write-Host "📋 NEXT STEPS:" -ForegroundColor Yellow
-Write-Host "1. Update connection strings in appsettings.json" -ForegroundColor White
-Write-Host "2. Test database connection from services" -ForegroundColor White
-Write-Host "3. Test authentication with test accounts" -ForegroundColor White
-Write-Host "4. Check all API endpoints" -ForegroundColor White
-
-Write-Host ""
 Write-Host "Press any key to continue..." -ForegroundColor Cyan
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-
-# Ensure all blocks are closed
-}
