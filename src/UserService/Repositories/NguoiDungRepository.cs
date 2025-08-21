@@ -168,4 +168,44 @@ public class NguoiDungRepository : INguoiDungRepository
     {
         return await _context.NguoiDung.AnyAsync(n => n.Email == email && !n.IsDeleted);
     }
+
+    // BỔ SUNG: Các phương thức cho tính năng Reset Password
+
+    public async Task<OtpCode> SaveOtpCodeAsync(OtpCode otpCode)
+    {
+        _context.OtpCodes.Add(otpCode);
+        await _context.SaveChangesAsync();
+        return otpCode;
+    }
+
+    public async Task<OtpCode?> GetValidOtpByUserIdAndHashAsync(Guid userId, string otpHash)
+    {
+        return await _context.OtpCodes
+            .Where(o => o.UserId == userId && o.OtpHash == otpHash && o.IsUsed == false && o.ExpiresAt > DateTime.UtcNow)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task InvalidateOtpAsync(Guid otpId)
+    {
+        var otpCode = await _context.OtpCodes.FindAsync(otpId);
+        if (otpCode != null)
+        {
+            otpCode.IsUsed = true;
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task SavePasswordHistoryAsync(PasswordHistory history)
+    {
+        _context.PasswordHistory.Add(history);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<PasswordHistory>> GetPasswordHistoryByUserIdAsync(Guid userId)
+    {
+        return await _context.PasswordHistory
+            .Where(h => h.UserId == userId)
+            .OrderByDescending(h => h.ChangedAt)
+            .ToListAsync();
+    }
 }

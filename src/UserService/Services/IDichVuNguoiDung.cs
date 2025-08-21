@@ -1,4 +1,4 @@
-using UserService.Models.DTOs;
+﻿using UserService.Models.DTOs;
 
 namespace UserService.Services;
 
@@ -17,4 +17,9 @@ public interface IDichVuNguoiDung
     // User management
     Task<bool> KiemTraNguoiDungTonTaiAsync(Guid userId);
     Task<bool> KiemTraEmailTonTaiAsync(string email);
+
+    // Bổ sung các phương thức cho tính năng Quên Mật khẩu
+    Task<PhanHoiHoSo> QuenMatKhauAsync(string email);
+    Task<PhanHoiHoSo> XacThucOtpAsync(string email, string otp);
+    Task<PhanHoiHoSo> DatLaiMatKhauAsync(string email, string otp, string matKhauMoi);
 }

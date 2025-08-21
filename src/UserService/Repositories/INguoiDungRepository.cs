@@ -1,4 +1,4 @@
-using UserService.Models.Entities;
+﻿using UserService.Models.Entities;
 
 namespace UserService.Repositories;
 
@@ -15,4 +15,11 @@ public interface INguoiDungRepository
     Task<bool> RestoreAsync(Guid id);
     Task<bool> ExistsAsync(Guid id);
     Task<bool> ExistsByEmailAsync(string email);
+
+    //mới
+    Task<OtpCode> SaveOtpCodeAsync(OtpCode otpCode);
+    Task<OtpCode?> GetValidOtpByUserIdAndHashAsync(Guid userId, string otpHash);
+    Task InvalidateOtpAsync(Guid otpId);
+    Task SavePasswordHistoryAsync(PasswordHistory history);
+    Task<List<PasswordHistory>> GetPasswordHistoryByUserIdAsync(Guid userId);
 }

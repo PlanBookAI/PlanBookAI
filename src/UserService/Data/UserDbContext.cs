@@ -13,10 +13,12 @@ public class UserDbContext : DbContext
 	public DbSet<NguoiDung> NguoiDung { get; set; }
 	public DbSet<VaiTro> VaiTro { get; set; }
 	public DbSet<HoSoNguoiDung> HoSoNguoiDung { get; set; }
-	// Không dùng DbSet<LichSuDangNhap> để EF Core không can thiệp
-	// public DbSet<LichSuDangNhap> LichSuDangNhap { get; set; }
+    public DbSet<OtpCode> OtpCodes { get; set; }
+    public DbSet<PasswordHistory> PasswordHistory { get; set; }
+    // Không dùng DbSet<LichSuDangNhap> để EF Core không can thiệp
+    // public DbSet<LichSuDangNhap> LichSuDangNhap { get; set; }
 
-	protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
 

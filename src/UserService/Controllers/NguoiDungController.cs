@@ -213,4 +213,77 @@ public class NguoiDungController : ControllerBase
 		var tonTai = await _dichVuNguoiDung.KiemTraEmailTonTaiAsync(email);
 		return Ok(tonTai);
 	}
+
+    /// <summary>
+    /// Gửi mã OTP để đặt lại mật khẩu cho người dùng.
+    /// </summary>
+    [HttpPost("quen-mat-khau")]
+    [ProducesResponseType(typeof(PhanHoiHoSo), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> QuenMatKhau([FromBody] YeuCauQuenMatKhau yeuCau)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var phanHoi = await _dichVuNguoiDung.QuenMatKhauAsync(yeuCau.Email);
+        return Ok(phanHoi);
+    }
+
+    /// <summary>
+    /// Xác thực mã OTP để cho phép người dùng đặt mật khẩu mới.
+    /// </summary>
+    [HttpPost("xac-thuc-otp")]
+    [ProducesResponseType(typeof(PhanHoiHoSo), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> XacThucOtp([FromBody] YeuCauXacThucOtpDto yeuCau)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var phanHoi = await _dichVuNguoiDung.XacThucOtpAsync(yeuCau.Email, yeuCau.Otp);
+        if (!phanHoi.ThanhCong)
+        {
+            return BadRequest(phanHoi);
+        }
+        return Ok(phanHoi);
+    }
+
+    /// <summary>
+    /// Đặt lại mật khẩu mới sau khi xác thực OTP thành công.
+    /// </summary>
+    [HttpPost("dat-lai-mat-khau")]
+    [ProducesResponseType(typeof(PhanHoiHoSo), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DatLaiMatKhau([FromBody] YeuCauDatLaiMatKhauDto yeuCau)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var phanHoi = await _dichVuNguoiDung.DatLaiMatKhauAsync(yeuCau.Email, yeuCau.Otp, yeuCau.MatKhauMoi);
+        if (!phanHoi.ThanhCong)
+        {
+            return BadRequest(phanHoi);
+        }
+        return Ok(phanHoi);
+    }
+
+    // --- Endpoint mới để xem lịch sử mật khẩu ---
+
+    /// <summary>
+    /// Xem lịch sử thay đổi mật khẩu của một người dùng cụ thể.
+    /// (Lưu ý: Cần xác thực quyền admin hoặc chính người dùng đó)
+    /// </summary>
+    [HttpGet("lich-su-mat-khau/{userId}")]
+    [ProducesResponseType(typeof(PhanHoiDanhSachLichSuDangNhap), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> XemLichSuMatKhau(Guid userId)
+    {
+        return Ok(new PhanHoiHoSo { ThanhCong = true, ThongBao = "Tính năng xem lịch sử mật khẩu đang được phát triển." });
+    }
 }
