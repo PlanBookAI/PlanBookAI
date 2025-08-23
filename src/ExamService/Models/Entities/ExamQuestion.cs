@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TaskService.Models.Entities
+namespace ExamService.Models.Entities
 {
     [Table("exam_questions", Schema = "assessment")]
     public class ExamQuestion

@@ -1,31 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using TaskService.Data;
-using TaskService.Models.Entities;
+﻿using ExamService.Data;
+using ExamService.Interfaces;
+using ExamService.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
-namespace TaskService.Repositories
+namespace ExamService.Repositories
 {
-    // Lớp triển khai repository cho DeThi
     public class DeThiRepository : IDeThiRepository
     {
-        private readonly TaskDbContext _context;
+        private readonly ExamDbContext _context;
 
-        // Dependency Injection của TaskDbContext
-        public DeThiRepository(TaskDbContext context)
+        public DeThiRepository(ExamDbContext context)
         {
             _context = context;
         }
 
-        public async Task<List<DeThi>> GetAllAsync()
+        public IQueryable<DeThi> GetQueryable()
         {
-            return await _context.DeThis.ToListAsync();
+            return _context.DeThis.AsQueryable();
         }
 
-        public async Task<DeThi?> GetByIdAsync(string id)
+        public async Task<DeThi?> GetByIdAsync(Guid id)
         {
-            return await _context.DeThis.FindAsync(id);
+            return await _context.DeThis
+                .Include(d => d.ExamQuestions)
+                    .ThenInclude(eq => eq.CauHoi)
+                        .ThenInclude(q => q.LuaChons)
+                .FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task<DeThi> CreateAsync(DeThi deThi)
@@ -35,21 +35,38 @@ namespace TaskService.Repositories
             return deThi;
         }
 
-        public async Task<DeThi> UpdateAsync(DeThi deThi)
+        public async Task UpdateAsync(DeThi deThi)
         {
-            _context.Entry(deThi).State = EntityState.Modified;
+            _context.DeThis.Update(deThi);
             await _context.SaveChangesAsync();
-            return deThi;
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var deThi = await _context.DeThis.FindAsync(id);
-            if (deThi != null)
-            {
-                _context.DeThis.Remove(deThi);
-                await _context.SaveChangesAsync();
-            }
+            if (deThi == null) return false;
+
+            _context.DeThis.Remove(deThi);
+            await _context.SaveChangesAsync();
+            return true;
         }
+
+        public async Task<bool> IsOwnerAsync(Guid id, Guid teacherId)
+        {
+            return await _context.DeThis.AnyAsync(d => d.Id == id && d.NguoiTaoId == teacherId);
+        }
+
+        public async Task<DeThi?> GetByIdWithResultsAsync(Guid id)
+        {
+            // Tải kèm tất cả các dữ liệu liên quan cần thiết cho việc thống kê
+            return await _context.DeThis
+                .Include(d => d.ExamQuestions)
+                    .ThenInclude(eq => eq.CauHoi)
+                .Include(d => d.BaiLams)
+                    .ThenInclude(bl => bl.KetQua)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.Id == id);
+        }
+
     }
 }

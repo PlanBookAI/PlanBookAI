@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TaskService.Models.Entities
+namespace ExamService.Models.Entities
 {
     [Table("student_results", Schema = "students")]
     public class KetQua

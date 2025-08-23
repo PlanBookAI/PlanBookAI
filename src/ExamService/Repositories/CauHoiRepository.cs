@@ -1,42 +1,39 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ExamService.Data;
+using ExamService.Interfaces;
+using ExamService.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using TaskService.Data;
-using TaskService.Models.Entities;
 
-namespace TaskService.Repositories
+namespace ExamService.Repositories
 {
-    // Lớp triển khai repository cho CauHoi
-    public class CauHoiRepository : ICauHoiRepository
+    public class CauHoiRepository : ICauHoiRepository // Đảm bảo kế thừa từ interface đúng
     {
-        private readonly TaskDbContext _context;
+        private readonly ExamDbContext _context;
 
-        // Dependency Injection của TaskDbContext
-        public CauHoiRepository(TaskDbContext context)
+        public CauHoiRepository(ExamDbContext context)
         {
             _context = context;
         }
 
-        public async Task<List<CauHoi>> GetAllAsync()
-        {
-            return await _context.CauHois.ToListAsync();
-        }
-
-        public async Task<CauHoi?> GetByIdAsync(string id)
-        {
-            if (Guid.TryParse(id, out Guid guidId))
-            {
-                return await _context.CauHois.FindAsync(guidId);
-            }
-            return null;
-        }
-
-        public async Task<List<CauHoi>> GetByMonHocAndDoKhoAsync(string monHoc, string doKho)
+        // Triển khai đúng GetAllAsync(Guid teacherId)
+        public async Task<List<CauHoi>> GetAllAsync(Guid teacherId)
         {
             return await _context.CauHois
-                .Where(c => c.MonHoc == monHoc && c.DoKho == doKho)
+                .Where(c => c.NguoiTaoId == teacherId)
+                .Include(c => c.LuaChons)
+                .AsNoTracking()
                 .ToListAsync();
+        }
+
+        // Triển khai đúng GetByIdAsync(Guid id)
+        public async Task<CauHoi?> GetByIdAsync(Guid id)
+        {
+            return await _context.CauHois
+                .Include(c => c.LuaChons)
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<CauHoi> CreateAsync(CauHoi cauHoi)
@@ -48,23 +45,33 @@ namespace TaskService.Repositories
 
         public async Task<CauHoi> UpdateAsync(CauHoi cauHoi)
         {
-            // Đánh dấu trạng thái của entity là đã được chỉnh sửa
-            _context.Entry(cauHoi).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return cauHoi;
         }
 
-        public async Task DeleteAsync(string id)
+        // Triển khai đúng DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
-            if (Guid.TryParse(id, out Guid guidId))
+            var cauHoi = await _context.CauHois.FindAsync(id);
+            if (cauHoi == null)
             {
-                var cauHoi = await _context.CauHois.FindAsync(guidId);
-                if (cauHoi != null)
-                {
-                    _context.CauHois.Remove(cauHoi);
-                    await _context.SaveChangesAsync();
-                }
+                return false;
             }
+
+            _context.CauHois.Remove(cauHoi);
+            var changedEntries = await _context.SaveChangesAsync();
+            return changedEntries > 0;
+        }
+
+        // Triển khai các phương thức mới
+        public async Task<bool> IsOwnerAsync(Guid id, Guid teacherId)
+        {
+            return await _context.CauHois.AnyAsync(c => c.Id == id && c.NguoiTaoId == teacherId);
+        }
+
+        public IQueryable<CauHoi> GetQueryable()
+        {
+            return _context.CauHois.AsQueryable();
         }
     }
 }

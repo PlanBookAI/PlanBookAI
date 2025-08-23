@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace TaskService.Middleware;
+namespace ExamService.Middleware;
 
 public class RequestLoggingMiddleware
 {
