@@ -1,0 +1,200 @@
+{
+  "rabbit_version": "3.12.0",
+  "rabbitmq_version": "3.12.0",
+  "product_name": "RabbitMQ",
+  "product_version": "3.12.0",
+  "users": [
+    {
+      "name": "admin",
+      "password_hash": "planbookai2024",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [],
+  "parameters": [],
+  "policies": [],
+  "queues": [
+    {
+      "name": "planbookai_ocr_processing_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "planbookai_grading_results_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "planbookai_ai_processing_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "planbookai_ai_requests_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "planbookai_logging_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "planbookai_metrics_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "planbookai_exam_updates_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "planbookai_file_operations_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "planbookai_notification_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "planbookai_dead_letter_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "planbookai_exchange",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "planbookai_direct_exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "planbookai_exchange",
+      "vhost": "/",
+      "destination": "planbookai_ocr_processing_queue",
+      "destination_type": "queue",
+      "routing_key": "ocr.processing",
+      "arguments": {}
+    },
+    {
+      "source": "planbookai_exchange",
+      "vhost": "/",
+      "destination": "planbookai_grading_results_queue",
+      "destination_type": "queue",
+      "routing_key": "grading.results",
+      "arguments": {}
+    },
+    {
+      "source": "planbookai_exchange",
+      "vhost": "/",
+      "destination": "planbookai_ai_processing_queue",
+      "destination_type": "queue",
+      "routing_key": "ai.processing",
+      "arguments": {}
+    },
+    {
+      "source": "planbookai_exchange",
+      "vhost": "/",
+      "destination": "planbookai_ai_requests_queue",
+      "destination_type": "queue",
+      "routing_key": "ai.requests",
+      "arguments": {}
+    },
+    {
+      "source": "planbookai_exchange",
+      "vhost": "/",
+      "destination": "planbookai_logging_queue",
+      "destination_type": "queue",
+      "routing_key": "logging.*",
+      "arguments": {}
+    },
+    {
+      "source": "planbookai_exchange",
+      "vhost": "/",
+      "destination": "planbookai_metrics_queue",
+      "destination_type": "queue",
+      "routing_key": "metrics.*",
+      "arguments": {}
+    },
+    {
+      "source": "planbookai_exchange",
+      "vhost": "/",
+      "destination": "planbookai_exam_updates_queue",
+      "destination_type": "queue",
+      "routing_key": "exam.*",
+      "arguments": {}
+    },
+    {
+      "source": "planbookai_exchange",
+      "vhost": "/",
+      "destination": "planbookai_file_operations_queue",
+      "destination_type": "queue",
+      "routing_key": "file.*",
+      "arguments": {}
+    },
+    {
+      "source": "planbookai_exchange",
+      "vhost": "/",
+      "destination": "planbookai_notification_queue",
+      "destination_type": "queue",
+      "routing_key": "notification.*",
+      "arguments": {}
+    }
+  ]
+}
