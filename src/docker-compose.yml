@@ -1,4 +1,25 @@
 services:
+  # === INFRASTRUCTURE SERVICES ===
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: planbookai_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: planbookai2024
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"      # AMQP protocol
+      - "15672:15672"    # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # === APPLICATION SERVICES ===
   authservice:
     image: ${DOCKER_REGISTRY-}authservice
     build:
@@ -14,6 +35,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    depends_on:
+      authservice:
+        condition: service_started
 
   planservice:
     image: ${DOCKER_REGISTRY-}planservice
@@ -22,6 +46,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8083:8083"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   userservice:
     image: ${DOCKER_REGISTRY-}userservice
@@ -38,6 +65,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8084:8084"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   classroomservice:
     image: ${DOCKER_REGISTRY-}classroomservice
@@ -46,6 +76,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8085:8085"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   filestorageservice:
     image: ${DOCKER_REGISTRY-}filestorageservice
@@ -54,6 +87,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8086:8086"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   notificationservice:
     image: ${DOCKER_REGISTRY-}notificationservice
@@ -62,6 +98,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8087:8087"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   ocrservice:
     image: ${DOCKER_REGISTRY-}ocrservice
@@ -70,6 +109,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8088:8088"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   studentgradingservice:
     image: ${DOCKER_REGISTRY-}studentgradingservice
@@ -78,6 +120,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8089:8089"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   aiplanservice:
     image: ${DOCKER_REGISTRY-}aiplanservice
@@ -86,6 +131,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8090:8090"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   logservice:
     image: ${DOCKER_REGISTRY-}logservice
@@ -94,4 +142,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8091:8091"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+  rabbitmq_data:
 
