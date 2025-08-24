@@ -47,7 +47,7 @@
                                 ▼                        ▼
                        ┌─────────────────┐    ┌─────────────────┐
                        │  External APIs  │    │   PostgreSQL    │
-                       │  Gemini AI      │    │   (Supabase)    │
+                       │  Gemini AI      │    │   (PostgreSQL)  │
                        │  Google Vision  │    │   Database      │
                        └─────────────────┘    └─────────────────┘
                                 ▲                        ▲
@@ -66,7 +66,7 @@
 | **Frontend** | React 18, TypeScript | Responsive UI, modern web standards |
 | **API Gateway** | .NET 9, C# 13 | Reverse proxy, authentication, rate limiting |
 | **Backend Services** | .NET 9, C# 13 | Microservices architecture |
-| **Database** | PostgreSQL 15 (Supabase) | Managed database with real-time features |
+| **Database** | PostgreSQL 15 (Local) | Local development database |
 | **Message Queue** | RabbitMQ 3.12 | Asynchronous communication between services |
 | **Authentication** | JWT, BCrypt | Token-based auth with role-based access |
 | **AI Services** | Gemini AI, Google Vision API | Content generation and OCR processing |

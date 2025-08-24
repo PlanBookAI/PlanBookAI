@@ -415,7 +415,7 @@ graph TD
 
 - Sử dụng .NET Core cho backend
 - ReactJS/Next.js cho frontend
-- PostgreSQL database (qua Supabase)
+- PostgreSQL database (local)
 - Deploy trên AWS infrastructure
 - Mobile-responsive design
 
