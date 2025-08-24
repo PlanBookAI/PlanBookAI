@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using ExamService.Models.Enums;
 
-namespace TaskService.Models.Entities
+namespace ExamService.Models.Entities
 {
     [Table("exams", Schema = "assessment")]
     public class DeThi
@@ -34,7 +35,7 @@ namespace TaskService.Models.Entities
         public string? HuongDan { get; set; }
 
         [Column("status")]
-        public string TrangThai { get; set; } = "draft";
+        public string TrangThai { get; set; } = TrangThaiDeThi.Draft.ToString();
 
         [Column("created_by")]
         public Guid NguoiTaoId { get; set; }

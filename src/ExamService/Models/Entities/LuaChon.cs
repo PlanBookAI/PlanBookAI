@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TaskService.Models.Entities
+namespace ExamService.Models.Entities
 {
     [Table("question_choices", Schema = "assessment")]
     public class LuaChon

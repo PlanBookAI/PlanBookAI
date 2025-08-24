@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace TaskService.Middleware
+namespace ExamService.Middleware
 {
     public class HeaderAuthenticationMiddleware
     {

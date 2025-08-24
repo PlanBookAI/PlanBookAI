@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace TaskService.Models.DTOs
+namespace ExamService.Models.DTOs
 {
     public class PhanHoiDeThi
     {

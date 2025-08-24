@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TaskService.Models.Entities
+namespace ExamService.Models.Entities
 {
     [Table("answer_sheets", Schema = "students")]
     public class BaiLam
