@@ -2,8 +2,8 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-9.0-purple.svg)](https://dotnet.microsoft.com/)
-[![React](https://img.shields.io/badge/React-18.0-blue.svg)](https://reactjs.org/)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://docker.com/)
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.12-blue.svg)](https://rabbitmq.com/)
 
 > **PlanbookAI** là một nền tảng web tích hợp AI nhằm hỗ trợ giáo viên trung học phổ thông tự động hóa các công việc giảng dạy và hành chính, đặc biệt tập trung vào môn Hóa học trong giai đoạn phát triển ban đầu.
 
@@ -15,6 +15,7 @@
 - [🔒 Security](#-security)
 - [🚦 Monitoring & Logging](#-monitoring--logging)
 - [📈 Performance](#-performance)
+- [🚀 Getting Started](#-getting-started)
 
 ## ✨ Tính năng chính
 
@@ -24,6 +25,7 @@
 - **📋 Tạo Đề thi**: Sinh đề trắc nghiệm tự động với thuật toán cân bằng
 - **🔍 Chấm bài OCR**: Nhận dạng và chấm điểm tự động từ ảnh bài làm
 - **📊 Phân tích Kết quả**: Báo cáo chi tiết về hiệu suất học sinh
+- **👥 Quản lý Lớp học**: Quản lý học sinh và kết quả học tập
 
 ### 🛠️ Dành cho Quản trị
 - **👤 Quản lý Người dùng**: Phân quyền theo vai trò (RBAC)
@@ -36,9 +38,9 @@
 ### 📐 Tổng quan
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Next.js       │    │  API Gateway    │    │  Microservices  │
-│   Frontend      │◄──►│  (YARP)         │◄──►│  (.NET Core)    │
-│   (Vercel)      │    │  Load Balancer  │    │  Auth/User/Plan │
+│   Frontend      │    │  API Gateway    │    │  Microservices  │
+│   (React/Next)  │◄──►│  (.NET 9)       │◄──►│  (.NET 9)      │
+│                 │    │  Load Balancer  │    │  Auth/User/Plan │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                 ▲                        ▲
                                 │                        │
@@ -48,16 +50,24 @@
                        │  Gemini AI      │    │   (Supabase)    │
                        │  Google Vision  │    │   Database      │
                        └─────────────────┘    └─────────────────┘
+                                ▲                        ▲
+                                │                        │
+                                ▼                        ▼
+                       ┌─────────────────┐    ┌─────────────────┐
+                       │  Message Queue │    │   File Storage  │
+                       │  RabbitMQ      │    │   Service       │
+                       └─────────────────┘    └─────────────────┘
 ```
 
 ### 🔧 Tech Stack
 
 | Lớp | Công nghệ | Mô tả |
 |-----|-----------|--------|
-| **Frontend** | Next.js 14, React 18, TypeScript | Server-side rendering, responsive UI |
-| **API Gateway** | .NET 9, YARP | Reverse proxy, authentication, rate limiting |
+| **Frontend** | React 18, TypeScript | Responsive UI, modern web standards |
+| **API Gateway** | .NET 9, C# 13 | Reverse proxy, authentication, rate limiting |
 | **Backend Services** | .NET 9, C# 13 | Microservices architecture |
 | **Database** | PostgreSQL 15 (Supabase) | Managed database with real-time features |
+| **Message Queue** | RabbitMQ 3.12 | Asynchronous communication between services |
 | **Authentication** | JWT, BCrypt | Token-based auth with role-based access |
 | **AI Services** | Gemini AI, Google Vision API | Content generation and OCR processing |
 | **Containerization** | Docker, Docker Compose | Development and deployment |
@@ -65,13 +75,25 @@
 
 ### 🎯 Microservices
 
-| Service | Port | Mô tả | Endpoint |
-|---------|------|--------|----------|
-| **Gateway** | 8080 | API Gateway, routing, auth | `/api/v1/*` |
-| **Auth** | 8081 | Authentication, authorization | `/api/v1/xac-thuc` |
-| **User** | 8082 | User management, profiles | `/api/v1/nguoi-dung` |
-| **Plan** | 8083 | Lesson plans, templates | `/api/v1/giao-an` |
-| **Task** | 8084 | Assignments, grading | `/api/v1/nhiem-vu` |
+| Service | Port | Mô tả | Endpoint | Status |
+|---------|------|--------|----------|---------|
+| **Gateway** | 8080 | API Gateway, routing, auth | `/api/v1/*` | ✅ Active |
+| **Auth** | 8081 | Authentication, authorization | `/api/v1/xac-thuc` | ✅ Active |
+| **User** | 8082 | User management, profiles | `/api/v1/nguoi-dung` | ✅ Active |
+| **Plan** | 8083 | Lesson plans, templates | `/api/v1/giao-an` | ✅ Active |
+| **Exam** | 8084 | Question bank, exams | `/api/v1/cau-hoi` | ✅ Active |
+| **Classroom** | 8085 | Class management | `/api/v1/lop-hoc` | 🔄 In Progress |
+| **FileStorage** | 8086 | File upload/download | `/api/v1/file` | 🔄 In Progress |
+| **Notification** | 8087 | Email, SMS notifications | `/api/v1/thong-bao` | 🔄 In Progress |
+| **OCR** | 8088 | Document processing | `/api/v1/ocr` | 🔄 In Progress |
+| **StudentGrading** | 8089 | Student assessment | `/api/v1/cham-diem` | 🔄 In Progress |
+| **AIPlan** | 8090 | AI-powered lesson planning | `/api/v1/ai-giao-an` | 🔄 In Progress |
+| **Log** | 8091 | Centralized logging | `/api/v1/log` | 🔄 In Progress |
+
+### 🔄 Service Status Legend
+- ✅ **Active**: Fully implemented and running
+- 🔄 **In Progress**: Partially implemented
+- ⏳ **Planned**: Planned for future development
 
 ## 📚 API Documentation
 
@@ -219,20 +241,20 @@ Content-Type: multipart/form-data
 
 ### Thông tin hệ thống
 ```bash
-GET /api/v1/giam-sat/thong-tin-he-thong
+GET /api/v1/health
 Authorization: Bearer {token}
 ```
 
 ### Thống kê hiệu năng
 ```bash
-GET /api/v1/giam-sat/thong-ke
+GET /api/v1/metrics
 Authorization: Bearer {token}
 ```
 
 ### Kiểm tra sức khỏe services
 ```bash
-GET /api/v1/giam-sat/kiem-tra-dich-vu
-Authorization: Bearer {token}
+GET /api/v1/health/ready
+GET /api/v1/health/live
 ```
 
 </details>
@@ -245,6 +267,7 @@ Authorization: Bearer {token}
 - **CORS** configuration cho frontend
 - **Data Encryption** cho thông tin nhạy cảm
 - **Input Validation** với FluentValidation
+- **Header-based Authentication** cho microservices
 
 ## 🚦 Monitoring & Logging
 
@@ -252,13 +275,51 @@ Authorization: Bearer {token}
 - **Structured Logging**: Serilog với JSON format
 - **Performance Metrics**: Response time, throughput
 - **Error Tracking**: Centralized error handling
+- **Message Queue Monitoring**: RabbitMQ management UI
 
 ## 📈 Performance
 
-- **Response Time**: < 2s cho hầu hết operations
+- **Response Time**: < 500ms cho hầu hết operations
 - **OCR Processing**: < 30s per document
 - **Concurrent Users**: 100+ teachers simultaneously
 - **Uptime**: 99.5% availability target
+- **Message Queue**: Asynchronous processing for heavy operations
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker & Docker Compose
+- .NET 9 SDK
+- PostgreSQL 15
+- RabbitMQ 3.12
+
+### Quick Start
+```bash
+# Clone repository
+git clone https://github.com/PlanBookAI/PlanBookAI.git
+cd PlanBookAI
+
+# Start services
+cd src
+docker-compose up -d
+
+# Access services
+# Gateway: http://localhost:8080
+# RabbitMQ Management: http://localhost:15672 (admin/planbookai2024)
+```
+
+### Development Setup
+```bash
+# Install dependencies
+dotnet restore
+
+# Run individual services
+cd src/AuthService
+dotnet run
+
+# Run tests
+dotnet test
+```
 
 ## 👥 Development Team
 
@@ -289,3 +350,29 @@ Authorization: Bearer {token}
 ## 📄 License
 
 Dự án này được phát hành dưới [MIT License](LICENSE).
+
+## 📊 Project Status
+
+### ✅ Completed Features
+- Authentication & Authorization system
+- User management with RBAC
+- Lesson plan management
+- Question bank system
+- Exam creation and management
+- Basic microservices architecture
+- Docker containerization
+- Message queue infrastructure (RabbitMQ)
+
+### 🔄 In Progress
+- OCR service implementation
+- File storage service
+- Notification system
+- Student grading system
+- AI-powered lesson planning
+
+### ⏳ Planned Features
+- Advanced analytics dashboard
+- Mobile application
+- Third-party integrations
+- Advanced AI features
+- Performance optimization
