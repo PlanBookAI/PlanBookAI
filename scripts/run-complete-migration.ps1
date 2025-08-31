@@ -419,8 +419,54 @@ Execute-SQL $triggerSql "Create updated_at trigger"
 
 Write-Host "[OK] UserService schema update completed!" -ForegroundColor Green
 
-# Update table count after creating UserService schema
-Write-Host "[INFO] Updating table count after UserService schema creation..." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "STEP 8.6: UPDATE OCR SERVICE SCHEMA" -ForegroundColor Yellow
+Write-Host "=====================================" -ForegroundColor Yellow
+
+# Update students.answer_sheets table for OCR
+Write-Host "[INFO] Adding OCR columns to students.answer_sheets..." -ForegroundColor Cyan
+$ocrAnswerSheetsResult = Execute-SQL "ALTER TABLE students.answer_sheets ADD COLUMN IF NOT EXISTS ocr_request_id uuid;" "Add ocr_request_id column"
+if ($ocrAnswerSheetsResult) {
+    Execute-SQL "ALTER TABLE students.answer_sheets ADD COLUMN IF NOT EXISTS ocr_processing_time integer;" "Add ocr_processing_time column"
+    Execute-SQL "ALTER TABLE students.answer_sheets ADD COLUMN IF NOT EXISTS ocr_provider varchar(50);" "Add ocr_provider column"
+    Execute-SQL "ALTER TABLE students.answer_sheets ADD COLUMN IF NOT EXISTS ocr_started_at timestamp;" "Add ocr_started_at column"
+    Execute-SQL "ALTER TABLE students.answer_sheets ADD COLUMN IF NOT EXISTS ocr_completed_at timestamp;" "Add ocr_completed_at column"
+    Execute-SQL "ALTER TABLE students.answer_sheets ADD COLUMN IF NOT EXISTS ocr_error text;" "Add ocr_error column"
+}
+
+# Update students.student_results table for OCR
+Write-Host "[INFO] Adding OCR columns to students.student_results..." -ForegroundColor Cyan
+$ocrStudentResultsResult = Execute-SQL "ALTER TABLE students.student_results ADD COLUMN IF NOT EXISTS ocr_result_id uuid;" "Add ocr_result_id column"
+if ($ocrStudentResultsResult) {
+    Execute-SQL "ALTER TABLE students.student_results ADD COLUMN IF NOT EXISTS ocr_confidence numeric(3,2);" "Add ocr_confidence column"
+}
+
+# Create indexes for OCR performance
+Write-Host "[INFO] Creating indexes for OCR performance..." -ForegroundColor Cyan
+Execute-SQL "CREATE INDEX IF NOT EXISTS idx_answer_sheets_ocr_request ON students.answer_sheets(ocr_request_id);" "Create OCR request index"
+Execute-SQL "CREATE INDEX IF NOT EXISTS idx_student_results_ocr_result ON students.student_results(ocr_result_id);" "Create OCR result index"
+
+Write-Host "[OK] OCRService schema update completed!" -ForegroundColor Green
+
+# Verify OCR columns were added
+Write-Host "[INFO] Verifying OCR columns were added..." -ForegroundColor Cyan
+
+# Check answer_sheets OCR columns
+$answerSheetsOcrCount = docker exec planbookai-postgres-dev psql -U $DB_USER -d $DB_NAME -t -c "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'students' AND table_name = 'answer_sheets' AND column_name LIKE 'ocr_%';" 2>$null
+
+# Check student_results OCR columns  
+$studentResultsOcrCount = docker exec planbookai-postgres-dev psql -U $DB_USER -d $DB_NAME -t -c "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'students' AND table_name = 'student_results' AND column_name LIKE 'ocr_%';" 2>$null
+
+if ($answerSheetsOcrCount -and $studentResultsOcrCount) {
+    Write-Host "[OK] OCR columns verification:" -ForegroundColor Green
+    Write-Host "  - answer_sheets: $($answerSheetsOcrCount.Trim()) OCR columns" -ForegroundColor White
+    Write-Host "  - student_results: $($studentResultsOcrCount.Trim()) OCR columns" -ForegroundColor White
+} else {
+    Write-Host "[WARNING] Could not verify OCR columns" -ForegroundColor Yellow
+}
+
+# Update table count after creating OCRService schema
+Write-Host "[INFO] Updating table count after OCRService schema creation..." -ForegroundColor Cyan
 $tableCount = docker exec planbookai-postgres-dev psql -U $DB_USER -d $DB_NAME -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema IN ('auth', 'users', 'assessment', 'content', 'students', 'files', 'notifications', 'logging');" 2>$null
 Write-Host "[INFO] Updated table count: $($tableCount.Trim())/25+" -ForegroundColor Cyan
 
@@ -480,6 +526,7 @@ if ($schemaCountSafe -eq "8" -and $tableCountSafe -ge "25" -and $rolesCountSafe 
     Write-Host "  - All indexes and constraints created" -ForegroundColor White
     Write-Host "  - Auto-update triggers implemented" -ForegroundColor White
     Write-Host "  - UserService schema: OTP, password history, user sessions" -ForegroundColor White
+    Write-Host "  - OCRService schema: OCR columns added to answer_sheets and student_results" -ForegroundColor White
     Write-Host ""
     Write-Host "✅ Seed Data:" -ForegroundColor Green
     Write-Host "  - 4 Roles: ADMIN, MANAGER, STAFF, TEACHER" -ForegroundColor White
