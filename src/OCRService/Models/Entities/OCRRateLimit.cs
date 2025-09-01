@@ -104,3 +104,4 @@ namespace OCRService.Models.Entities
         public string Role { get; set; } = string.Empty;
     }
 }
+

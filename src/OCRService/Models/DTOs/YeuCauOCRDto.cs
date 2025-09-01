@@ -128,3 +128,4 @@ namespace OCRService.Models.DTOs
         public DateTime ThoiGianLoi { get; set; } = DateTime.UtcNow;
     }
 }
+

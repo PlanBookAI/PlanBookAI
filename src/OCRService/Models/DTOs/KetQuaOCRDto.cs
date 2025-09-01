@@ -177,3 +177,4 @@ namespace OCRService.Models.DTOs
         public DateTime ThoiGianTraVe { get; set; } = DateTime.UtcNow;
     }
 }
+

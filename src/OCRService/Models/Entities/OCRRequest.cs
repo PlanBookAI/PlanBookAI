@@ -222,3 +222,4 @@ namespace OCRService.Models.Entities
         public string Title { get; set; } = string.Empty;
     }
 }
+

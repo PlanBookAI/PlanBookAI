@@ -171,3 +171,4 @@ namespace OCRService.Interfaces
         Task<int> CleanupOldFailedRequestsAsync(DateTime cutoffDate);
     }
 }
+

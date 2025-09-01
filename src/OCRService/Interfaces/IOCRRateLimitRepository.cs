@@ -203,3 +203,4 @@ namespace OCRService.Interfaces
         Task<bool> EnableRateLimitAsync(Guid teacherId);
     }
 }
+

@@ -209,3 +209,4 @@ namespace OCRService.Interfaces
         Task<int> CleanupLowScoreResultsAsync(decimal minScore);
     }
 }
+

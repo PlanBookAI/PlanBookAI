@@ -151,3 +151,4 @@ namespace OCRService.Models.Entities
         public bool IsOcrGrading => GradingMethod == "OCR";
     }
 }
+
