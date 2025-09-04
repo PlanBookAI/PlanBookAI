@@ -1,31 +1,56 @@
-﻿
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace NotificationService.Models
 {
-    // Lớp này định nghĩa cấu trúc của một thông báo.
+    // Ánh xạ lớp này tới bảng 'notifications.notifications' trong cơ sở dữ liệu.
     [Table("notifications", Schema = "notifications")]
     public class Notification
     {
-        // Khóa chính của bảng.
         [Key]
+        [Column("id")]
         public Guid Id { get; set; }
 
-        // ID của người dùng nhận thông báo.
+        [Required]
+        [Column("user_id")]
         public string UserId { get; set; }
 
-        // Tiêu đề của thông báo.
+        [Required]
+        [Column("title")]
         public string Title { get; set; }
 
-        // Nội dung chi tiết của thông báo.
+        [Required]
+        [Column("message")]
         public string Message { get; set; }
 
-        // Trạng thái đã đọc của thông báo (mặc định là false).
-        public bool IsRead { get; set; } = false;
+        [Column("is_read")]
+        public bool IsRead { get; set; }
 
-        // Thời gian tạo thông báo.
+        [Column("created_at")]
         public DateTime CreatedAt { get; set; }
+
+        [Column("scheduled_at")]
+        public DateTime? ScheduledAt { get; set; }
+
+        [Column("template_data", TypeName = "jsonb")]
+        public object TemplateData { get; set; }
+
+        [Column("bulk_user_ids")]
+        public Guid[] BulkUserIds { get; set; }
+
+        [Column("parent_notification_id")]
+        public Guid? ParentNotificationId { get; set; }
+
+        [Column("retry_count")]
+        public int RetryCount { get; set; }
+
+        [Column("max_retries")]
+        public int MaxRetries { get; set; }
+
+        [Required]
+        [Column("status")]
+        public string Status { get; set; }
     }
 }

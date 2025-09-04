@@ -1,7 +1,8 @@
-﻿
-using NotificationService.Repositories;
+﻿using NotificationService.Repositories;
 using NotificationService.Services;
 using NotificationService.Workers;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,10 +15,12 @@ builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<EmailQueueRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<TemplateEngine>();
 
-// Đăng ký EmailWorker như một Hosted Service.
+// Đăng ký các Worker như một Hosted Service.
 // Điều này giúp worker chạy ở chế độ nền khi ứng dụng khởi động.
 builder.Services.AddHostedService<EmailWorker>();
+builder.Services.AddHostedService<NotificationWorker>();
 
 builder.Services.AddOpenApi();
 
