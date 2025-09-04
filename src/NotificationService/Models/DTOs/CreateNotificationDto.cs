@@ -9,7 +9,7 @@ namespace NotificationService.Models.DTOs
     {
         [Required]
         // ID của người dùng nhận thông báo.
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [Required]
         // Tiêu đề của thông báo.

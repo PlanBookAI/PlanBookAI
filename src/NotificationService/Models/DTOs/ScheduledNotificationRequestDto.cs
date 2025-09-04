@@ -13,7 +13,7 @@ namespace NotificationService.Models.DTOs
         /// ID của người dùng nhận thông báo.
         /// </summary>
         [Required(ErrorMessage = "User ID is required.")]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
 
         /// <summary>
         /// ID của template thông báo sẽ được sử dụng.

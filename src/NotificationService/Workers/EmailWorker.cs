@@ -7,7 +7,6 @@ using MimeKit;
 using NotificationService.Repositories;
 using System;
 using System.Linq;
-using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 

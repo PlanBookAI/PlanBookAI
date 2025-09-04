@@ -33,9 +33,8 @@ namespace NotificationService.Services
                 UserId = createDto.UserId,
                 Title = createDto.Title,
                 Message = createDto.Message,
-                CreatedAt = DateTime.UtcNow,
-                IsRead = false,
-                Status = "PENDING"
+                Type = "INFO",
+                IsRead = false
             };
             return await _notificationRepository.Create(notification);
         }
@@ -70,13 +69,11 @@ namespace NotificationService.Services
 
                 notifications.Add(new Notification
                 {
-                    UserId = userId.ToString(),
+                    UserId = userId,
                     Title = renderedTitle,
                     Message = renderedContent,
-                    ParentNotificationId = null, // Có thể tạo một thông báo cha để theo dõi
-                    IsRead = false,
-                    Status = "PENDING",
-                    CreatedAt = DateTime.UtcNow
+                    Type = "INFO",
+                    IsRead = false
                 });
             }
             // Lưu tất cả các thông báo vào database.
@@ -102,13 +99,11 @@ namespace NotificationService.Services
 
             var notification = new Notification
             {
-                UserId = scheduledDto.UserId.ToString(),
+                UserId = scheduledDto.UserId,
                 Title = renderedTitle,
                 Message = renderedContent,
-                ScheduledAt = scheduledDto.ScheduledAt,
-                IsRead = false,
-                Status = "SCHEDULED",
-                CreatedAt = DateTime.UtcNow
+                Type = "INFO",
+                IsRead = false
             };
             await _notificationRepository.Create(notification);
         }
@@ -121,11 +116,10 @@ namespace NotificationService.Services
         public async Task<bool> CancelScheduledNotification(Guid id)
         {
             var notification = await _notificationRepository.FindById(id);
-            if (notification == null || notification.Status != "SCHEDULEED")
+            if (notification == null)
             {
                 return false;
             }
-            notification.Status = "CANCELLED";
             await _notificationRepository.Update(notification);
             return true;
         }
@@ -148,7 +142,7 @@ namespace NotificationService.Services
         /// </summary>
         /// <param name="userId">ID của người dùng.</param>
         /// <returns>Danh sách các thông báo.</returns>
-        public async Task<IEnumerable<Notification>> GetNotificationsByUserId(string userId)
+        public async Task<IEnumerable<Notification>> GetNotificationsByUserId(Guid userId)
         {
             return await _notificationRepository.FindByUserId(userId);
         }
@@ -209,16 +203,4 @@ namespace NotificationService.Services
         public string ContentTemplate { get; set; }
     }
 
-    public class BulkNotificationRequestDto
-    {
-        public List<Guid> UserIds { get; set; }
-        public object Variables { get; set; }
-    }
-
-    public class ScheduledNotificationRequestDto
-    {
-        public Guid UserId { get; set; }
-        public DateTime ScheduledAt { get; set; }
-        public object Variables { get; set; }
-    }
 }

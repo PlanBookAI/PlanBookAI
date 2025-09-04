@@ -38,7 +38,7 @@ namespace NotificationService.Repositories
         }
 
         // Lấy danh sách thông báo theo ID người dùng.
-        public async Task<IEnumerable<Notification>> FindByUserId(string userId)
+        public async Task<IEnumerable<Notification>> FindByUserId(Guid userId)
         {
             return await _context.Notifications
                                  .Where(n => n.UserId == userId)
@@ -71,15 +71,16 @@ namespace NotificationService.Repositories
         // Đánh dấu một thông báo là đã đọc.
         public async Task<bool> UpdateIsRead(Guid id)
         {
-            var notification = await _context.Notifications.FindAsync(id);
-            if (notification == null)
-            {
-                return false;
-            }
-            notification.IsRead = true;
-            _context.Entry(notification).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return true;
+            // Tránh load toàn bộ entity, chỉ attach và cập nhật 2 trường cần thiết
+            var stub = new Notification { Id = id };
+            _context.Attach(stub);
+            stub.IsRead = true;
+            var nowUtc = DateTime.UtcNow;
+            stub.ReadAt = DateTime.SpecifyKind(new DateTime(nowUtc.Ticks), DateTimeKind.Unspecified);
+            _context.Entry(stub).Property(x => x.IsRead).IsModified = true;
+            _context.Entry(stub).Property(x => x.ReadAt).IsModified = true;
+            var affected = await _context.SaveChangesAsync();
+            return affected > 0;
         }
 
         // Xóa một thông báo.
@@ -95,17 +96,34 @@ namespace NotificationService.Repositories
             return true;
         }
 
-        // Lấy danh sách các thông báo đã lên lịch cần được gửi.
-        public async Task<IEnumerable<Notification>> GetScheduledNotifications()
+        // Lấy danh sách các thông báo chưa đọc của người dùng.
+        public async Task<IEnumerable<Notification>> GetUnreadNotifications(Guid userId)
         {
             return await _context.Notifications
-                                 .Where(n => n.Status == "SCHEDULED" && n.ScheduledAt <= DateTime.UtcNow)
+                                 .Where(n => n.UserId == userId && !n.IsRead)
+                                 .OrderByDescending(n => n.CreatedAt)
                                  .ToListAsync();
         }
 
         private bool NotificationExists(Guid id)
         {
             return _context.Notifications.Any(e => e.Id == id);
+        }
+
+        // Cập nhật trạng thái xử lý của thông báo
+        public async Task<bool> UpdateProcessingStatus(Guid id, bool success, int retryCount)
+        {
+            var notification = await _context.Notifications.FindAsync(id);
+            if (notification == null)
+            {
+                return false;
+            }
+
+            notification.Type = success ? "SUCCESS" : "ERROR";
+
+            _context.Entry(notification).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 
@@ -118,5 +136,16 @@ namespace NotificationService.Repositories
         }
 
         public DbSet<Notification> Notifications { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.Property(e => e.ReadAt).HasColumnType("timestamp without time zone");
+                entity.Property(e => e.CreatedAt).HasColumnType("timestamp without time zone");
+            });
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

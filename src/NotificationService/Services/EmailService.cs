@@ -13,7 +13,7 @@ namespace NotificationService.Services
         private readonly EmailQueueRepository _emailQueueRepository;
         // Thực tế, bạn sẽ tiêm thêm một service khác để gửi email qua SMTP tại đây,
         // nhưng hiện tại chúng ta sẽ chỉ tập trung vào việc tạo bản ghi trong hàng đợi.
-        private readonly SmtpClientService _smtpClientService;
+        // private readonly ISmtpClient _smtpClient;
 
         public EmailService(EmailQueueRepository emailQueueRepository)
         {

@@ -12,15 +12,15 @@ namespace NotificationService.Controllers
     [Route("api/v1/thong-bao")]
     public class NotificationController : ControllerBase
     {
-        private readonly NotificationService _notificationService;
+        private readonly NotificationService.Services.NotificationService _notificationService;
 
-        public NotificationController(NotificationService notificationService)
+        public NotificationController(NotificationService.Services.NotificationService notificationService)
         {
             _notificationService = notificationService;
         }
 
         [HttpGet("nguoi-dung/{userId}")]
-        public async Task<ActionResult<IEnumerable<Notification>>> GetNotificationsByUserId(string userId)
+        public async Task<ActionResult<IEnumerable<Notification>>> GetNotificationsByUserId(Guid userId)
         {
             var notifications = await _notificationService.GetNotificationsByUserId(userId);
             if (notifications == null)

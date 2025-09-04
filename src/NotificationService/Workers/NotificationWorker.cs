@@ -23,9 +23,9 @@ namespace NotificationService.Workers
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("D?ch v? Notification Worker ?„ kh?i ??ng.");
+            _logger.LogInformation("D·ªãch v·ª• Notification Worker ƒë√£ kh·ªüi ƒë·ªông.");
 
-            // H?n gi? ?? worker ch?y m?i 60 gi‚y.
+            // H·∫πn gi·ªù ƒë·ªÉ worker ch·∫°y m·ªói 60 gi√¢y.
             _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(60));
 
             return Task.CompletedTask;
@@ -33,50 +33,42 @@ namespace NotificationService.Workers
 
         private async void DoWork(object state)
         {
-            _logger.LogInformation("Worker ?ang ki?m tra c·c thÙng b·o ?„ lÍn l?ch.");
+            _logger.LogInformation("Worker ƒëang ki·ªÉm tra c√°c th√¥ng b√°o ch∆∞a ƒë·ªçc.");
             using (var scope = _serviceProvider.CreateScope())
             {
                 var notificationRepository = scope.ServiceProvider.GetRequiredService<NotificationRepository>();
-                var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>();
+                var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService.Services.NotificationService>();
 
-                // L?y c·c thÙng b·o ?„ ??n h?n t? repository.
-                var dueNotifications = await notificationRepository.GetScheduledNotifications();
+                // L·∫•y c√°c th√¥ng b√°o ch∆∞a ƒë·ªçc
+                var unreadNotifications = await notificationRepository.GetUnreadNotifications(Guid.Empty);
 
-                if (dueNotifications.Any())
+                if (unreadNotifications.Any())
                 {
-                    _logger.LogInformation($"TÏm th?y {dueNotifications.Count()} thÙng b·o c?n x? l˝.");
-                    foreach (var notification in dueNotifications)
+                    _logger.LogInformation($"T√¨m th·∫•y {unreadNotifications.Count()} th√¥ng b√°o ch∆∞a ƒë·ªçc.");
+                    foreach (var notification in unreadNotifications)
                     {
                         try
                         {
-                            // Logic g?i thÙng b·o th?c t?
-                            _logger.LogInformation($"?ang x? l˝ thÙng b·o {notification.Id}...");
-
-                            // G?i thÙng b·o b?ng service
+                            _logger.LogInformation($"ƒêang x·ª≠ l√Ω th√¥ng b√°o {notification.Id}...");
                             await notificationService.SendNotification(notification);
-
-                            // C?p nh?t tr?ng th·i sau khi g?i th‡nh cÙng
-                            await notificationRepository.UpdateProcessingStatus(notification.Id, true, notification.RetryCount);
-                            _logger.LogInformation($"ThÙng b·o {notification.Id} ?„ ???c g?i th‡nh cÙng.");
+                            _logger.LogInformation($"Th√¥ng b√°o {notification.Id} ƒë√£ ƒë∆∞·ª£c g·ª≠i th√†nh c√¥ng.");
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, $"CÛ l?i khi x? l˝ thÙng b·o {notification.Id}.");
-                            // Logic x? l˝ l?i v‡ retry
-                            await notificationRepository.UpdateProcessingStatus(notification.Id, false, notification.RetryCount + 1);
+                            _logger.LogError(ex, $"C√≥ l·ªói khi x·ª≠ l√Ω th√¥ng b√°o {notification.Id}.");
                         }
                     }
                 }
                 else
                 {
-                    _logger.LogInformation("KhÙng tÏm th?y thÙng b·o n‡o ?„ lÍn l?ch.");
+                    _logger.LogInformation("Kh√¥ng t√¨m th·∫•y th√¥ng b√°o n√†o ch∆∞a ƒë·ªçc.");
                 }
             }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("D?ch v? Notification Worker ?ang d?ng l?i.");
+            _logger.LogInformation("D·ªãch v·ª• Notification Worker ƒëang d·ª´ng l·∫°i.");
             _timer?.Change(Timeout.Infinite, 0);
             return Task.CompletedTask;
         }
