@@ -6,12 +6,14 @@ namespace ExamService.Interfaces
 {
     public interface IThongKeService
     {
-        Task<ApiPhanHoi<ThongKeTongQuanDTO>> GetGeneralStatisticsAsync(Guid teacherId);
-        Task<ApiPhanHoi<CauHoiThongKeTongQuanDTO>> GetQuestionStatisticsAsync(Guid teacherId);
-        Task<ApiPhanHoi<DeThiThongKeTongQuanDTO>> GetExamStatisticsOverviewAsync(Guid teacherId);
-        Task<ApiPhanHoi<List<ThongKeTheoNhomDTO>>> GetStatsByDifficultyAsync(Guid teacherId);
-        Task<ApiPhanHoi<List<ThongKeTheoNhomDTO>>> GetStatsByTopicAsync(Guid teacherId);
-        Task<ApiPhanHoi<List<ThongKeTheoNhomDTO>>> GetStatsBySubjectAsync(Guid teacherId);
-        Task<ApiPhanHoi<NguoiDungThongKeDTO>> GetUserStatisticsAsync(Guid teacherId);
+        /// <summary>
+        /// Lấy báo cáo thống kê tổng hợp cho một giáo viên.
+        /// </summary>
+        Task<ApiPhanHoi<BaoCaoThongKeGiaoVienDTO>> GetTeacherReportAsync(Guid teacherId);
+
+        /// <summary>
+        /// Xuất báo cáo thống kê của một giáo viên ra file Excel.
+        /// </summary>
+        Task<byte[]> ExportTeacherReportToExcelAsync(Guid teacherId);
     }
 }

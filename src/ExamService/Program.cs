@@ -2,7 +2,6 @@ using ExamService.Data;
 using ExamService.Interfaces;
 using ExamService.Middleware;
 using ExamService.Profiles;
-using ExamService.Profiles;
 using ExamService.Repositories;
 using ExamService.Services;
 using ExamService.Validators;
@@ -20,6 +19,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -111,6 +111,22 @@ builder.Services.AddHealthChecks()
     .AddCheck<MemoryHealthCheck>(
         "memory_check",
         tags: new[] { "system", "live" });
+
+
+// === Cấu hình MassTransit với RabbitMQ ===
+builder.Services.AddMassTransit(mt =>
+{
+    mt.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(new Uri(builder.Configuration.GetConnectionString("RabbitMQ")!), h => {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        // Cấu hình các endpoint, retry policy... nếu cần
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 

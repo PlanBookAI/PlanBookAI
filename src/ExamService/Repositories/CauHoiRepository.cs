@@ -73,5 +73,11 @@ namespace ExamService.Repositories
         {
             return _context.CauHois.AsQueryable();
         }
+
+        public async Task CreateRangeAsync(IEnumerable<CauHoi> cauHois)
+        {
+            await _context.CauHois.AddRangeAsync(cauHois);
+            await _context.SaveChangesAsync();
+        }
     }
 }

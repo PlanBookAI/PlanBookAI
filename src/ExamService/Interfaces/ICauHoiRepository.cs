@@ -15,5 +15,6 @@ namespace ExamService.Interfaces
         Task<bool> DeleteAsync(Guid id);
         Task<bool> IsOwnerAsync(Guid id, Guid teacherId);
         IQueryable<CauHoi> GetQueryable();
+        Task CreateRangeAsync(IEnumerable<CauHoi> cauHois);
     }
 }

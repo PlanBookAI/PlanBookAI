@@ -1,7 +1,9 @@
-﻿using ExamService.Models.Entities;
+﻿using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using ExamService.Models.Entities;
 using System.IO;
-using Xceed.Document.NET;
-using Xceed.Words.NET;
+using System.Linq;
 
 namespace ExamService.Helpers
 {
@@ -11,51 +13,64 @@ namespace ExamService.Helpers
         {
             using (var memoryStream = new MemoryStream())
             {
-                // Tạo một tài liệu Word mới trong memory stream
-                using (var document = DocX.Create(memoryStream))
+                using (var wordDocument = WordprocessingDocument.Create(memoryStream, WordprocessingDocumentType.Document, true))
                 {
-                    // --- Header ---
-                    var title = document.InsertParagraph(deThi.TieuDe);
-                    title.Bold().FontSize(18).Alignment = Alignment.center;
+                    MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                    mainPart.Document = new Document();
+                    Body body = mainPart.Document.AppendChild(new Body());
 
-                    document.InsertParagraph($"Môn: {deThi.MonHoc} - Khối: {deThi.KhoiLop}")
-                        .FontSize(12).Alignment = Alignment.center;
-                    document.InsertParagraph($"Thời gian làm bài: {deThi.ThoiGianLamBai} phút")
-                        .FontSize(12).Alignment = Alignment.center;
-                    document.InsertParagraph(); // Thêm một dòng trống
+                    // --- Header ---
+                    AddParagraph(body, deThi.TieuDe, new RunProperties(new Bold(), new FontSize() { Val = "36" }), JustificationValues.Center);
+                    AddParagraph(body, $"Môn: {deThi.MonHoc} - Khối: {deThi.KhoiLop}", new RunProperties(new FontSize() { Val = "24" }), JustificationValues.Center);
+                    AddParagraph(body, $"Thời gian làm bài: {deThi.ThoiGianLamBai} phút", new RunProperties(new FontSize() { Val = "24" }), JustificationValues.Center);
+                    AddParagraph(body, ""); // Dòng trống
 
                     // --- Content ---
                     var sortedQuestions = deThi.ExamQuestions.OrderBy(q => q.ThuTu).ToList();
-
                     foreach (var eq in sortedQuestions)
                     {
                         var cauHoi = eq.CauHoi;
 
                         // Nội dung câu hỏi
-                        var pQuestion = document.InsertParagraph();
-                        pQuestion.Append($"Câu {eq.ThuTu}: ").Bold();
-                        pQuestion.Append(cauHoi.NoiDung);
+                        Paragraph pQuestion = body.AppendChild(new Paragraph());
+                        Run rQuestion = pQuestion.AppendChild(new Run());
+                        rQuestion.AppendChild(new Text($"Câu {eq.ThuTu}: ") { Space = SpaceProcessingModeValues.Preserve });
+                        rQuestion.RunProperties = new RunProperties(new Bold());
+                        pQuestion.AppendChild(new Run(new Text(cauHoi.NoiDung)));
 
                         // Các lựa chọn
                         var sortedChoices = cauHoi.LuaChons.OrderBy(c => c.ThuTu).ToList();
-
-                        // Tạo list có thứ tự A, B, C, D
-                        var list = document.AddList(listType: ListItemType.Numbered, startNumber: 1);
                         for (int i = 0; i < sortedChoices.Count; i++)
                         {
                             var choice = sortedChoices[i];
                             var choiceLetter = (char)('A' + i);
-                            // Thêm lựa chọn vào list
-                            document.AddListItem(list, $"{choiceLetter}. {choice.NoiDung}");
+                            AddParagraph(body, $"{choiceLetter}. {choice.NoiDung}", null, null, "200");
                         }
-                        document.InsertList(list);
-                        document.InsertParagraph(); // Thêm dòng trống giữa các câu hỏi
+                        AddParagraph(body, ""); // Dòng trống
                     }
-
-                    document.Save();
                 }
                 return memoryStream.ToArray();
             }
+        }
+
+        private static void AddParagraph(Body body, string text, RunProperties? runProperties = null, JustificationValues? justification = null, string? leftIndent = null)
+        {
+            Paragraph para = body.AppendChild(new Paragraph());
+            if (justification != null)
+            {
+                para.ParagraphProperties = new ParagraphProperties(new Justification() { Val = justification });
+            }
+            if (leftIndent != null)
+            {
+                para.ParagraphProperties = new ParagraphProperties(new Indentation() { Left = leftIndent });
+            }
+
+            Run run = para.AppendChild(new Run());
+            if (runProperties != null)
+            {
+                run.RunProperties = (RunProperties)runProperties.CloneNode(true);
+            }
+            run.AppendChild(new Text(text));
         }
     }
 }

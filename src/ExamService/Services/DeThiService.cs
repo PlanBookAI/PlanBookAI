@@ -7,6 +7,8 @@ using ExamService.Models.Enums;
 using ExamService.Documents; // Thêm using cho Document
 using QuestPDF.Fluent;      // Thêm using cho QuestPDF
 using ExamService.Helpers; // Thêm using cho Helper
+using MassTransit;
+using ExamService.MessageContracts;
 
 namespace ExamService.Services
 {
@@ -15,12 +17,14 @@ namespace ExamService.Services
         private readonly IDeThiRepository _deThiRepo;
         private readonly ICauHoiRepository _cauHoiRepo; // Thêm repository cho câu hỏi
         private readonly IMapper _mapper;
+        private readonly IPublishEndpoint _publishEndpoint; // Inject
 
-        public DeThiService(IDeThiRepository deThiRepo, ICauHoiRepository cauHoiRepo, IMapper mapper)
+        public DeThiService(IDeThiRepository deThiRepo, ICauHoiRepository cauHoiRepo, IMapper mapper, IPublishEndpoint publishEndpoint)
         {
             _deThiRepo = deThiRepo;
             _cauHoiRepo = cauHoiRepo;
             _mapper = mapper;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<ApiPhanHoi<PagedResult<DeThiResponseDTO>>> GetAllAsync(Guid teacherId, PagingDTO pagingParams)
@@ -67,6 +71,16 @@ namespace ExamService.Services
             deThi.TrangThai = "draft"; // Trạng thái mặc định
 
             var newDeThi = await _deThiRepo.CreateAsync(deThi);
+
+            // Publish sự kiện
+            await _publishEndpoint.Publish<DeThiMoiCreated>(new
+            {
+                DeThiId = newDeThi.Id,
+                TieuDe = newDeThi.TieuDe,
+                NguoiTaoId = teacherId,
+                Timestamp = DateTime.UtcNow
+            });
+
             var responseDto = _mapper.Map<DeThiResponseDTO>(newDeThi);
 
             return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Tạo đề thi thành công.");
@@ -251,6 +265,14 @@ namespace ExamService.Services
             // 5. Lưu thay đổi
             await _deThiRepo.UpdateAsync(deThi);
 
+            // Publish sự kiện
+            await _publishEndpoint.Publish<DeThiPublished>(new
+            {
+                DeThiId = deThi.Id,
+                NguoiTaoId = teacherId,
+                Timestamp = DateTime.UtcNow
+            });
+
             var responseDto = _mapper.Map<DeThiResponseDTO>(deThi);
 
             return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Xuất bản đề thi thành công.");
@@ -305,9 +327,8 @@ namespace ExamService.Services
                 return ApiPhanHoi<byte[]>.ThatBai("Không thể xuất PDF cho đề thi rỗng.");
             }
 
-            // 3. Tạo document và sinh file PDF
-            var document = new DeThiDocument(deThi);
-            byte[] pdfBytes = document.GeneratePdf();
+            // 3.Sinh file PDF
+            byte[] pdfBytes = PdfExportHelper.CreateDeThiDocument(deThi);
 
             return ApiPhanHoi<byte[]>.ThanhCongVoiDuLieu(pdfBytes);
         }

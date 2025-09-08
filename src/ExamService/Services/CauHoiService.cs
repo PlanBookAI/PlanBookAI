@@ -3,10 +3,12 @@ using ExamService.Interfaces;
 using ExamService.Models.DTOs;
 using ExamService.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using OfficeOpenXml; // Thêm using cho EPPlus
 using OfficeOpenXml.Style; // Thêm using cho style
 using System.Drawing; // Thêm using cho Color
+using System.Linq.Expressions;
+using MassTransit;
+using ExamService.MessageContracts;
 
 namespace ExamService.Services
 {
@@ -14,11 +16,13 @@ namespace ExamService.Services
     {
         private readonly ICauHoiRepository _repo;
         private readonly IMapper _mapper;
+        private readonly IPublishEndpoint _publishEndpoint; // Inject IPublishEndpoint
 
-        public CauHoiService(ICauHoiRepository repo, IMapper mapper)
+        public CauHoiService(ICauHoiRepository repo, IMapper mapper, IPublishEndpoint publishEndpoint)
         {
             _repo = repo;
             _mapper = mapper;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<ApiPhanHoi<PagedResult<CauHoiResponseDTO>>> GetAllAsync(Guid teacherId, PagingDTO pagingParams)
@@ -58,6 +62,15 @@ namespace ExamService.Services
 
             var newCauHoi = await _repo.CreateAsync(cauHoi);
             var responseDto = _mapper.Map<CauHoiResponseDTO>(newCauHoi);
+
+            // Publish sự kiện sau khi tạo thành công
+            await _publishEndpoint.Publish<CauHoiMoiCreated>(new
+            {
+                CauHoiId = newCauHoi.Id,
+                NguoiTaoId = teacherId,
+                MonHoc = newCauHoi.MonHoc,
+                Timestamp = DateTime.UtcNow
+            });
 
             return ApiPhanHoi<CauHoiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Tạo câu hỏi thành công.");
         }
@@ -173,25 +186,23 @@ namespace ExamService.Services
             var result = new ImportResultDTO();
             var newQuestions = new List<CauHoi>();
 
-            // EPPlus cần có LicenseContext
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             using (var stream = new MemoryStream())
             {
                 await file.CopyToAsync(stream);
                 using (var package = new ExcelPackage(stream))
                 {
+                    package.Compatibility.IsWorksheets1Based = false;
                     var worksheet = package.Workbook.Worksheets.FirstOrDefault();
                     if (worksheet == null)
                     {
-                        return ApiPhanHoi<ImportResultDTO>.ThatBai("File Excel không chứa worksheet nào.");
+                        return ApiPhanHoi<ImportResultDTO>.ThatBai("File Excel không hợp lệ hoặc không có trang tính nào.");
                     }
 
                     int rowCount = worksheet.Dimension.Rows;
-                    result.TotalRows = rowCount - 1; // Trừ dòng header
+                    result.TotalRows = rowCount > 1 ? rowCount - 1 : 0;
 
-                    // Giả sử file Excel có cấu trúc cột:
-                    // A: NoiDung, B: MonHoc, C: DoKho, D: DapAnDung, E->H: LuaChon1->4, I: LaDapAnDung (chứa A,B,C,D)
                     for (int row = 2; row <= rowCount; row++) // Bắt đầu từ dòng 2, bỏ qua header
                     {
                         try
@@ -200,12 +211,13 @@ namespace ExamService.Services
                             var monHoc = worksheet.Cells[row, 2].Value?.ToString()?.Trim();
                             var doKho = worksheet.Cells[row, 3].Value?.ToString()?.Trim();
                             var dapAnDung = worksheet.Cells[row, 4].Value?.ToString()?.Trim();
+                            var giaiThich = worksheet.Cells[row, 9].Value?.ToString()?.Trim();
 
-                            // Validation cơ bản
+                            // Validation dữ liệu từng dòng
                             if (string.IsNullOrWhiteSpace(noiDung) || string.IsNullOrWhiteSpace(monHoc) || string.IsNullOrWhiteSpace(dapAnDung))
                             {
                                 result.FailedImports++;
-                                result.ErrorMessages.Add($"Dòng {row}: Nội dung, Môn học, và Đáp án đúng là bắt buộc.");
+                                result.ErrorMessages.Add($"Dòng {row}: Thiếu thông tin bắt buộc (Nội dung, Môn học, Đáp án đúng).");
                                 continue;
                             }
 
@@ -215,24 +227,36 @@ namespace ExamService.Services
                                 NoiDung = noiDung,
                                 MonHoc = monHoc,
                                 DoKho = string.IsNullOrWhiteSpace(doKho) ? "medium" : doKho,
-                                DapAnDung = dapAnDung,
+                                DapAnDung = dapAnDung.ToUpper(),
+                                GiaiThich = giaiThich,
                                 NguoiTaoId = teacherId,
                                 LuaChons = new List<LuaChon>()
                             };
 
-                            // Đọc các lựa chọn (giả sử có 4 lựa chọn từ cột E đến H)
+                            // Đọc các lựa chọn và kiểm tra tính hợp lệ
+                            int choiceCount = 0;
                             for (int col = 5; col <= 8; col++)
                             {
                                 var luaChonText = worksheet.Cells[row, col].Value?.ToString()?.Trim();
                                 if (!string.IsNullOrWhiteSpace(luaChonText))
                                 {
+                                    choiceCount++;
                                     var choiceLetter = ((char)('A' + col - 5)).ToString();
                                     cauHoi.LuaChons.Add(new LuaChon
                                     {
+                                        Id = Guid.NewGuid(),
                                         NoiDung = luaChonText,
-                                        LaDapAnDung = dapAnDung.Equals(choiceLetter, StringComparison.OrdinalIgnoreCase)
+                                        LaDapAnDung = dapAnDung.Equals(choiceLetter, StringComparison.OrdinalIgnoreCase),
+                                        ThuTu = col - 4 // 1, 2, 3, 4
                                     });
                                 }
+                            }
+
+                            if (choiceCount < 2)
+                            {
+                                result.FailedImports++;
+                                result.ErrorMessages.Add($"Dòng {row}: Câu hỏi phải có ít nhất 2 lựa chọn.");
+                                continue;
                             }
 
                             newQuestions.Add(cauHoi);
@@ -241,19 +265,17 @@ namespace ExamService.Services
                         catch (Exception ex)
                         {
                             result.FailedImports++;
-                            result.ErrorMessages.Add($"Dòng {row}: Lỗi xử lý dữ liệu - {ex.Message}");
+                            result.ErrorMessages.Add($"Dòng {row}: Lỗi không xác định - {ex.Message}");
                         }
                     }
                 }
             }
 
-            // Thêm tất cả câu hỏi hợp lệ vào DB trong một transaction
+            // Thêm tất cả câu hỏi hợp lệ vào DB
             if (newQuestions.Any())
             {
-                foreach (var q in newQuestions)
-                {
-                    await _repo.CreateAsync(q);
-                }
+                // Sử dụng AddRange để tối ưu hóa việc thêm nhiều bản ghi
+                await _repo.CreateRangeAsync(newQuestions);
             }
 
             return ApiPhanHoi<ImportResultDTO>.ThanhCongVoiDuLieu(result, "Quá trình import hoàn tất.");
@@ -261,35 +283,33 @@ namespace ExamService.Services
 
         public async Task<byte[]> ExportToExcelAsync(Guid teacherId)
         {
-            // Lấy tất cả câu hỏi của giáo viên
-            var questions = await _repo.GetAllAsync(teacherId);
+            var questions = await _repo.GetQueryable()
+                .Where(q => q.NguoiTaoId == teacherId)
+                .Include(q => q.LuaChons)
+                .OrderBy(q => q.MonHoc).ThenBy(q => q.ChuDe)
+                .AsNoTracking()
+                .ToListAsync();
 
-            // EPPlus cần có LicenseContext
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
+            //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (var package = new ExcelPackage())
             {
+                package.Compatibility.IsWorksheets1Based = false;
                 var worksheet = package.Workbook.Worksheets.Add("NganHangCauHoi");
 
-                // --- Định dạng Header ---
-                var headerCells = worksheet.Cells["A1:I1"];
-                headerCells.Style.Font.Bold = true;
-                headerCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                headerCells.Style.Fill.BackgroundColor.SetColor(Color.LightGray);
-                headerCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                // --- Header ---
+                string[] headers = { "NoiDung", "MonHoc", "DoKho", "DapAnDung", "LuaChonA", "LuaChonB", "LuaChonC", "LuaChonD", "GiaiThich" };
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    worksheet.Cells[1, i + 1].Value = headers[i];
+                }
+                using (var range = worksheet.Cells[1, 1, 1, headers.Length])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#CCCCCC"));
+                }
 
-                // --- Ghi Header ---
-                worksheet.Cells[1, 1].Value = "NoiDung";
-                worksheet.Cells[1, 2].Value = "MonHoc";
-                worksheet.Cells[1, 3].Value = "DoKho";
-                worksheet.Cells[1, 4].Value = "DapAnDung";
-                worksheet.Cells[1, 5].Value = "LuaChonA";
-                worksheet.Cells[1, 6].Value = "LuaChonB";
-                worksheet.Cells[1, 7].Value = "LuaChonC";
-                worksheet.Cells[1, 8].Value = "LuaChonD";
-                worksheet.Cells[1, 9].Value = "GiaiThich";
-
-                // --- Ghi Dữ liệu ---
+                // --- Dữ liệu ---
                 int row = 2;
                 foreach (var q in questions)
                 {
@@ -298,20 +318,18 @@ namespace ExamService.Services
                     worksheet.Cells[row, 3].Value = q.DoKho;
                     worksheet.Cells[row, 4].Value = q.DapAnDung;
 
-                    // Gán các lựa chọn vào các cột tương ứng
-                    for (int i = 0; i < q.LuaChons.Count && i < 4; i++)
+                    var sortedChoices = q.LuaChons.OrderBy(c => c.ThuTu).ToList();
+                    for (int i = 0; i < sortedChoices.Count && i < 4; i++)
                     {
-                        worksheet.Cells[row, 5 + i].Value = q.LuaChons.ElementAt(i).NoiDung;
+                        worksheet.Cells[row, 5 + i].Value = sortedChoices[i].NoiDung;
                     }
 
                     worksheet.Cells[row, 9].Value = q.GiaiThich;
                     row++;
                 }
 
-                // Tự động điều chỉnh độ rộng cột
                 worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
 
-                // Chuyển package thành mảng byte để trả về
                 return await package.GetAsByteArrayAsync();
             }
         }
