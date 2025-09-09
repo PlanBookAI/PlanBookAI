@@ -92,7 +92,7 @@ builder.Services.AddScoped<IDeThiCauHoiService, DeThiCauHoiService>();
 builder.Services.AddScoped<ITaoDeThiService, TaoDeThiService>();
 builder.Services.AddScoped<IMauDeThiService, MauDeThiService>();
 builder.Services.AddScoped<IThongKeService, ThongKeService>();
-builder.Services.AddScoped<IEventLogger, EventLoggerService>();
+
 
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
