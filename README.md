@@ -81,14 +81,14 @@
 | **Auth** | 8081 | Authentication, authorization | `/api/v1/xac-thuc` | ✅ Active |
 | **User** | 8082 | User management, profiles | `/api/v1/nguoi-dung` | ✅ Active |
 | **Plan** | 8083 | Lesson plans, templates | `/api/v1/giao-an` | ✅ Active |
-| **Exam** | 8084 | Question bank, exams | `/api/v1/cau-hoi` | ✅ Active |
+| **Exam** | 8084 | Question bank, exams | `/api/v1/cau-hoi` | ❌ Needed fix |
 | **Classroom** | 8085 | Class management | `/api/v1/lop-hoc` | 🔄 In Progress |
-| **FileStorage** | 8086 | File upload/download | `/api/v1/file` | 🔄 In Progress |
-| **Notification** | 8087 | Email, SMS notifications | `/api/v1/thong-bao` | 🔄 In Progress |
+| **FileStorage** | 8086 | File upload/download | `/api/v1/file` | 🔄 In Progress (In review) |
+| **Notification** | 8087 | Email, SMS notifications | `/api/v1/thong-bao` | 🔄 In Progress 50% (Only Push noti) |
 | **OCR** | 8088 | Document processing | `/api/v1/ocr` | 🔄 In Progress |
 | **StudentGrading** | 8089 | Student assessment | `/api/v1/cham-diem` | 🔄 In Progress |
 | **AIPlan** | 8090 | AI-powered lesson planning | `/api/v1/ai-giao-an` | 🔄 In Progress |
-| **Log** | 8091 | Centralized logging | `/api/v1/log` | 🔄 In Progress |
+| **Log** | 8091 | Centralized logging | `/api/v1/log` | 🔄 In Progress(Might abort) |
 
 ### 🔄 Service Status Legend
 - ✅ **Active**: Fully implemented and running
