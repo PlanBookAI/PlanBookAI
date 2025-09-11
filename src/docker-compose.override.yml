@@ -88,17 +88,6 @@ services:
     ports:
       - "8087:8087"
 
-  ocrservice:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8088
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=planbookai2024
-    ports:
-      - "8088:8088"
-
   studentgradingservice:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -109,18 +98,6 @@ services:
       - RABBITMQ_PASSWORD=planbookai2024
     ports:
       - "8089:8089"
-
-  aiplanservice:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8090
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=planbookai2024
-    ports:
-      - "8090:8090"
-
   logservice:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development

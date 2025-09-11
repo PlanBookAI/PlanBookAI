@@ -102,17 +102,6 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  ocrservice:
-    image: ${DOCKER_REGISTRY-}ocrservice
-    build:
-      context: OCRService
-      dockerfile: Dockerfile
-    ports:
-      - "8088:8088"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
   studentgradingservice:
     image: ${DOCKER_REGISTRY-}studentgradingservice
     build:
@@ -120,17 +109,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8089:8089"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
-  aiplanservice:
-    image: ${DOCKER_REGISTRY-}aiplanservice
-    build:
-      context: AIPlanService
-      dockerfile: Dockerfile
-    ports:
-      - "8090:8090"
     depends_on:
       rabbitmq:
         condition: service_healthy

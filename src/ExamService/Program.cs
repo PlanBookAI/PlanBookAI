@@ -2,6 +2,7 @@ using ExamService.Data;
 using ExamService.Interfaces;
 using ExamService.Middleware;
 using ExamService.Profiles;
+using ExamService.Profiles;
 using ExamService.Repositories;
 using ExamService.Services;
 using ExamService.Validators;
@@ -73,9 +74,9 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API quản lý câu hỏi, đề thi và các chức năng liên quan cho PlanbookAI."
     });
-    // var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    // var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    // c.IncludeXmlComments(xmlPath);
+    //var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    //var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    //c.IncludeXmlComments(xmlPath);
 });
 
 // Add repositories - sử dụng database thực
