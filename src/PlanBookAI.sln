@@ -19,13 +19,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileStorageService", "FileS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService", "NotificationService\NotificationService.csproj", "{78B521A4-021D-45A3-9991-5EE6960683D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OCRService", "OCRService\OCRService.csproj", "{195D77CF-1357-4F0D-A568-84AA2CB90A58}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentGradingService", "StudentGradingService\StudentGradingService.csproj", "{2228114A-2EB1-494E-9051-4EB58824DBA6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassroomService", "ClassroomService\ClassroomService.csproj", "{EAAAFB26-B2F0-4804-BBF5-69EB212380F3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIPlanService", "AIPlanService\AIPlanService.csproj", "{F974FDCA-0AA6-4B6C-BD1B-6D9046385624}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogService", "LogService\LogService.csproj", "{BD18D71B-B1E4-4F8E-8577-6F740A1EF11B}"
 EndProject
