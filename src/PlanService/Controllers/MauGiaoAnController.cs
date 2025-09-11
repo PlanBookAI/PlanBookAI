@@ -39,7 +39,7 @@ namespace PlanService.Controllers
 
         // POST /api/v1/mau-giao-an - Tạo mẫu mới
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] MauGiaoAn request)
+        public async Task<IActionResult> Create([FromBody] YeuCauTaoMauGiaoAn request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiPhanHoi<MauGiaoAn>.ThatBai("Dữ liệu không hợp lệ", ModelState));

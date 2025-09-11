@@ -37,20 +37,41 @@ namespace PlanService.Services
             }
         }
 
-        public async Task<ApiPhanHoi<GiaoAn?>> GetByIdAsync(Guid id, Guid teacherId)
+        public async Task<ApiPhanHoi<ThongTinGiaoAn?>> GetByIdAsync(Guid id, Guid teacherId)
         {
             try
             {
                 var giaoAn = await _giaoAnRepository.GetByIdAndTeacherIdAsync(id, teacherId);
                 if (giaoAn == null)
                 {
-                    return ApiPhanHoi<GiaoAn?>.ThatBai("Không tìm thấy giáo án");
+                    return ApiPhanHoi<ThongTinGiaoAn?>.ThatBai("Không tìm thấy giáo án");
                 }
-                return ApiPhanHoi<GiaoAn?>.ThanhCongOk(giaoAn, "Lấy chi tiết giáo án thành công");
+
+                var thongTin = new ThongTinGiaoAn
+                {
+                    Id = giaoAn.Id,
+                    TieuDe = giaoAn.TieuDe,
+                    MucTieu = giaoAn.MucTieu,
+                    NoiDung = giaoAn.NoiDung,
+                    MonHoc = giaoAn.MonHoc,
+                    TrangThai = giaoAn.TrangThai,
+                    NgayTao = giaoAn.TaoLuc,
+                    NgayCapNhat = giaoAn.CapNhatLuc,
+                    NguoiTaoId = giaoAn.GiaoVienId,
+                    MauGiaoAnId = giaoAn.MauGiaoAnId,
+                    // Extract an toàn từ NoiDung dictionary
+                    ThoiLuongTiet = GetIntFromDictionary(giaoAn.NoiDung, "ThoiLuongTiet", 1),
+                    LopHoc = GetStringFromDictionary(giaoAn.NoiDung, "LopHoc"),
+                    GhiChu = GetStringFromDictionary(giaoAn.NoiDung, "GhiChu"),
+                    YeuCauDacBiet = GetStringFromDictionary(giaoAn.NoiDung, "YeuCauDacBiet"),
+                    DuocTaoTuAI = GetBoolFromDictionary(giaoAn.NoiDung, "SuDungAI", false)
+                };
+
+                return ApiPhanHoi<ThongTinGiaoAn?>.ThanhCongOk(thongTin, "Lấy chi tiết giáo án thành công");
             }
             catch (Exception ex)
             {
-                return ApiPhanHoi<GiaoAn?>.ThatBai("Lỗi khi lấy chi tiết giáo án: " + ex.Message);
+                return ApiPhanHoi<ThongTinGiaoAn?>.ThatBai("Lỗi khi lấy chi tiết giáo án: " + ex.Message);
             }
         }
 
@@ -338,6 +359,59 @@ namespace PlanService.Services
             {
                 return ApiPhanHoi<GiaoAn>.ThatBai("Lỗi khi tạo giáo án từ mẫu: " + ex.Message);
             }
+        }
+
+        // Helper methods để xử lý JsonElement an toàn
+        private static T GetValueFromDictionary<T>(Dictionary<string, object> dict, string key, T defaultValue)
+        {
+            if (!dict.ContainsKey(key) || dict[key] == null)
+                return defaultValue;
+
+            var value = dict[key];
+
+            // Handle JsonElement
+            if (value is System.Text.Json.JsonElement jsonElement)
+            {
+                try
+                {
+                    return typeof(T) switch
+                    {
+                        var t when t == typeof(int) => (T)(object)jsonElement.GetInt32(),
+                        var t when t == typeof(bool) => (T)(object)jsonElement.GetBoolean(),
+                        var t when t == typeof(string) => (T)(object)(jsonElement.GetString() ?? string.Empty),
+                        _ => defaultValue
+                    };
+                }
+                catch
+                {
+                    return defaultValue;
+                }
+            }
+
+            // Handle direct conversion
+            try
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
+        private static string? GetStringFromDictionary(Dictionary<string, object> dict, string key)
+        {
+            return GetValueFromDictionary<string?>(dict, key, null);
+        }
+
+        private static int GetIntFromDictionary(Dictionary<string, object> dict, string key, int defaultValue = 0)
+        {
+            return GetValueFromDictionary(dict, key, defaultValue);
+        }
+
+        private static bool GetBoolFromDictionary(Dictionary<string, object> dict, string key, bool defaultValue = false)
+        {
+            return GetValueFromDictionary(dict, key, defaultValue);
         }
     }
 }

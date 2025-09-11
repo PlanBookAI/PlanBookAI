@@ -24,7 +24,7 @@ namespace PlanService.Repositories
             return await _context.MauGiaoAns.ToListAsync();
         }
 
-        public async Task<MauGiaoAn> GetByIdAsync(Guid id)
+        public async Task<MauGiaoAn?> GetByIdAsync(Guid id)
         {
             return await _context.MauGiaoAns.FindAsync(id);
         }

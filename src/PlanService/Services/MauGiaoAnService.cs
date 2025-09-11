@@ -1,6 +1,7 @@
 ﻿using PlanService.Models.DTOs;
 using PlanService.Models.Entities;
 using PlanService.Repositories;
+using System.Text.Json;
 
 namespace PlanService.Services
 {
@@ -39,16 +40,24 @@ namespace PlanService.Services
             return ApiPhanHoi<MauGiaoAn?>.ThanhCongOk(item, "Lấy chi tiết mẫu giáo án thành công");
         }
 
-        public async Task<ApiPhanHoi<MauGiaoAn>> CreateAsync(MauGiaoAn request, Guid teacherId)
+        public async Task<ApiPhanHoi<MauGiaoAn>> CreateAsync(YeuCauTaoMauGiaoAn request, Guid teacherId)
         {
-            request.Id = Guid.NewGuid();
-            request.NguoiTaoId = teacherId;
-            request.TrangThai = "ACTIVE";
-            request.TaoLuc = DateTime.UtcNow;
-            request.CapNhatLuc = DateTime.UtcNow;
+            var entity = new MauGiaoAn
+            {
+                Id = Guid.NewGuid(),
+                TieuDe = request.TieuDe,
+                MoTa = request.MoTa,
+                NoiDungMau = ConvertToJsonDictionary(request.NoiDungMau),
+                MonHoc = request.MonHoc,
+                Lop = request.Khoi,
+                NguoiTaoId = teacherId,
+                TrangThai = request.TrangThai,
+                TaoLuc = DateTime.UtcNow,
+                CapNhatLuc = DateTime.UtcNow
+            };
 
-            await _repo.AddAsync(request);
-            return ApiPhanHoi<MauGiaoAn>.ThanhCongOk(request, "Tạo mẫu giáo án thành công");
+            await _repo.AddAsync(entity);
+            return ApiPhanHoi<MauGiaoAn>.ThanhCongOk(entity, "Tạo mẫu giáo án thành công");
         }
 
         public async Task<ApiPhanHoi<MauGiaoAn>> UpdateAsync(Guid id, MauGiaoAn request, Guid teacherId)
@@ -99,6 +108,25 @@ namespace PlanService.Services
                 current,
                 chiaSe ? "Chia sẻ mẫu giáo án thành công" : "Hủy chia sẻ mẫu giáo án thành công"
             );
+        }
+
+        private static Dictionary<string, object> ConvertToJsonDictionary(object obj)
+        {
+            if (obj is System.Text.Json.JsonElement jsonElement)
+            {
+                return System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(jsonElement.GetRawText())
+                       ?? new Dictionary<string, object>();
+            }
+
+            if (obj is Dictionary<string, object> dict)
+            {
+                return dict;
+            }
+
+            // Fallback: serialize then deserialize
+            var json = System.Text.Json.JsonSerializer.Serialize(obj);
+            return System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json)
+                   ?? new Dictionary<string, object>();
         }
     }
 }

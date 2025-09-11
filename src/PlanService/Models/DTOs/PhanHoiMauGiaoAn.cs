@@ -8,9 +8,9 @@ namespace PlanService.Models.DTOs
     public class PhanHoiMauGiaoAn
     {
         public Guid Id { get; set; }
-        public string TenMauGiaoAn { get; set; }
-        public string NoiDungTomTat { get; set; }
-        public string GhiChu { get; set; }
+        public string TenMauGiaoAn { get; set; } = string.Empty;
+        public string NoiDungTomTat { get; set; } = string.Empty;
+        public string GhiChu { get; set; } = string.Empty;
         public DateTime NgayTao { get; set; }
     }
 }

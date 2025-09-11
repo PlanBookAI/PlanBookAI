@@ -11,10 +11,25 @@ namespace PlanService.Repositories
     /// </summary>
     public interface IGiaoAnRepository
     {
-        Task<IEnumerable<GiaoAn>> GetAllAsync(); // Lấy tất cả các giáo án.
-        Task<GiaoAn> GetByIdAsync(Guid id); // Lấy một giáo án theo Id.
-        Task AddAsync(GiaoAn giaoAn); 
-        Task UpdateAsync(GiaoAn giaoAn); 
-        Task DeleteAsync(Guid id); 
+        // Basic CRUD Operations
+        Task<IEnumerable<GiaoAn>> GetAllAsync();
+        Task<GiaoAn?> GetByIdAsync(Guid id);
+        Task AddAsync(GiaoAn giaoAn);
+        Task UpdateAsync(GiaoAn giaoAn);
+        Task DeleteAsync(Guid id);
+
+        // Teacher Isolation 
+        Task<IEnumerable<GiaoAn>> GetByTeacherIdAsync(Guid teacherId);
+        Task<GiaoAn?> GetByIdAndTeacherIdAsync(Guid id, Guid teacherId);
+
+        // Search & Filter Methods 
+        Task<IEnumerable<GiaoAn>> SearchAsync(string keyword, Guid teacherId);
+        Task<IEnumerable<GiaoAn>> GetByTeacherIdAndSubjectAsync(Guid teacherId, string monHoc);
+        Task<IEnumerable<GiaoAn>> GetByTeacherIdAndGradeAsync(Guid teacherId, int khoi);
+        Task<IEnumerable<GiaoAn>> GetByTeacherIdAndStatusAsync(Guid teacherId, string status);
+        Task<IEnumerable<GiaoAn>> GetByTeacherIdAndTemplateIdAsync(Guid teacherId, Guid templateId);
+        Task<IEnumerable<GiaoAn>> GetByTeacherIdAndTopicAsync(Guid teacherId, Guid topicId);
+        // Status Management
+        Task<GiaoAn?> UpdateStatusAsync(Guid id, string status);
     }
 }

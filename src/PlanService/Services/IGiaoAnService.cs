@@ -11,7 +11,7 @@ namespace PlanService.Services
     {
         // CRUD Operations
         Task<ApiPhanHoi<IEnumerable<GiaoAn>>> GetAllAsync(Guid teacherId);
-        Task<ApiPhanHoi<GiaoAn?>> GetByIdAsync(Guid id, Guid teacherId);
+        Task<ApiPhanHoi<ThongTinGiaoAn?>> GetByIdAsync(Guid id, Guid teacherId);
         Task<ApiPhanHoi<GiaoAn>> CreateAsync(YeuCauTaoGiaoAn request, Guid teacherId);
         Task<ApiPhanHoi<GiaoAn>> UpdateAsync(Guid id, YeuCauTaoGiaoAn request, Guid teacherId);
         Task<ApiPhanHoi<GiaoAn>> DeleteAsync(Guid id, Guid teacherId);

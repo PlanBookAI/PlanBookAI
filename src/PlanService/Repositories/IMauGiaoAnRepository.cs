@@ -11,7 +11,7 @@ namespace PlanService.Repositories
     public interface IMauGiaoAnRepository
     {
         Task<IEnumerable<MauGiaoAn>> GetAllAsync();
-        Task<MauGiaoAn> GetByIdAsync(Guid id);
+        Task<MauGiaoAn?> GetByIdAsync(Guid id);
         Task AddAsync(MauGiaoAn mauGiaoAn);
         Task UpdateAsync(MauGiaoAn mauGiaoAn);
         Task DeleteAsync(Guid id);
