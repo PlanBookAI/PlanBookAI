@@ -1,0 +1,58 @@
+# --- Môi trường ảo của Python ---
+# Bỏ qua toàn bộ thư mục môi trường ảo
+.venv/
+venv/
+env/
+ENV/
+
+# --- File chứa biến môi trường và bí mật (CỰC KỲ QUAN TRỌNG) ---
+# KHÔNG BAO GIỜ đưa file .env chứa API keys và mật khẩu database lên Git.
+.env
+*.env
+*.env.*
+
+# --- Cấu hình của IDE (PyCharm) ---
+# Thư mục này chứa các cài đặt riêng của bạn cho dự án.
+.idea/
+
+# --- Các file tạm và bytecode của Python ---
+# Thư mục cache của Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Các file do trình cài đặt pip tạo ra ---
+*.egg-info/
+*.egg
+
+# --- Các file log ---
+# Không lưu trữ file log trong Git
+*.log
+logs/
+
+# --- Database file tạm ---
+# Trong trường hợp bạn dùng SQLite để test local
+*.db
+*.sqlite3
+
+# --- File do các thư viện testing tạo ra ---
+# Ví dụ: pytest, coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+
+# --- Thư mục chứa các file upload ---
+# Nếu bạn có lưu trữ tạm các file PDF người dùng tải lên
+uploads/
+media/
+
+# --- Các file tạm của hệ điều hành ---
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
