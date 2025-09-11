@@ -33,5 +33,12 @@ class Question(BaseModel):
 
 # Mô hình cho toàn bộ đề thi (đây là output của API)
 class Exam(BaseModel):
+    exam_code: int = Field(..., description="Mã đề thi ngẫu nhiên gồm 3 chữ số")
     title: str = Field(..., description="Tiêu đề của đề thi")
     questions: List[Question] = Field(..., description="Danh sách các câu hỏi")
+
+    @field_validator('exam_code')
+    def check_exam_code_range(cls, v):
+        if not (100 <= v <= 999):
+            raise ValueError('Mã đề phải là một số trong khoảng từ 100 đến 999')
+        return v
