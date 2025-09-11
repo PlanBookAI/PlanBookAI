@@ -2,7 +2,6 @@
 using PlanService.Models.Entities;
 using PlanService.Repositories;
 using System.Text.Json;
-// using PlanService.Services.Export;
 
 namespace PlanService.Services
 {
@@ -13,14 +12,12 @@ namespace PlanService.Services
     public class GiaoAnService : IGiaoAnService
     {
         private readonly IGiaoAnRepository _giaoAnRepository;
-        // private readonly IXuatGiaoAnPdfService _xuatPdf;
-        // private readonly IXuatGiaoAnWordService _xuatWord;
+        private readonly IMauGiaoAnRepository _mauGiaoAnRepository;
 
-        public GiaoAnService(IGiaoAnRepository giaoAnRepository /*, IXuatGiaoAnWordService xuatWord, IXuatGiaoAnPdfService xuatPdf */)
+        public GiaoAnService(IGiaoAnRepository giaoAnRepository, IMauGiaoAnRepository mauGiaoAnRepository)
         {
             _giaoAnRepository = giaoAnRepository;
-            // _xuatWord = xuatWord;
-            // _xuatPdf = xuatPdf;
+            _mauGiaoAnRepository = mauGiaoAnRepository;
         }
 
         // CRUD Operations
@@ -84,14 +81,7 @@ namespace PlanService.Services
                     Id = Guid.NewGuid(),
                     TieuDe = request.TieuDe,
                     MucTieu = request.MucTieu,
-                    NoiDung = new Dictionary<string, object>
-                    {
-                        ["ThoiLuongTiet"] = request.ThoiLuongTiet,
-                        ["LopHoc"] = request.LopHoc ?? "",
-                        ["GhiChu"] = request.GhiChu ?? "",
-                        ["SuDungAI"] = request.SuDungAI,
-                        ["YeuCauDacBiet"] = request.YeuCauDacBiet ?? ""
-                    },
+                    NoiDung = BuildNoiDungFromRequest(request),
                     MonHoc = request.MonHoc.ToString(),
                     Lop = request.Khoi,
                     GiaoVienId = teacherId,
@@ -136,14 +126,12 @@ namespace PlanService.Services
                 giaoAn.Lop = request.Khoi;
                 giaoAn.MauGiaoAnId = request.MauGiaoAnId;
                 giaoAn.ChuDeId = request.ChuDeId;
-                giaoAn.NoiDung = new Dictionary<string, object>
+                giaoAn.NoiDung = BuildNoiDungFromRequest(request);
+                // Chuẩn hóa thời gian về UTC tránh lỗi timestamptz
+                if (giaoAn.TaoLuc.Kind == DateTimeKind.Unspecified)
                 {
-                    ["ThoiLuongTiet"] = request.ThoiLuongTiet,
-                    ["LopHoc"] = request.LopHoc ?? "",
-                    ["GhiChu"] = request.GhiChu ?? "",
-                    ["SuDungAI"] = request.SuDungAI,
-                    ["YeuCauDacBiet"] = request.YeuCauDacBiet ?? ""
-                };
+                    giaoAn.TaoLuc = DateTime.SpecifyKind(giaoAn.TaoLuc, DateTimeKind.Utc);
+                }
                 giaoAn.CapNhatLuc = DateTime.UtcNow;
 
                 await _giaoAnRepository.UpdateAsync(giaoAn);
@@ -314,21 +302,17 @@ namespace PlanService.Services
             }
         }
 
-        // Export (theo yêu cầu: Word/PDF với định dạng chuẩn giáo dục)
+        // Export (tạm thời vô hiệu hóa - sẽ implement trong tương lai)
         public async Task<ApiPhanHoi<byte[]>> XuatPDFAsync(Guid id, Guid teacherId)
         {
-            #if false
-            return await _xuatPdf.XuatPdfAsync(id, teacherId);
-            #endif
-            return ApiPhanHoi<byte[]>.ThatBai("Tính năng xuất PDF tạm thời vô hiệu hóa.");
+            await Task.Delay(1); // Placeholder để tránh warning
+            return ApiPhanHoi<byte[]>.ThatBai("Tính năng xuất PDF chưa được triển khai.");
         }
 
         public async Task<ApiPhanHoi<byte[]>> XuatWordAsync(Guid id, Guid teacherId)
         {
-            #if false
-            return await _xuatWord.XuatWordAsync(id, teacherId);
-            #endif
-            return ApiPhanHoi<byte[]>.ThatBai("Tính năng xuất Word tạm thời vô hiệu hóa. Vui lòng thử lại sau.");
+            await Task.Delay(1); // Placeholder để tránh warning
+            return ApiPhanHoi<byte[]>.ThatBai("Tính năng xuất Word chưa được triển khai.");
         }
 
         // Create from Template (theo yêu cầu: Tạo giáo án từ mẫu có sẵn)
@@ -336,17 +320,41 @@ namespace PlanService.Services
         {
             try
             {
-                // TODO: Implement khi có MauGiaoAn relationship
+                // Lấy mẫu và kiểm tra quyền truy cập (công khai hoặc là chủ sở hữu)
+                var mau = await _mauGiaoAnRepository.GetByIdAsync(templateId);
+                if (mau == null)
+                {
+                    return ApiPhanHoi<GiaoAn>.ThatBai("Không tìm thấy mẫu giáo án");
+                }
+
+                var laChuSoHuu = mau.NguoiTaoId == teacherId;
+                var laCongKhai = string.Equals(mau.TrangThai, "ACTIVE", StringComparison.OrdinalIgnoreCase);
+                if (!laChuSoHuu && !laCongKhai)
+                {
+                    return ApiPhanHoi<GiaoAn>.ThatBai("Bạn không có quyền sử dụng mẫu này");
+                }
+
+                // Snapshot toàn bộ nội dung mẫu sang content của giáo án mới
+                var snapshotNoiDung = DeepCloneDictionary(mau.NoiDungMau);
+
+                // Ghép thêm phần ThongTinChung từ request
+                snapshotNoiDung["ThoiLuongTiet"] = request.ThoiLuongTiet;
+                snapshotNoiDung["LopHoc"] = request.LopHoc ?? string.Empty;
+                snapshotNoiDung["GhiChu"] = request.GhiChu ?? string.Empty;
+                snapshotNoiDung["SuDungAI"] = request.SuDungAI;
+                snapshotNoiDung["YeuCauDacBiet"] = request.YeuCauDacBiet ?? string.Empty;
+
                 var giaoAn = new GiaoAn
                 {
                     Id = Guid.NewGuid(),
                     TieuDe = request.TieuDe,
                     MucTieu = request.MucTieu,
-                    NoiDung = new Dictionary<string, object>(),
+                    NoiDung = snapshotNoiDung,
                     MonHoc = request.MonHoc.ToString(),
                     Lop = request.Khoi,
                     GiaoVienId = teacherId,
                     MauGiaoAnId = templateId,
+                    ChuDeId = request.ChuDeId,
                     TrangThai = "DRAFT",
                     TaoLuc = DateTime.UtcNow,
                     CapNhatLuc = DateTime.UtcNow
@@ -359,6 +367,33 @@ namespace PlanService.Services
             {
                 return ApiPhanHoi<GiaoAn>.ThatBai("Lỗi khi tạo giáo án từ mẫu: " + ex.Message);
             }
+        }
+
+        private static Dictionary<string, object> DeepCloneDictionary(Dictionary<string, object> source)
+        {
+            // Clone an toàn qua (de)serialize để tránh tham chiếu chung
+            var json = System.Text.Json.JsonSerializer.Serialize(source);
+            return System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json) ?? new Dictionary<string, object>();
+        }
+
+        private static Dictionary<string, object> BuildNoiDungFromRequest(YeuCauTaoGiaoAn request)
+        {
+            var noiDung = new Dictionary<string, object>
+            {
+                ["ThoiLuongTiet"] = request.ThoiLuongTiet,
+                ["LopHoc"] = request.LopHoc ?? string.Empty,
+                ["GhiChu"] = request.GhiChu ?? string.Empty,
+                ["SuDungAI"] = request.SuDungAI,
+                ["YeuCauDacBiet"] = request.YeuCauDacBiet ?? string.Empty
+            };
+
+            if (request.NoiDungChiTiet != null)
+            {
+                // Lưu toàn bộ nội dung chi tiết vào key 'NoiDungChiTiet'
+                noiDung["NoiDungChiTiet"] = request.NoiDungChiTiet;
+            }
+
+            return noiDung;
         }
 
         // Helper methods để xử lý JsonElement an toàn

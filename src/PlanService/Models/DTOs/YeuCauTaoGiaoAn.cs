@@ -38,5 +38,9 @@ namespace PlanService.Models.DTOs
 
         [StringLength(500, ErrorMessage = "Yêu cầu đặc biệt không được vượt quá 500 ký tự")]
         public string? YeuCauDacBiet { get; set; }
+
+        // Nội dung chi tiết (tùy ý) để lưu kèm vào jsonb 'NoiDung'
+        // Cho phép object hoặc dictionary tùy payload của FE/Postman
+        public object? NoiDungChiTiet { get; set; }
     }
 }
