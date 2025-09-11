@@ -74,6 +74,9 @@ namespace PlanService.Services
             current.Lop = request.Lop;
             current.NoiDungMau = request.NoiDungMau;
             current.TrangThai = request.TrangThai; // ACTIVE/INACTIVE/ARCHIVED theo schema
+            // Chuẩn hóa DateTime về UTC để tương thích timestamptz
+            if (current.TaoLuc.Kind == DateTimeKind.Unspecified)
+                current.TaoLuc = DateTime.SpecifyKind(current.TaoLuc, DateTimeKind.Utc);
             current.CapNhatLuc = DateTime.UtcNow;
 
             await _repo.UpdateAsync(current);
@@ -92,6 +95,18 @@ namespace PlanService.Services
             return ApiPhanHoi<MauGiaoAn>.ThanhCongOk(current, "Xóa mẫu giáo án thành công");
         }
 
+        public async Task<ApiPhanHoi<IEnumerable<MauGiaoAn>>> LayCongKhaiAsync(string? keyword, string? monHoc, int? khoi)
+        {
+            var list = await _repo.GetCongKhaiAsync(keyword, monHoc, khoi);
+            return ApiPhanHoi<IEnumerable<MauGiaoAn>>.ThanhCongOk(list, "Lấy danh sách mẫu công khai thành công");
+        }
+
+        public async Task<ApiPhanHoi<IEnumerable<MauGiaoAn>>> LayCuaToiAsync(Guid teacherId, string? keyword, string? monHoc, int? khoi)
+        {
+            var list = await _repo.GetCuaToiAsync(teacherId, keyword, monHoc, khoi);
+            return ApiPhanHoi<IEnumerable<MauGiaoAn>>.ThanhCongOk(list, "Lấy danh sách mẫu của tôi thành công");
+        }
+
         public async Task<ApiPhanHoi<MauGiaoAn>> ChiaSeAsync(Guid id, bool chiaSe, Guid teacherId)
         {
             var current = await _repo.GetByIdAsync(id);
@@ -101,6 +116,9 @@ namespace PlanService.Services
                 return ApiPhanHoi<MauGiaoAn>.ThatBai("Bạn không có quyền thay đổi chia sẻ mẫu này");
 
             current.TrangThai = chiaSe ? "ACTIVE" : "INACTIVE";
+            // Chuẩn hóa DateTime về UTC để tương thích timestamptz
+            if (current.TaoLuc.Kind == DateTimeKind.Unspecified)
+                current.TaoLuc = DateTime.SpecifyKind(current.TaoLuc, DateTimeKind.Utc);
             current.CapNhatLuc = DateTime.UtcNow;
 
             await _repo.UpdateAsync(current);
