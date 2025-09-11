@@ -15,10 +15,12 @@ namespace PlanService.Models.DTOs
         [StringLength(1000, ErrorMessage = "Mục tiêu không được vượt quá 1000 ký tự")]
         public string? MucTieu { get; set; }
 
-        [Required(ErrorMessage = "Chủ đề ID là bắt buộc")]
-        public Guid ChuDeId { get; set; }
+        [Required(ErrorMessage = "Khối lớp là bắt buộc")]
+        [Range(10, 12, ErrorMessage = "Khối lớp phải từ 10 đến 12")]
+        public int Khoi { get; set; } = 10;
 
         public Guid? MauGiaoAnId { get; set; }
+        public Guid? ChuDeId { get; set; }
 
         [Required(ErrorMessage = "Môn học là bắt buộc")]
         public MonHoc MonHoc { get; set; } = MonHoc.HoaHoc;
@@ -36,5 +38,9 @@ namespace PlanService.Models.DTOs
 
         [StringLength(500, ErrorMessage = "Yêu cầu đặc biệt không được vượt quá 500 ký tự")]
         public string? YeuCauDacBiet { get; set; }
+
+        // Nội dung chi tiết (tùy ý) để lưu kèm vào jsonb 'NoiDung'
+        // Cho phép object hoặc dictionary tùy payload của FE/Postman
+        public object? NoiDungChiTiet { get; set; }
     }
 }

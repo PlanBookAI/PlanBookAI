@@ -1,4 +1,5 @@
 ﻿using PlanService.Models.Enums;
+using System.Collections.Generic;
 
 namespace PlanService.Models.DTOs
 {
@@ -22,15 +23,12 @@ namespace PlanService.Models.DTOs
         public Guid Id { get; set; }
         public string TieuDe { get; set; } = string.Empty;
         public string? MucTieu { get; set; }
-        public string NoiDung { get; set; } = string.Empty;
-        public MonHoc MonHoc { get; set; }
-        public TrangThaiGiaoAn TrangThai { get; set; }
+        public Dictionary<string, object> NoiDung { get; set; } = new Dictionary<string, object>();
+        public string MonHoc { get; set; } = string.Empty;
+        public string TrangThai { get; set; } = string.Empty;
         public int ThoiLuongTiet { get; set; }
         public string? LopHoc { get; set; }
         public string? GhiChu { get; set; }
-
-        // Thông tin chủ đề
-        public Guid ChuDeId { get; set; }
         public string TenChuDe { get; set; } = string.Empty;
 
         // Thông tin template (nếu có)

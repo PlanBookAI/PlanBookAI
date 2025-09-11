@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace PlanService.Models.Entities
 {
@@ -20,12 +21,12 @@ namespace PlanService.Models.Entities
 
         [Required]
         [Column("content")]
-        public string NoiDung { get; set; } = string.Empty;
+        public Dictionary<string, object> NoiDung { get; set; } = new();
 
         [Required]
-        [StringLength(50)]
+        [StringLength(100)]
         [Column("subject")]
-        public string MonHoc { get; set; } = string.Empty;
+        public string MonHoc { get; set; } = "HOA_HOC";
 
         [Required]
         [Column("grade")]
@@ -38,25 +39,8 @@ namespace PlanService.Models.Entities
         [Column("template_id")]
         public Guid? MauGiaoAnId { get; set; }
 
-        [Column("chu_de_id")]
-        public Guid? ChuDeId { get; set; }
-
-        [Required]
-        [StringLength(20)]
         [Column("status")]
         public string TrangThai { get; set; } = "DRAFT";
-
-        [Column("duration_minutes")]
-        public int? ThoiLuongPhut { get; set; }
-
-        [Column("class_session")]
-        public string? BuoiHoc { get; set; }
-
-        [Column("teaching_date")]
-        public DateTime? NgayGiangDay { get; set; }
-
-        [Column("notes")]
-        public string? GhiChu { get; set; }
 
         [Column("created_at")]
         public DateTime TaoLuc { get; set; } = DateTime.UtcNow;
@@ -64,14 +48,14 @@ namespace PlanService.Models.Entities
         [Column("updated_at")]
         public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
 
+        [Column("topic_id")]
+        public Guid? ChuDeId { get; set; }
+
+        // Navigation properties 
         [ForeignKey("MauGiaoAnId")]
         public virtual MauGiaoAn? MauGiaoAn { get; set; }
 
         [ForeignKey("ChuDeId")]
         public virtual ChuDe? ChuDe { get; set; }
-
-        // Navigation properties cho mối quan hệ 1-N
-        public virtual ICollection<NoiDungGiaoDuc> NoiDungGiaoDucs { get; set; } = new List<NoiDungGiaoDuc>();
-        public virtual ICollection<MucTieu> MucTieus { get; set; } = new List<MucTieu>();
     }
 }

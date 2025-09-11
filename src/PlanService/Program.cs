@@ -3,19 +3,71 @@ using Microsoft.EntityFrameworkCore;
 using PlanService.Data;
 using PlanService.Repositories;
 using PlanService.Models.Entities;
+using PlanService.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 
-// Thêm Entity Framework DbContext
+// Configure JSON options to handle cycles and references
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    options.SerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+});
+
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+});
+
+// Thêm Entity Framework DbContext với JSON support
+var dataSourceBuilder = new Npgsql.NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
+dataSourceBuilder.EnableDynamicJson();
+var dataSource = dataSourceBuilder.Build();
+
 builder.Services.AddDbContext<PlanDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(dataSource));
 
 // Thêm các Repository
+builder.Services.AddScoped<IChuDeRepository, ChuDeRepository>();
 builder.Services.AddScoped<IGiaoAnRepository, GiaoAnRepository>();
 builder.Services.AddScoped<IMauGiaoAnRepository, MauGiaoAnRepository>();
+
+// Thêm các Services
+builder.Services.AddScoped<IChuDeService, ChuDeService>();
+builder.Services.AddScoped<IGiaoAnService, GiaoAnService>();
+builder.Services.AddScoped<IMauGiaoAnService, MauGiaoAnService>();
+
+// Cấu hình JWT Bearer
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwt = builder.Configuration.GetSection("JwtSettings");
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwt["SecretKey"]!)),
+            ValidateIssuer = true,
+            ValidIssuer = jwt["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwt["Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(5)
+        };
+
+    });
+
+// Authorization: Chỉ có giáo viên mới được phép tạo/quản lý giáo án
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("TeacherOnly", p => p.RequireRole("TEACHER"));
+}); 
 
 // Add Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -43,6 +95,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
@@ -54,11 +107,11 @@ using (var scope = app.Services.CreateScope())
     {
         // Tạo database và schema nếu chưa tồn tại
         await context.Database.EnsureCreatedAsync();
-        Console.WriteLine("PlanService: Database schema created successfully");
+        Console.WriteLine("PlanService: Khởi tạo schema cơ sở dữ liệu thành công");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"PlanService: Database setup error: {ex.Message}");
+        Console.WriteLine($"PlanService: Lỗi khởi tạo cơ sở dữ liệu: {ex.Message}");
     }
 }
 

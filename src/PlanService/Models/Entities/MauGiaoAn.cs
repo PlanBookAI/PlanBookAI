@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace PlanService.Models.Entities
 {
@@ -19,27 +20,23 @@ namespace PlanService.Models.Entities
         public string? MoTa { get; set; }
 
         [Required]
-        [Column("template_content")]
-        public string NoiDungMau { get; set; } = string.Empty;
+        [Column("template_content", TypeName = "jsonb")]
+        public Dictionary<string, object> NoiDungMau { get; set; } = new Dictionary<string, object>();
 
         [Required]
-        [StringLength(50)]
+        [StringLength(100)] // DB2: subject varchar(100)
         [Column("subject")]
         public string MonHoc { get; set; } = string.Empty;
 
-        [Required]
-        [Column("grade")]
-        public int Lop { get; set; }
-
-        [Column("chu_de_id")]
-        public Guid? ChuDeId { get; set; }
+        [Column("grade")] // DB2: grade integer (nullable)
+        public int? Lop { get; set; }
 
         [Required]
         [Column("created_by")]
         public Guid NguoiTaoId { get; set; }
 
         [Required]
-        [StringLength(20)]
+        [StringLength(50)] // DB2: status varchar(50)
         [Column("status")]
         public string TrangThai { get; set; } = "ACTIVE";
 
@@ -48,10 +45,5 @@ namespace PlanService.Models.Entities
 
         [Column("updated_at")]
         public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
-
-        [ForeignKey("ChuDeId")]
-        public virtual ChuDe? ChuDe { get; set; }
-
-        public virtual ICollection<GiaoAn> DanhSachGiaoAn { get; set; } = new List<GiaoAn>();
     }
 }
