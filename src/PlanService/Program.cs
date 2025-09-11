@@ -43,8 +43,6 @@ builder.Services.AddScoped<IMauGiaoAnRepository, MauGiaoAnRepository>();
 builder.Services.AddScoped<IChuDeService, ChuDeService>();
 builder.Services.AddScoped<IGiaoAnService, GiaoAnService>();
 builder.Services.AddScoped<IMauGiaoAnService, MauGiaoAnService>();
-// builder.Services.AddScoped<PlanService.Services.Export.IXuatGiaoAnWordService, PlanService.Services.Export.XuatGiaoAnWordService>();
-// builder.Services.AddScoped<PlanService.Services.Export.IXuatGiaoAnPdfService, PlanService.Services.Export.XuatGiaoAnPdfService>();
 
 // Cấu hình JWT Bearer
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -109,11 +107,11 @@ using (var scope = app.Services.CreateScope())
     {
         // Tạo database và schema nếu chưa tồn tại
         await context.Database.EnsureCreatedAsync();
-        Console.WriteLine("PlanService: Database schema created successfully");
+        Console.WriteLine("PlanService: Khởi tạo schema cơ sở dữ liệu thành công");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"PlanService: Database setup error: {ex.Message}");
+        Console.WriteLine($"PlanService: Lỗi khởi tạo cơ sở dữ liệu: {ex.Message}");
     }
 }
 
