@@ -142,8 +142,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "PlanbookAI Gateway API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gateway Service API");
         c.RoutePrefix = "swagger";
+        c.DocumentTitle = "Gateway Service API Documentation";
     });
 }
 
