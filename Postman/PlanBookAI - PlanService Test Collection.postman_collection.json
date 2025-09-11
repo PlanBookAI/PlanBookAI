@@ -1,0 +1,1110 @@
+{
+	"info": {
+		"_postman_id": "eaeeae32-ad07-472e-a073-d3fa13cd4875",
+		"name": "PlanBookAI - PlanService Test Collection",
+		"description": "Collection đầy đủ để test PlanService từ login đến các API endpoint",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47415826",
+		"_collection_link": "https://lamgenesis-9008381.postman.co/workspace/Lam's-Workspace~aca06466-159a-41ae-8930-fe10cd2aaf3f/collection/47415826-eaeeae32-ad07-472e-a073-d3fa13cd4875?action=share&source=collection_link&creator=47415826"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login Teacher",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.thanhCong && response.duLieu && response.duLieu.token) {",
+									"        pm.collectionVariables.set('auth_token', response.duLieu.token);",
+									"        console.log('Token saved:', response.duLieu.token);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Email\": \"teacher@test.com\",\n  \"MatKhau\": \"teacher123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/xac-thuc/dang-nhap",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"xac-thuc",
+								"dang-nhap"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Mẫu Giáo Án - Templates",
+			"item": [
+				{
+					"name": "GET /mau-giao-an (Deprecated - Should return 410)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Should return 410 Gone', function () {",
+									"    pm.response.to.have.status(410);",
+									"});",
+									"pm.test('Should have deprecation message', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.thongDiep).to.include('deprecated');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-giao-an",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-giao-an"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /mau-giao-an/cong-khai (Public Templates)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-giao-an/cong-khai?keyword=&monHoc=HOA_HOC&khoi=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-giao-an",
+								"cong-khai"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": ""
+								},
+								{
+									"key": "monHoc",
+									"value": "HOA_HOC"
+								},
+								{
+									"key": "khoi",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /mau-giao-an/cua-toi (My Templates)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-giao-an/cua-toi?keyword=&monHoc=HOA_HOC&khoi=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-giao-an",
+								"cua-toi"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": ""
+								},
+								{
+									"key": "monHoc",
+									"value": "HOA_HOC"
+								},
+								{
+									"key": "khoi",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /mau-giao-an (Create Template)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.thanhCong && response.duLieu && response.duLieu.id) {",
+									"        pm.collectionVariables.set('template_id', response.duLieu.id);",
+									"        console.log('Template ID saved:', response.duLieu.id);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"TieuDe\": \"Khung giáo án Hóa 10 - Cấu trúc nguyên tử\",\n  \"MoTa\": \"Khung chuẩn cho chương 1\",\n  \"MonHoc\": \"HOA_HOC\",\n  \"Khoi\": 10,\n  \"TrangThai\": \"ACTIVE\",\n  \"NoiDungMau\": {\n    \"CauTrucChung\": {\n      \"MucTieu\": [\"Kiến thức\", \"Kỹ năng\", \"Thái độ\"],\n      \"NoiDungKhung\": [\"Ổn định\", \"Bài mới\", \"Củng cố\", \"Dặn dò\"],\n      \"DanhMucTaiNguyen\": [\"Mô hình nguyên tử\", \"Bảng tuần hoàn\"],\n      \"DanhMucDanhGia\": [\"Câu hỏi nhanh\", \"Bài tập vận dụng\"]\n    }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-giao-an",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-giao-an"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /mau-giao-an/{id} (Template Detail)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-giao-an/{{template_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-giao-an",
+								"{{template_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT /mau-giao-an/{id} (Update Template)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"{{template_id}}\",\n  \"tieuDe\": \"Khung giáo án Hóa 10 - Cấu trúc nguyên tử (Cập nhật)\",\n  \"moTa\": \"Khung chuẩn cho chương 1 - Đã cập nhật\",\n  \"monHoc\": \"HOA_HOC\",\n  \"lop\": 10,\n  \"trangThai\": \"ACTIVE\",\n  \"noiDungMau\": {\n    \"CauTrucChung\": {\n      \"MucTieu\": [\"Kiến thức\", \"Kỹ năng\", \"Thái độ\", \"Giá trị sống\"],\n      \"NoiDungKhung\": [\"Ổn định\", \"Bài mới\", \"Củng cố\", \"Dặn dò\"],\n      \"DanhMucTaiNguyen\": [\"Mô hình nguyên tử\", \"Bảng tuần hoàn\", \"Video minh họa\"],\n      \"DanhMucDanhGia\": [\"Câu hỏi nhanh\", \"Bài tập vận dụng\"]\n    }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-giao-an/{{template_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-giao-an",
+								"{{template_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /mau-giao-an/{id}/chia-se (Share Template)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-giao-an/{{template_id}}/chia-se?chiaSe=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-giao-an",
+								"{{template_id}}",
+								"chia-se"
+							],
+							"query": [
+								{
+									"key": "chiaSe",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Chủ Đề - Topics",
+			"item": [
+				{
+					"name": "POST /chu-de (Create Topic)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.thanhCong && response.duLieu && response.duLieu.id) {",
+									"        pm.collectionVariables.set('topic_id', response.duLieu.id);",
+									"        console.log('Topic ID saved:', response.duLieu.id);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Ten\": \"Cấu trúc nguyên tử\",\n  \"MoTa\": \"Chương 1 - Khối 10\",\n  \"MonHoc\": \"HOA_HOC\",\n  \"Khoi\": 10,\n  \"ParentId\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/chu-de",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"chu-de"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /chu-de (List Topics)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/chu-de",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"chu-de"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /chu-de/theo-mon/{monHoc}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/chu-de/theo-mon/HOA_HOC",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"chu-de",
+								"theo-mon",
+								"HOA_HOC"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Giáo Án - Lesson Plans",
+			"item": [
+				{
+					"name": "POST /giao-an (Create Lesson Plan Manual)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.thanhCong && response.duLieu && response.duLieu.id) {",
+									"        pm.collectionVariables.set('lesson_id', response.duLieu.id);",
+									"        console.log('Lesson ID saved:', response.duLieu.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"TieuDe\": \"Bài 1: Cấu tạo hạt nhân nguyên tử\",\n  \"MucTieu\": \"- Trình bày được khái niệm hạt nhân, số hiệu nguyên tử (Z), số khối (A)\\n- Phân biệt được đồng vị; nêu ví dụ minh họa trong thực tiễn\\n- Rèn luyện kĩ năng đọc bảng tuần hoàn, trích xuất thông tin hạt nhân\\n- Hình thành thái độ nghiêm túc, yêu thích môn học\",\n  \"Khoi\": 10,\n  \"ChuDeId\": \"{{topic_id}}\",\n  \"MauGiaoAnId\": null,\n  \"MonHoc\": 1,\n  \"ThoiLuongTiet\": 2,\n  \"LopHoc\": \"10A1\",\n  \"GhiChu\": \"Chuẩn bị: mô hình nguyên tử, phiếu học tập, video minh họa hạt nhân\",\n  \"SuDungAI\": true,\n  \"YeuCauDacBiet\": \"Cần máy chiếu và loa\",\n  \"MoTaChiTiet\": {\n    \"OnDinhToChuc\": \"Ổn định lớp, kiểm tra sĩ số (2')\",\n    \"KiemTraBaiCu\": \"- Ôn khái niệm electron, lớp vỏ (5')\",\n    \"KhoiDong\": \"Chiếu video ngắn về hạt nhân nguyên tử, nêu vấn đề: 'Hạt nhân gồm những gì?' (3')\",\n    \"HinhThanhKienThuc\": {\n      \"NoiDung1\": {\n        \"TieuDe\": \"Cấu tạo hạt nhân\",\n        \"ThoiLuong\": 10,\n        \"HoatDongGV\": \"- Giới thiệu proton, neutron; khối lượng xấp xỉ\\n- Minh họa mô hình hạt nhân\",\n        \"HoatDongHS\": \"- Quan sát, ghi chép, trả lời câu hỏi\",\n        \"KienThucCanNho\": \"- Hạt nhân gồm proton (+) và neutron (0)\"\n      },\n      \"NoiDung2\": {\n        \"TieuDe\": \"Số hiệu Z, số khối A\",\n        \"ThoiLuong\": 10,\n        \"HoatDongGV\": \"- Định nghĩa Z, A; liên hệ số proton/electron\\n- Bài tập nhanh xác định Z, A\",\n        \"HoatDongHS\": \"- Làm bài tập ví dụ, thảo luận cặp đôi\",\n        \"KienThucCanNho\": \"- Z = số proton = số electron (nguyên tử trung hòa)\\n- A = Z + N (N là số neutron)\"\n      },\n      \"NoiDung3\": {\n        \"TieuDe\": \"Đồng vị\",\n        \"ThoiLuong\": 8,\n        \"HoatDongGV\": \"- Khái niệm đồng vị; ví dụ ¹²C, ¹³C, ¹⁴C\\n- Ứng dụng đồng vị trong đo niên đại\",\n        \"HoatDongHS\": \"- Nhận diện đồng vị từ ký hiệu\",\n        \"KienThucCanNho\": \"- Đồng vị: cùng Z khác A (khác số neutron)\"\n      }\n    },\n    \"LuyenTapVanDung\": {\n      \"BaiTapNhanh\": [\n        \"Xác định Z, A, N của ³⁵Cl (biết Z=17)\",\n        \"Kí hiệu đồng vị của nguyên tử có Z=20, N=20\"\n      ],\n      \"BaiTapNangCao\": \"So sánh tính chất đồng vị của H: ¹H, ²H, ³H\"\n    },\n    \"DanhGia\": {\n      \"HinhThuc\": \"Câu hỏi miệng + phiếu trắc nghiệm nhanh (5 câu)\",\n      \"TieuChi\": [\n        \"Nêu đúng khái niệm Z, A, đồng vị\",\n        \"Xác định được Z, A, N từ kí hiệu\",\n        \"Liên hệ thực tiễn (đo niên đại C-14)\"\n      ]\n    },\n    \"TaiNguyenHocLieu\": [\n      \"Mô hình nguyên tử\",\n      \"Bảng tuần hoàn\",\n      \"Video minh họa cấu tạo hạt nhân\",\n      \"Phiếu học tập\"\n    ],\n    \"HuongDanVeNha\": \"Hoàn thành phiếu luyện tập; đọc trước bài 'Điện tích hạt nhân và đồng vị'\",\n    \"DieuChinhBoSung\": \"Nếu thời lượng thiếu, rút ngắn phần ví dụ đồng vị\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /giao-an/tu-mau/{templateId} (Create from Template)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Snapshot should be created', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.thanhCong).to.be.true;",
+									"    pm.expect(response.duLieu.noiDung).to.exist;",
+									"    pm.expect(response.duLieu.noiDung.CauTrucChung).to.exist;",
+									"    pm.expect(response.duLieu.noiDung.ThoiLuongTiet).to.equal(2);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"TieuDe\": \"Bài 2: Electron và lớp vỏ electron\",\n  \"MucTieu\": \"Mô tả được lớp vỏ electron...\",\n  \"Khoi\": 10,\n  \"ChuDeId\": \"{{topic_id}}\",\n  \"MonHoc\": 1,\n  \"ThoiLuongTiet\": 2,\n  \"LopHoc\": \"10A2\",\n  \"GhiChu\": \"Tạo từ mẫu công khai\",\n  \"SuDungAI\": false,\n  \"YeuCauDacBiet\": \"Không\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/tu-mau/{{template_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"tu-mau",
+								"{{template_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /giao-an (List Lesson Plans)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /giao-an/{id} (Lesson Plan Detail - Full Content)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Should return full content with utility fields', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.thanhCong).to.be.true;",
+									"    pm.expect(response.duLieu.noiDung).to.exist;",
+									"    pm.expect(response.duLieu.thoiLuongTiet).to.exist;",
+									"    pm.expect(response.duLieu.lopHoc).to.exist;",
+									"    pm.expect(response.duLieu.ghiChu).to.exist;",
+									"    pm.expect(response.duLieu.yeuCauDacBiet).to.exist;",
+									"    pm.expect(response.duLieu.duocTaoTuAI).to.exist;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/{{lesson_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"{{lesson_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT /giao-an/{id} (Update Lesson Plan)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"TieuDe\": \"Bài 1: Cấu tạo hạt nhân nguyên tử (Cập nhật)\",\n  \"MucTieu\": \"Nêu được thành phần hạt nhân, số hiệu Z, số khối A... (Đã cập nhật)\",\n  \"Khoi\": 10,\n  \"ChuDeId\": \"{{topic_id}}\",\n  \"MauGiaoAnId\": null,\n  \"MonHoc\": 1,\n  \"ThoiLuongTiet\": 3,\n  \"LopHoc\": \"10A1\",\n  \"GhiChu\": \"Chuẩn bị mô hình nguyên tử và video\",\n  \"SuDungAI\": true,\n  \"YeuCauDacBiet\": \"Có video mô phỏng và thí nghiệm\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/{{lesson_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"{{lesson_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /giao-an/{id}/copy (Copy Lesson Plan)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/{{lesson_id}}/copy",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"{{lesson_id}}",
+								"copy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /giao-an/tim-kiem (Search Lesson Plans)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/tim-kiem?keyword=nguyên tử",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"tim-kiem"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "nguyên tử"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /giao-an/loc-theo-chu-de/{chuDeId}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/loc-theo-chu-de/{{topic_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"loc-theo-chu-de",
+								"{{topic_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /giao-an/loc-theo-mon/{monHoc}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/loc-theo-mon/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"loc-theo-mon",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /giao-an/loc-theo-khoi/{khoi}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/loc-theo-khoi/10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"loc-theo-khoi",
+								"10"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Status Management",
+			"item": [
+				{
+					"name": "POST /giao-an/{id}/phe-duyet (DRAFT → COMPLETED)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/{{lesson_id}}/phe-duyet",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"{{lesson_id}}",
+								"phe-duyet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /giao-an/{id}/xuat-ban (COMPLETED → PUBLISHED)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/{{lesson_id}}/xuat-ban",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"{{lesson_id}}",
+								"xuat-ban"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /giao-an/{id}/luu-tru (PUBLISHED → ARCHIVED)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/{{lesson_id}}/luu-tru",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"{{lesson_id}}",
+								"luu-tru"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Export (Currently Disabled)",
+			"item": [
+				{
+					"name": "POST /giao-an/{id}/xuat-word",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/{{lesson_id}}/xuat-word",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"{{lesson_id}}",
+								"xuat-word"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /giao-an/{id}/xuat-pdf",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/{{lesson_id}}/xuat-pdf",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"{{lesson_id}}",
+								"xuat-pdf"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Permission Tests",
+			"item": [
+				{
+					"name": "Try PUT Staff Template (Should Fail)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Should deny permission to update non-owned template', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([403, 400]);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.thanhCong).to.be.false;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"fake-staff-template-id\",\n  \"tieuDe\": \"Trying to hack staff template\",\n  \"moTa\": \"This should fail\",\n  \"monHoc\": \"HOA_HOC\",\n  \"lop\": 10,\n  \"trangThai\": \"ACTIVE\",\n  \"noiDungMau\": {}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-giao-an/fake-staff-template-id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-giao-an",
+								"fake-staff-template-id"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Try DELETE Staff Template (Should Fail)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Should deny permission to delete non-owned template', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([403, 400, 404]);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.thanhCong).to.be.false;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-giao-an/fake-staff-template-id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-giao-an",
+								"fake-staff-template-id"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "8. Cleanup (Optional)",
+			"item": [
+				{
+					"name": "DELETE /mau-giao-an/{id} (Delete Created Template)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-giao-an/{{template_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-giao-an",
+								"{{template_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE /giao-an/{id} (Delete Created Lesson)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/giao-an/{{lesson_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"giao-an",
+								"{{lesson_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDIiLCJlbWFpbCI6InRlYWNoZXJAdGVzdC5jb20iLCJyb2xlIjoiVEVBQ0hFUiIsIlZhaVRyb0lkIjoiNCIsIm5iZiI6MTc1NzYwMjEzMCwiZXhwIjoxNzU3NjA1NzMwLCJpYXQiOjE3NTc2MDIxMzAsImlzcyI6IlBsYW5ib29rQUkiLCJhdWQiOiJQbGFuYm9va0FJLVVzZXJzIn0.VuoOHE5FIooybTXHIFWzmzz-qSY0xwx9WZPVu_6FMng",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "auth_token",
+			"value": ""
+		},
+		{
+			"key": "template_id",
+			"value": ""
+		},
+		{
+			"key": "lesson_id",
+			"value": ""
+		},
+		{
+			"key": "topic_id",
+			"value": ""
+		}
+	]
+}
