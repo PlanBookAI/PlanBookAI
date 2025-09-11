@@ -4,6 +4,7 @@
 *.userosscache
 *.sln.docstates
 *.txt
+*.Tests
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
