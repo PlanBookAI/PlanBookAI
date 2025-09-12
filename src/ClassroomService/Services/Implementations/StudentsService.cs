@@ -97,7 +97,7 @@ namespace ClassroomService.Services.Implementations
             return _mapper.Map<StudentDto>(createdStudent);
         }
 
-        public async Task<StudentDto> CapNhatHocSinh(int id, UpdateStudentDto dto, int ownerTeacherId)
+        async Task<StudentDto> IStudentsService.CapNhatHocSinh(int id, UpdateStudentDto dto, int ownerTeacherId)
         {
             _logger.LogInformation("Cập nhật học sinh ID: {Id}", id);
 
