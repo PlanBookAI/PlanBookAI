@@ -16,7 +16,37 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - planbookai-network
 
+  # === DATABASE MIGRATION SERVICE ===
+  db-migration:
+    image: postgres:17
+    container_name: planbookai-db-migration
+    environment:
+      POSTGRES_DB: planbookai
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test123
+      PGHOST: postgres
+      PGPORT: 5432
+    volumes:
+      - ../scripts:/scripts:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        until pg_isready -h postgres -p 5432 -U test; do
+          echo 'Database not ready, waiting...'
+          sleep 2
+        done &&
+        echo 'Database is ready. Running migration...' &&
+        psql -h postgres -U test -d planbookai -f /scripts/bpa.sql &&
+        echo 'Migration completed successfully!'
+      "
+    networks:
+      - planbookai-network
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: planbookai_rabbitmq
@@ -35,7 +65,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
+    networks:
+      - planbookai-network
   # === APPLICATION SERVICES ===
   authservice:
     image: ${DOCKER_REGISTRY-}authservice
@@ -44,7 +75,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8081:8081"
-
+    networks:
+      - planbookai-network
   gatewayservice:
     image: ${DOCKER_REGISTRY-}gatewayservice
     build:
@@ -55,7 +87,8 @@ services:
     depends_on:
       authservice:
         condition: service_started
-
+    networks:
+      - planbookai-network
   planservice:
     image: ${DOCKER_REGISTRY-}planservice
     build:
@@ -66,7 +99,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-
+    networks:
+      - planbookai-network
   userservice:
     image: ${DOCKER_REGISTRY-}userservice
     build:
@@ -74,7 +108,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8082:8082"
-
+    networks:
+      - planbookai-network
   examservice:
     image: ${DOCKER_REGISTRY-}examservice
     build:
@@ -85,7 +120,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-
+    networks:
+      - planbookai-network
   classroomservice:
     image: ${DOCKER_REGISTRY-}classroomservice
     build:
@@ -96,7 +132,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-
+    networks:
+      - planbookai-network
   filestorageservice:
     image: ${DOCKER_REGISTRY-}filestorageservice
     build:
@@ -107,7 +144,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-
+    networks:
+      - planbookai-network
   notificationservice:
     image: ${DOCKER_REGISTRY-}notificationservice
     build:
@@ -120,7 +158,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
+    networks:
+      - planbookai-network
   studentgradingservice:
     image: ${DOCKER_REGISTRY-}studentgradingservice
     build:
@@ -131,7 +170,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-
+    networks:
+      - planbookai-network
   logservice:
     image: ${DOCKER_REGISTRY-}logservice
     build:
@@ -142,8 +182,11 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-
+    networks:
+      - planbookai-network
 volumes:
   rabbitmq_data:
   postgres_data:
-
+networks:
+  planbookai-network:
+    driver: bridge
