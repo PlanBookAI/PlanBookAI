@@ -129,7 +129,7 @@ namespace PlanbookAI.FileStorageService.Controllers
                 var fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
                 var contentDisposition = $"attachment; filename=\"{file.OriginalName}\"";
                 
-                Response.Headers.Add("Content-Disposition", contentDisposition);
+                Response.Headers["Content-Disposition"] = contentDisposition;
                 
                 return File(fileStream, file.MimeType, file.OriginalName);
             }

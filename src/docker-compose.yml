@@ -1,5 +1,22 @@
 services:
   # === INFRASTRUCTURE SERVICES ===
+  postgres:
+    image: postgres:17
+    container_name: planbookai-postgres-dev
+    environment:
+      POSTGRES_DB: planbookai
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d planbookai"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: planbookai_rabbitmq
@@ -99,6 +116,8 @@ services:
     ports:
       - "8087:8087"
     depends_on:
+      postgres:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
 
@@ -126,4 +145,5 @@ services:
 
 volumes:
   rabbitmq_data:
+  postgres_data:
 

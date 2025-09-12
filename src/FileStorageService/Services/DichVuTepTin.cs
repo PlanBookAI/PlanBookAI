@@ -149,7 +149,7 @@ namespace PlanbookAI.FileStorageService.Services
             
             return new PhanHoiDanhSachTepTin
             {
-                DanhSach = files.Select(MapToResponse).ToList(),
+                DanhSach = files.Select(f => MapToResponse(f)).ToList(),
                 TongSo = total,
                 Trang = page,
                 KichThuoc = size,
@@ -161,7 +161,7 @@ namespace PlanbookAI.FileStorageService.Services
         {
             var searchUserId = isAdmin ? null : userId;
             var files = await _repository.SearchByMetadataAsync(key, value, searchUserId);
-            return files.Select(MapToResponse).ToList();
+            return files.Select(f => MapToResponse(f)).ToList();
         }
         
         public async Task<bool> SoftDeleteAsync(Guid id, Guid userId, bool isAdmin)
