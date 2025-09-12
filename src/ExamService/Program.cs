@@ -53,12 +53,16 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         var errors = actionContext.ModelState
             .Where(x => x.Value?.Errors.Count > 0)
             .Select(x => new { 
-                Field = x.Key, 
-                Errors = x.Value?.Errors.Select(e => e.ErrorMessage ?? "Unknown error") ?? Enumerable.Empty<string>() 
+                TruongDuLieu = x.Key, 
+                LoiDuLieu = x.Value?.Errors.Select(e => e.ErrorMessage ?? "Lỗi không xác định") ?? Enumerable.Empty<string>() 
             })
             .ToList();
 
-        return new BadRequestObjectResult(new { Message = "Validation failed", Errors = errors });
+        return new BadRequestObjectResult(new { 
+            MaLoi = "LOI_DU_LIEU", 
+            ThongBao = "Dữ liệu không hợp lệ", 
+            ChiTiet = errors 
+        });
     };
 });
 
@@ -114,19 +118,56 @@ builder.Services.AddHealthChecks()
 
 
 // === Cấu hình MassTransit với RabbitMQ ===
-builder.Services.AddMassTransit(mt =>
-{
-    mt.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.Host(new Uri(builder.Configuration.GetConnectionString("RabbitMQ")!), h => {
-            h.Username("guest");
-            h.Password("guest");
-        });
+var rabbitMqHost = builder.Configuration["RABBITMQ_HOST"] ?? 
+                  Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? 
+                  "localhost";
 
-        // Cấu hình các endpoint, retry policy... nếu cần
-        cfg.ConfigureEndpoints(context);
+var rabbitMqPort = builder.Configuration["RABBITMQ_PORT"] ?? 
+                  Environment.GetEnvironmentVariable("RABBITMQ_PORT") ?? 
+                  "5672";
+
+var rabbitMqUsername = builder.Configuration["RABBITMQ_USERNAME"] ?? 
+                      Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? 
+                      "guest";
+
+var rabbitMqPassword = builder.Configuration["RABBITMQ_PASSWORD"] ?? 
+                      Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? 
+                      "guest";
+
+// Chỉ cấu hình MassTransit nếu có thông tin RabbitMQ
+if (!string.IsNullOrEmpty(rabbitMqHost))
+{
+    builder.Services.AddMassTransit(mt =>
+    {
+        mt.UsingRabbitMq((context, cfg) =>
+        {
+            cfg.Host(new Uri($"rabbitmq://{rabbitMqHost}:{rabbitMqPort}"), h => {
+                h.Username(rabbitMqUsername);
+                h.Password(rabbitMqPassword);
+            });
+
+            // Cấu hình retry policy
+            cfg.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
+            
+            // Cấu hình các endpoint
+            cfg.ConfigureEndpoints(context);
+        });
     });
-});
+}
+else
+{
+    // Nếu không có thông tin RabbitMQ, thêm MassTransit với in-memory transport
+    builder.Services.AddMassTransit(mt =>
+    {
+        mt.UsingInMemory((context, cfg) =>
+        {
+            cfg.ConfigureEndpoints(context);
+        });
+    });
+    
+    // Log thông báo
+    Console.WriteLine("RabbitMQ không được cấu hình. Sử dụng in-memory transport cho MassTransit.");
+}
 
 var app = builder.Build();
 
@@ -149,6 +190,9 @@ app.UseHttpsRedirection();
 // Expose endpoint /metrics cho Prometheus
 app.UseMetricServer();
 app.UseHttpMetrics();
+
+// Add global error handling middleware
+app.UseMiddleware<LoiToanCucMiddleware>();
 
 // Add custom logging middleware
 app.UseMiddleware<RequestLoggingMiddleware>();

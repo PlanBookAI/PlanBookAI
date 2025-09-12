@@ -38,7 +38,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.GetByIdAsync(id, teacherId);
-            if (!result.ThanhCong) return NotFound(result);
+            if (result.MaTrangThai != 200) return NotFound(result);
             return Ok(result);
         }
 
@@ -52,7 +52,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.CreateAsync(dto, teacherId);
-            if (!result.ThanhCong) return BadRequest(result);
+            if (result.MaTrangThai != 200) return BadRequest(result);
             return CreatedAtAction(nameof(GetById), new { id = result.DuLieu!.Id }, result);
         }
 
@@ -66,7 +66,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.UpdateAsync(id, dto, teacherId);
-            if (!result.ThanhCong) return NotFound(result);
+            if (result.MaTrangThai != 200) return NotFound(result);
             return Ok(result);
         }
 
@@ -80,7 +80,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.DeleteAsync(id, teacherId);
-            if (!result.ThanhCong) return NotFound(result);
+            if (result.MaTrangThai != 200) return NotFound(result);
             return Ok(result);
         }
 
@@ -99,7 +99,7 @@ namespace ExamService.Controllers
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.AddQuestionToExamAsync(id, dto, teacherId);
 
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 // Phân biệt lỗi do không tìm thấy hay do logic nghiệp vụ
                 if (result.ThongBao.Contains("Không tìm thấy"))
@@ -127,7 +127,7 @@ namespace ExamService.Controllers
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.RemoveQuestionFromExamAsync(id, cauHoiId, teacherId);
 
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 if (result.ThongBao.Contains("Không tìm thấy"))
                 {
@@ -155,7 +155,7 @@ namespace ExamService.Controllers
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.UpdateQuestionInExamAsync(id, cauHoiId, dto, teacherId);
 
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 if (result.ThongBao.Contains("Không tìm thấy"))
                 {
@@ -182,7 +182,7 @@ namespace ExamService.Controllers
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.PublishExamAsync(id, teacherId);
 
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 if (result.ThongBao.Contains("Không tìm thấy"))
                 {
@@ -209,7 +209,7 @@ namespace ExamService.Controllers
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.UnpublishExamAsync(id, teacherId);
 
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 if (result.ThongBao.Contains("Không tìm thấy"))
                 {
@@ -235,7 +235,7 @@ namespace ExamService.Controllers
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.ExportToPdfAsync(id, teacherId);
 
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 if (result.ThongBao.Contains("Không tìm thấy"))
                 {
@@ -266,7 +266,7 @@ namespace ExamService.Controllers
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.ExportToWordAsync(id, teacherId);
 
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 if (result.ThongBao.Contains("Không tìm thấy"))
                 {
@@ -298,7 +298,7 @@ namespace ExamService.Controllers
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.CloneExamAsync(id, teacherId);
 
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 return NotFound(result);
             }
@@ -320,7 +320,7 @@ namespace ExamService.Controllers
             var teacherId = HttpContext.GetUserId();
             var result = await _deThiService.GetExamStatisticsAsync(id, teacherId);
 
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 // Trả về NotFound nếu không tìm thấy, BadRequest cho các lỗi khác (vd: chưa ai nộp bài)
                 if (result.ThongBao.Contains("Không tìm thấy"))

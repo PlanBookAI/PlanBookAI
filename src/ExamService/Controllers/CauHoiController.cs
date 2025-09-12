@@ -47,7 +47,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _cauHoiService.GetByIdAsync(id, teacherId);
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 return NotFound(result);
             }
@@ -66,7 +66,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _cauHoiService.CreateAsync(dto, teacherId);
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 return BadRequest(result);
             }
@@ -86,7 +86,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _cauHoiService.UpdateAsync(id, dto, teacherId);
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 return NotFound(result); // Or BadRequest depending on the error
             }
@@ -104,7 +104,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _cauHoiService.DeleteAsync(id, teacherId);
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 return NotFound(result);
             }
@@ -117,7 +117,7 @@ namespace ExamService.Controllers
         /// </summary>
         /// <remarks>
         /// Endpoint này hỗ trợ phân trang, tìm kiếm theo từ khóa, lọc theo môn học, chủ đề, độ khó, và sắp xếp.
-        /// Ví dụ: `/api/v1/cau-hoi/tim-kiem?Keyword=axit&MonHoc=HoaHoc&PageNumber=1&PageSize=10&SortBy=DoKho&SortDirection=DESC`
+        /// Ví dụ: `/api/v1/cau-hoi/tim-kiem?Keyword=axit&amp;MonHoc=HoaHoc&amp;PageNumber=1&amp;PageSize=10&amp;SortBy=DoKho&amp;SortDirection=DESC`
         /// </remarks>
         /// <param name="searchParams">Đối tượng chứa các tham số tìm kiếm.</param>
         /// <returns>Danh sách câu hỏi thỏa mãn điều kiện.</returns>
@@ -272,7 +272,7 @@ namespace ExamService.Controllers
             var teacherId = HttpContext.GetUserId();
             var result = await _cauHoiService.ImportFromExcelAsync(file, teacherId);
 
-            if (!result.ThanhCong)
+            if (result.MaTrangThai != 200)
             {
                 return BadRequest(result);
             }

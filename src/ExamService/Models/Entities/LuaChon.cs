@@ -12,17 +12,19 @@ namespace ExamService.Models.Entities
         public Guid Id { get; set; }
 
         [Required]
-        [Column("choice_text")]
+        [Column("content")]
         public string NoiDung { get; set; } = string.Empty;
 
+        [Required]
         [Column("question_id")]
         public Guid CauHoiId { get; set; }
 
-        [Column("is_correct")]
-        public bool LaDapAnDung { get; set; }
-
-        [Column("order_index")]
-        public int ThuTu { get; set; }
+        [Required]
+        [Column("choice_order")]
+        public string MaLuaChon { get; set; } = "A";
+        
+        [Column("display_order")]
+        public int ThuTu { get; set; } = 0;
 
         [Column("created_at")]
         public DateTime TaoLuc { get; set; } = DateTime.UtcNow;

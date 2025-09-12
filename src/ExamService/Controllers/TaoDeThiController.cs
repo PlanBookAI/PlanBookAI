@@ -28,7 +28,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _service.CreateAutomaticAsync(dto, teacherId);
-            if (!result.ThanhCong) return BadRequest(result);
+            if (result.MaTrangThai != 200) return BadRequest(result);
             return Created($"/api/v1/de-thi/{result.DuLieu.Id}", result);
         }
 
@@ -42,7 +42,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _service.CreateFromTemplateAsync(dto, teacherId);
-            if (!result.ThanhCong) return BadRequest(result);
+            if (result.MaTrangThai != 200) return BadRequest(result);
             return Created($"/api/v1/de-thi/{result.DuLieu.Id}", result);
         }
 
@@ -56,7 +56,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _service.CreateRandomAsync(dto, teacherId);
-            if (!result.ThanhCong) return BadRequest(result);
+            if (result.MaTrangThai != 200) return BadRequest(result);
             return Created($"/api/v1/de-thi/{result.DuLieu!.Id}", result);
         }
 
@@ -70,7 +70,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _service.CreateFromBankAsync(dto, teacherId);
-            if (!result.ThanhCong) return BadRequest(result);
+            if (result.MaTrangThai != 200) return BadRequest(result);
             return Created($"/api/v1/de-thi/{result.DuLieu!.Id}", result);
         }
     }

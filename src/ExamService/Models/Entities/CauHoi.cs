@@ -13,36 +13,38 @@ namespace ExamService.Models.Entities
         public Guid Id { get; set; }
 
         [Required]
-        [Column("question_text")]
+        [Column("content")]
         public string NoiDung { get; set; } = string.Empty;
 
         [Required]
         [Column("subject")]
-        public string MonHoc { get; set; } = string.Empty;
+        public string MonHoc { get; set; } = "HOA_HOC";
 
-        [Column("question_type")]
-        public string LoaiCauHoi { get; set; } = "multiple_choice";
+        [Required]
+        [Column("type")]
+        public string LoaiCauHoi { get; set; } = "MULTIPLE_CHOICE";
 
         [Column("topic")]
         public string? ChuDe { get; set; }
 
-        [Column("difficulty_level")]
-        public string DoKho { get; set; } = "medium";
+        [Column("difficulty")]
+        public string DoKho { get; set; } = "MEDIUM";
 
         [Column("points")]
         public decimal Diem { get; set; } = 1.0M;
 
         [Column("correct_answer")]
-        public string DapAnDung { get; set; } = string.Empty;
+        public string? DapAnDung { get; set; }
 
         [Column("explanation")]
         public string? GiaiThich { get; set; }
 
+        [Required]
         [Column("created_by")]
         public Guid NguoiTaoId { get; set; }
 
-        [Column("is_active")]
-        public bool IsActive { get; set; } = true;
+        [Column("status")]
+        public string TrangThai { get; set; } = "ACTIVE";
 
         [Column("created_at")]
         public DateTime TaoLuc { get; set; } = DateTime.UtcNow;

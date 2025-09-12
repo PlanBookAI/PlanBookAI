@@ -19,11 +19,13 @@ namespace ExamService.Models.Entities
         [Column("question_id")]
         public Guid CauHoiId { get; set; }
 
+        [Required]
+        [Column("question_order")]
+        public int ThuTu { get; set; }
+
+        [Required]
         [Column("points")]
         public decimal Diem { get; set; } = 1.0M;
-
-        [Column("order_index")]
-        public int ThuTu { get; set; } = 0;
 
         [Column("created_at")]
         public DateTime TaoLuc { get; set; } = DateTime.UtcNow;

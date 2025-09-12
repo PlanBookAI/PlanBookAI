@@ -183,154 +183,415 @@ namespace ExamService.Services
                 return ApiPhanHoi<ImportResultDTO>.ThatBai("Vui lòng chọn một file Excel để tải lên.");
             }
 
-            var result = new ImportResultDTO();
+            var result = new ImportResultDTO
+            {
+                TotalRows = 0,
+                SuccessfulImports = 0,
+                FailedImports = 0,
+                ErrorMessages = new List<string>()
+            };
+            
             var newQuestions = new List<CauHoi>();
 
-            //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
-            using (var stream = new MemoryStream())
+            try
             {
-                await file.CopyToAsync(stream);
-                using (var package = new ExcelPackage(stream))
+                //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                using (var stream = new MemoryStream())
                 {
-                    package.Compatibility.IsWorksheets1Based = false;
-                    var worksheet = package.Workbook.Worksheets.FirstOrDefault();
-                    if (worksheet == null)
+                    await file.CopyToAsync(stream);
+                    using (var package = new ExcelPackage(stream))
                     {
-                        return ApiPhanHoi<ImportResultDTO>.ThatBai("File Excel không hợp lệ hoặc không có trang tính nào.");
-                    }
-
-                    int rowCount = worksheet.Dimension.Rows;
-                    result.TotalRows = rowCount > 1 ? rowCount - 1 : 0;
-
-                    for (int row = 2; row <= rowCount; row++) // Bắt đầu từ dòng 2, bỏ qua header
-                    {
-                        try
+                        package.Compatibility.IsWorksheets1Based = false;
+                        var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+                        if (worksheet == null)
                         {
-                            var noiDung = worksheet.Cells[row, 1].Value?.ToString()?.Trim();
-                            var monHoc = worksheet.Cells[row, 2].Value?.ToString()?.Trim();
-                            var doKho = worksheet.Cells[row, 3].Value?.ToString()?.Trim();
-                            var dapAnDung = worksheet.Cells[row, 4].Value?.ToString()?.Trim();
-                            var giaiThich = worksheet.Cells[row, 9].Value?.ToString()?.Trim();
-
-                            // Validation dữ liệu từng dòng
-                            if (string.IsNullOrWhiteSpace(noiDung) || string.IsNullOrWhiteSpace(monHoc) || string.IsNullOrWhiteSpace(dapAnDung))
-                            {
-                                result.FailedImports++;
-                                result.ErrorMessages.Add($"Dòng {row}: Thiếu thông tin bắt buộc (Nội dung, Môn học, Đáp án đúng).");
-                                continue;
-                            }
-
-                            var cauHoi = new CauHoi
-                            {
-                                Id = Guid.NewGuid(),
-                                NoiDung = noiDung,
-                                MonHoc = monHoc,
-                                DoKho = string.IsNullOrWhiteSpace(doKho) ? "medium" : doKho,
-                                DapAnDung = dapAnDung.ToUpper(),
-                                GiaiThich = giaiThich,
-                                NguoiTaoId = teacherId,
-                                LuaChons = new List<LuaChon>()
-                            };
-
-                            // Đọc các lựa chọn và kiểm tra tính hợp lệ
-                            int choiceCount = 0;
-                            for (int col = 5; col <= 8; col++)
-                            {
-                                var luaChonText = worksheet.Cells[row, col].Value?.ToString()?.Trim();
-                                if (!string.IsNullOrWhiteSpace(luaChonText))
-                                {
-                                    choiceCount++;
-                                    var choiceLetter = ((char)('A' + col - 5)).ToString();
-                                    cauHoi.LuaChons.Add(new LuaChon
-                                    {
-                                        Id = Guid.NewGuid(),
-                                        NoiDung = luaChonText,
-                                        LaDapAnDung = dapAnDung.Equals(choiceLetter, StringComparison.OrdinalIgnoreCase),
-                                        ThuTu = col - 4 // 1, 2, 3, 4
-                                    });
-                                }
-                            }
-
-                            if (choiceCount < 2)
-                            {
-                                result.FailedImports++;
-                                result.ErrorMessages.Add($"Dòng {row}: Câu hỏi phải có ít nhất 2 lựa chọn.");
-                                continue;
-                            }
-
-                            newQuestions.Add(cauHoi);
-                            result.SuccessfulImports++;
+                            return ApiPhanHoi<ImportResultDTO>.ThatBai("File Excel không hợp lệ hoặc không có trang tính nào.");
                         }
-                        catch (Exception ex)
+
+                        // Kiểm tra kích thước dữ liệu
+                        if (worksheet.Dimension == null)
                         {
-                            result.FailedImports++;
-                            result.ErrorMessages.Add($"Dòng {row}: Lỗi không xác định - {ex.Message}");
+                            return ApiPhanHoi<ImportResultDTO>.ThatBai("File Excel trống hoặc không có dữ liệu.");
+                        }
+                        
+                        int rowCount = worksheet.Dimension.Rows;
+                        int colCount = worksheet.Dimension.Columns;
+                        
+                        // Kiểm tra số cột tối thiểu
+                        if (colCount < 6)
+                        {
+                            return ApiPhanHoi<ImportResultDTO>.ThatBai("File Excel không đúng định dạng. Cần ít nhất 6 cột: NoiDung, MonHoc, DoKho, DapAnDung, LuaChonA, LuaChonB.");
+                        }
+                        
+                        // Kiểm tra header
+                        string[] expectedHeaders = { "NoiDung", "MonHoc", "DoKho", "DapAnDung", "LuaChonA", "LuaChonB", "LuaChonC", "LuaChonD", "GiaiThich" };
+                        for (int i = 0; i < Math.Min(colCount, expectedHeaders.Length); i++)
+                        {
+                            string headerValue = worksheet.Cells[1, i + 1].Value?.ToString() ?? "";
+                            if (!headerValue.Equals(expectedHeaders[i], StringComparison.OrdinalIgnoreCase))
+                            {
+                                return ApiPhanHoi<ImportResultDTO>.ThatBai($"Header không đúng định dạng. Cột {i + 1} nên là '{expectedHeaders[i]}' nhưng là '{headerValue}'.");
+                            }
+                        }
+
+                        result.TotalRows = rowCount > 1 ? rowCount - 1 : 0;
+                        
+                        if (result.TotalRows == 0)
+                        {
+                            return ApiPhanHoi<ImportResultDTO>.ThatBai("File Excel không chứa dữ liệu câu hỏi (chỉ có header).");
+                        }
+
+                        for (int row = 2; row <= rowCount; row++) // Bắt đầu từ dòng 2, bỏ qua header
+                        {
+                            try
+                            {
+                                var noiDung = worksheet.Cells[row, 1].Value?.ToString()?.Trim();
+                                var monHoc = worksheet.Cells[row, 2].Value?.ToString()?.Trim();
+                                var doKho = worksheet.Cells[row, 3].Value?.ToString()?.Trim();
+                                var dapAnDung = worksheet.Cells[row, 4].Value?.ToString()?.Trim();
+                                var chuDe = worksheet.Cells[row, 5].Value?.ToString()?.Trim();
+                                var giaiThich = worksheet.Cells[row, 9].Value?.ToString()?.Trim();
+                                
+                                // Chuẩn hóa các giá trị
+                                monHoc = ChuanHoaMonHoc(monHoc ?? "HOA_HOC");
+                                doKho = ChuanHoaDoKho(doKho ?? "MEDIUM");
+                                dapAnDung = (dapAnDung ?? "").Trim().ToUpper();
+
+                                // Validation dữ liệu từng dòng
+                                if (string.IsNullOrWhiteSpace(noiDung))
+                                {
+                                    result.FailedImports++;
+                                    result.ErrorMessages.Add($"Dòng {row}: Nội dung câu hỏi không được để trống.");
+                                    continue;
+                                }
+                                
+                                // Kiểm tra độ khó hợp lệ
+                                if (!new[] { "EASY", "MEDIUM", "HARD", "VERY_HARD" }.Contains(doKho))
+                                {
+                                    result.FailedImports++;
+                                    result.ErrorMessages.Add($"Dòng {row}: Độ khó '{doKho}' không hợp lệ. Phải là một trong: EASY, MEDIUM, HARD, VERY_HARD.");
+                                    continue;
+                                }
+                                
+                                // Kiểm tra đáp án đúng hợp lệ
+                                if (string.IsNullOrEmpty(dapAnDung) || !new[] { "A", "B", "C", "D" }.Contains(dapAnDung))
+                                {
+                                    result.FailedImports++;
+                                    result.ErrorMessages.Add($"Dòng {row}: Đáp án đúng '{dapAnDung}' không hợp lệ. Phải là một trong: A, B, C, D.");
+                                    continue;
+                                }
+
+                                var cauHoi = new CauHoi
+                                {
+                                    Id = Guid.NewGuid(),
+                                    NoiDung = noiDung,
+                                    MonHoc = monHoc,
+                                    DoKho = doKho,
+                                    ChuDe = chuDe,
+                                    DapAnDung = dapAnDung,
+                                    GiaiThich = giaiThich,
+                                    NguoiTaoId = teacherId,
+                                    LoaiCauHoi = "MULTIPLE_CHOICE", // Mặc định
+                                    TrangThai = "ACTIVE",
+                                    LuaChons = new List<LuaChon>(),
+                                    TaoLuc = DateTime.UtcNow,
+                                    CapNhatLuc = DateTime.UtcNow
+                                };
+
+                                // Đọc các lựa chọn và kiểm tra tính hợp lệ
+                                int choiceCount = 0;
+                                for (int col = 5; col <= 8; col++)
+                                {
+                                    var luaChonText = worksheet.Cells[row, col].Value?.ToString()?.Trim();
+                                    if (!string.IsNullOrWhiteSpace(luaChonText))
+                                    {
+                                        choiceCount++;
+                                        var choiceLetter = ((char)('A' + col - 5)).ToString();
+                                        cauHoi.LuaChons.Add(new LuaChon
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            NoiDung = luaChonText,
+                                            CauHoiId = cauHoi.Id,
+                                            MaLuaChon = choiceLetter,
+                                            TaoLuc = DateTime.UtcNow
+                                        });
+                                    }
+                                }
+
+                                if (choiceCount < 2)
+                                {
+                                    result.FailedImports++;
+                                    result.ErrorMessages.Add($"Dòng {row}: Câu hỏi phải có ít nhất 2 lựa chọn.");
+                                    continue;
+                                }
+                                
+                                // Kiểm tra đáp án đúng có trong các lựa chọn
+                                if (!cauHoi.LuaChons.Any(lc => lc.MaLuaChon == dapAnDung))
+                                {
+                                    result.FailedImports++;
+                                    result.ErrorMessages.Add($"Dòng {row}: Đáp án đúng '{dapAnDung}' không tồn tại trong các lựa chọn.");
+                                    continue;
+                                }
+
+                                newQuestions.Add(cauHoi);
+                                result.SuccessfulImports++;
+                            }
+                            catch (Exception ex)
+                            {
+                                result.FailedImports++;
+                                result.ErrorMessages.Add($"Dòng {row}: Lỗi không xác định - {ex.Message}");
+                            }
                         }
                     }
                 }
-            }
 
-            // Thêm tất cả câu hỏi hợp lệ vào DB
-            if (newQuestions.Any())
+                // Thêm tất cả câu hỏi hợp lệ vào DB
+                if (newQuestions.Any())
+                {
+                    try
+                    {
+                        // Sử dụng AddRange để tối ưu hóa việc thêm nhiều bản ghi
+                        await _repo.CreateRangeAsync(newQuestions);
+                        
+                        // Gửi thông báo qua RabbitMQ nếu có nhiều câu hỏi được thêm
+                        if (newQuestions.Count > 5)
+                        {
+                            try
+                            {
+                                await _publishEndpoint.Publish<CauHoiImported>(new 
+                                {
+                                    TeacherId = teacherId,
+                                    NumberOfQuestions = newQuestions.Count,
+                                    ImportedAt = DateTime.UtcNow
+                                });
+                            }
+                            catch (Exception mqEx)
+                            {
+                                // Lỗi RabbitMQ không ảnh hưởng đến kết quả import
+                                // Chỉ log lỗi
+                                Console.WriteLine($"Lỗi khi gửi thông báo RabbitMQ: {mqEx.Message}");
+                            }
+                        }
+                    }
+                    catch (Exception dbEx)
+                    {
+                        // Lỗi khi lưu vào DB
+                        return ApiPhanHoi<ImportResultDTO>.ThatBai($"Lỗi khi lưu câu hỏi vào cơ sở dữ liệu: {dbEx.Message}");
+                    }
+                }
+
+                return ApiPhanHoi<ImportResultDTO>.ThanhCongVoiDuLieu(result, $"Quá trình import hoàn tất. Đã import thành công {result.SuccessfulImports}/{result.TotalRows} câu hỏi.");
+            }
+            catch (Exception ex)
             {
-                // Sử dụng AddRange để tối ưu hóa việc thêm nhiều bản ghi
-                await _repo.CreateRangeAsync(newQuestions);
+                return ApiPhanHoi<ImportResultDTO>.ThatBai($"Lỗi khi xử lý file Excel: {ex.Message}");
             }
-
-            return ApiPhanHoi<ImportResultDTO>.ThanhCongVoiDuLieu(result, "Quá trình import hoàn tất.");
+        }
+        
+        private string ChuanHoaMonHoc(string monHoc)
+        {
+            monHoc = monHoc.Trim().ToUpper();
+            
+            // Ánh xạ các tên môn học phổ biến
+            var monHocMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "HOA", "HOA_HOC" },
+                { "HOAHOC", "HOA_HOC" },
+                { "HOA HOC", "HOA_HOC" },
+                { "HÓA HỌC", "HOA_HOC" },
+                { "TOAN", "TOAN_HOC" },
+                { "TOANHOC", "TOAN_HOC" },
+                { "TOAN HOC", "TOAN_HOC" },
+                { "TOÁN HỌC", "TOAN_HOC" },
+                { "LY", "VAT_LY" },
+                { "VATLY", "VAT_LY" },
+                { "VAT LY", "VAT_LY" },
+                { "VẬT LÝ", "VAT_LY" },
+                { "SINH", "SINH_HOC" },
+                { "SINHHOC", "SINH_HOC" },
+                { "SINH HOC", "SINH_HOC" },
+                { "SINH HỌC", "SINH_HOC" }
+            };
+            
+            if (monHocMapping.ContainsKey(monHoc))
+            {
+                return monHocMapping[monHoc];
+            }
+            
+            return monHoc;
+        }
+        
+        private string ChuanHoaDoKho(string doKho)
+        {
+            doKho = doKho.Trim().ToUpper();
+            
+            // Ánh xạ các mức độ khó
+            var doKhoMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "DE", "EASY" },
+                { "DỄ", "EASY" },
+                { "TRUNG BINH", "MEDIUM" },
+                { "TRUNG BÌNH", "MEDIUM" },
+                { "TB", "MEDIUM" },
+                { "KHO", "HARD" },
+                { "KHÓ", "HARD" },
+                { "RAT KHO", "VERY_HARD" },
+                { "RẤT KHÓ", "VERY_HARD" }
+            };
+            
+            if (doKhoMapping.ContainsKey(doKho))
+            {
+                return doKhoMapping[doKho];
+            }
+            
+            return doKho;
         }
 
         public async Task<byte[]> ExportToExcelAsync(Guid teacherId)
         {
-            var questions = await _repo.GetQueryable()
-                .Where(q => q.NguoiTaoId == teacherId)
-                .Include(q => q.LuaChons)
-                .OrderBy(q => q.MonHoc).ThenBy(q => q.ChuDe)
-                .AsNoTracking()
-                .ToListAsync();
-
-            //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using (var package = new ExcelPackage())
+            try
             {
-                package.Compatibility.IsWorksheets1Based = false;
-                var worksheet = package.Workbook.Worksheets.Add("NganHangCauHoi");
+                var questions = await _repo.GetQueryable()
+                    .Where(q => q.NguoiTaoId == teacherId)
+                    .Include(q => q.LuaChons)
+                    .OrderBy(q => q.MonHoc)
+                    .ThenBy(q => q.ChuDe)
+                    .AsNoTracking()
+                    .ToListAsync();
 
-                // --- Header ---
-                string[] headers = { "NoiDung", "MonHoc", "DoKho", "DapAnDung", "LuaChonA", "LuaChonB", "LuaChonC", "LuaChonD", "GiaiThich" };
-                for (int i = 0; i < headers.Length; i++)
+                if (questions == null || !questions.Any())
                 {
-                    worksheet.Cells[1, i + 1].Value = headers[i];
-                }
-                using (var range = worksheet.Cells[1, 1, 1, headers.Length])
-                {
-                    range.Style.Font.Bold = true;
-                    range.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    range.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#CCCCCC"));
-                }
-
-                // --- Dữ liệu ---
-                int row = 2;
-                foreach (var q in questions)
-                {
-                    worksheet.Cells[row, 1].Value = q.NoiDung;
-                    worksheet.Cells[row, 2].Value = q.MonHoc;
-                    worksheet.Cells[row, 3].Value = q.DoKho;
-                    worksheet.Cells[row, 4].Value = q.DapAnDung;
-
-                    var sortedChoices = q.LuaChons.OrderBy(c => c.ThuTu).ToList();
-                    for (int i = 0; i < sortedChoices.Count && i < 4; i++)
+                    // Tạo file Excel trống với thông báo
+                    using (var package = new ExcelPackage())
                     {
-                        worksheet.Cells[row, 5 + i].Value = sortedChoices[i].NoiDung;
+                        var worksheet = package.Workbook.Worksheets.Add("NganHangCauHoi");
+                        worksheet.Cells[1, 1].Value = "Không có câu hỏi nào trong ngân hàng câu hỏi của bạn.";
+                        worksheet.Cells[1, 1].Style.Font.Bold = true;
+                        return await package.GetAsByteArrayAsync();
+                    }
+                }
+
+                //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
+                {
+                    package.Compatibility.IsWorksheets1Based = false;
+                    var worksheet = package.Workbook.Worksheets.Add("NganHangCauHoi");
+
+                    // Thêm thông tin header
+                    worksheet.Cells[1, 1, 1, 9].Merge = true;
+                    worksheet.Cells[1, 1].Value = "NGÂN HÀNG CÂU HỎI";
+                    worksheet.Cells[1, 1].Style.Font.Bold = true;
+                    worksheet.Cells[1, 1].Style.Font.Size = 14;
+                    worksheet.Cells[1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    
+                    // Thêm thông tin thống kê
+                    worksheet.Cells[2, 1, 2, 9].Merge = true;
+                    worksheet.Cells[2, 1].Value = $"Tổng số câu hỏi: {questions.Count} | Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
+                    worksheet.Cells[2, 1].Style.Font.Italic = true;
+                    worksheet.Cells[2, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                    // --- Header ---
+                    string[] headers = { "NoiDung", "MonHoc", "DoKho", "DapAnDung", "LuaChonA", "LuaChonB", "LuaChonC", "LuaChonD", "GiaiThich" };
+                    for (int i = 0; i < headers.Length; i++)
+                    {
+                        worksheet.Cells[4, i + 1].Value = headers[i];
+                    }
+                    
+                    using (var range = worksheet.Cells[4, 1, 4, headers.Length])
+                    {
+                        range.Style.Font.Bold = true;
+                        range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        range.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#CCCCCC"));
+                        range.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        range.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        range.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        range.Style.Border.Right.Style = ExcelBorderStyle.Thin;
                     }
 
-                    worksheet.Cells[row, 9].Value = q.GiaiThich;
-                    row++;
+                    // --- Dữ liệu ---
+                    int row = 5; // Bắt đầu từ dòng 5 (sau header)
+                    foreach (var q in questions)
+                    {
+                        worksheet.Cells[row, 1].Value = q.NoiDung;
+                        worksheet.Cells[row, 2].Value = q.MonHoc;
+                        worksheet.Cells[row, 3].Value = q.DoKho;
+                        worksheet.Cells[row, 4].Value = q.DapAnDung;
+
+                        var sortedChoices = q.LuaChons.OrderBy(c => c.MaLuaChon).ToList();
+                        for (int i = 0; i < sortedChoices.Count && i < 4; i++)
+                        {
+                            worksheet.Cells[row, 5 + i].Value = sortedChoices[i].NoiDung;
+                        }
+
+                        worksheet.Cells[row, 9].Value = q.GiaiThich;
+                        
+                        // Định dạng dòng
+                        using (var rowRange = worksheet.Cells[row, 1, row, headers.Length])
+                        {
+                            rowRange.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            rowRange.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            rowRange.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            rowRange.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            
+                            // Đổi màu nền cho dòng chẵn
+                            if (row % 2 == 0)
+                            {
+                                rowRange.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                                rowRange.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#F2F2F2"));
+                            }
+                        }
+                        
+                        row++;
+                    }
+
+                    // Tự động điều chỉnh độ rộng cột
+                    worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+                    
+                    // Đặt độ rộng tối đa cho cột nội dung
+                    worksheet.Column(1).Width = Math.Min(worksheet.Column(1).Width, 50);
+                    
+                    // Đặt wrap text cho các cột dài
+                    worksheet.Column(1).Style.WrapText = true; // Nội dung
+                    worksheet.Column(9).Style.WrapText = true; // Giải thích
+                    
+                    // Đặt filter cho header
+                    worksheet.Cells[4, 1, 4, headers.Length].AutoFilter = true;
+                    
+                    // Đóng băng hàng đầu tiên
+                    worksheet.View.FreezePanes(5, 1);
+
+                    try
+                    {
+                        // Gửi thông báo qua RabbitMQ
+                        await _publishEndpoint.Publish<CauHoiExported>(new
+                        {
+                            TeacherId = teacherId,
+                            NumberOfQuestions = questions.Count,
+                            ExportedAt = DateTime.UtcNow
+                        });
+                    }
+                    catch (Exception mqEx)
+                    {
+                        // Lỗi RabbitMQ không ảnh hưởng đến kết quả export
+                        // Chỉ log lỗi
+                        Console.WriteLine($"Lỗi khi gửi thông báo RabbitMQ: {mqEx.Message}");
+                    }
+
+                    return await package.GetAsByteArrayAsync();
                 }
-
-                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-
-                return await package.GetAsByteArrayAsync();
+            }
+            catch (Exception ex)
+            {
+                // Tạo file Excel với thông báo lỗi
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("Lỗi");
+                    worksheet.Cells[1, 1].Value = "Đã xảy ra lỗi khi xuất dữ liệu:";
+                    worksheet.Cells[1, 1].Style.Font.Bold = true;
+                    worksheet.Cells[2, 1].Value = ex.Message;
+                    return await package.GetAsByteArrayAsync();
+                }
             }
         }
 

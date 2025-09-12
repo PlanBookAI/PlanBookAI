@@ -18,27 +18,34 @@ namespace ExamService.Models.Entities
         [Column("title")]
         public string TieuDe { get; set; } = string.Empty;
 
+        [Column("description")]
+        public string? MoTa { get; set; }
+
         [Required]
         [Column("subject")]
-        public string MonHoc { get; set; } = string.Empty;
+        public string MonHoc { get; set; } = "HOA_HOC";
 
-        [Column("grade_level")]
-        public int KhoiLop { get; set; }
+        [Column("grade")]
+        public int? KhoiLop { get; set; }
 
         [Column("duration_minutes")]
-        public int ThoiGianLamBai { get; set; }
+        public int? ThoiGianLamBai { get; set; }
 
-        [Column("total_points")]
-        public decimal DiemToiDa { get; set; } = 10.0M;
+        [Column("total_score")]
+        public decimal? DiemToiDa { get; set; }
 
+        [Required]
+        [Column("teacher_id")]
+        public Guid GiaoVienId { get; set; }
+        
+        [Column("creator_id")]
+        public Guid NguoiTaoId { get; set; }
+        
         [Column("instructions")]
         public string? HuongDan { get; set; }
 
         [Column("status")]
-        public string TrangThai { get; set; } = TrangThaiDeThi.Draft.ToString();
-
-        [Column("created_by")]
-        public Guid NguoiTaoId { get; set; }
+        public string TrangThai { get; set; } = "DRAFT";
 
         [Column("created_at")]
         public DateTime TaoLuc { get; set; } = DateTime.UtcNow;

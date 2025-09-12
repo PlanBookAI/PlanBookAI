@@ -28,7 +28,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _service.GetQuestionsByExamIdAsync(deThiId, teacherId);
-            if (!result.ThanhCong) return NotFound(result);
+            if (result.MaTrangThai != 200) return NotFound(result);
             return Ok(result);
         }
 
@@ -42,7 +42,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _service.UpdateOrderAsync(id, dto.ThuTuMoi, teacherId);
-            if (!result.ThanhCong) return NotFound(result);
+            if (result.MaTrangThai != 200) return NotFound(result);
             return Ok(result);
         }
 
@@ -56,7 +56,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _service.UpdatePointsAsync(id, dto.DiemMoi, teacherId);
-            if (!result.ThanhCong) return NotFound(result);
+            if (result.MaTrangThai != 200) return NotFound(result);
             return Ok(result);
         }
     }

@@ -33,8 +33,7 @@ public class ExamDbContext : DbContext
         modelBuilder.Entity<ExamQuestion>()
             .HasOne(eq => eq.CauHoi)
             .WithMany(ch => ch.ExamQuestions)
-            .HasForeignKey(eq => eq.CauHoiId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(eq => eq.CauHoiId);
 
         // DeThi - ExamQuestion relationship
         modelBuilder.Entity<ExamQuestion>()
@@ -43,60 +42,71 @@ public class ExamDbContext : DbContext
             .HasForeignKey(eq => eq.DeThiId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // BaiLam - HocSinh relationship
-        modelBuilder.Entity<BaiLam>()
-            .HasOne(bl => bl.HocSinh)
-            .WithMany(hs => hs.BaiLams)
-            .HasForeignKey(bl => bl.HocSinhId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // Unique constraints for exam_questions
+        modelBuilder.Entity<ExamQuestion>()
+            .HasIndex(eq => new { eq.DeThiId, eq.CauHoiId })
+            .IsUnique();
 
-        // BaiLam - DeThi relationship
-        modelBuilder.Entity<BaiLam>()
-            .HasOne(bl => bl.DeThi)
-            .WithMany(dt => dt.BaiLams)
-            .HasForeignKey(bl => bl.DeThiId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ExamQuestion>()
+            .HasIndex(eq => new { eq.DeThiId, eq.ThuTu })
+            .IsUnique();
 
-        // KetQua - BaiLam relationship (1-1)
-        modelBuilder.Entity<KetQua>()
-            .HasOne(kq => kq.BaiLam)
-            .WithOne(bl => bl.KetQua)
-            .HasForeignKey<KetQua>(kq => kq.BaiLamId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // Check constraints
+        modelBuilder.Entity<ExamQuestion>()
+            .HasCheckConstraint("exam_questions_points_check", "points > 0");
 
-        // KetQua - HocSinh relationship
-        modelBuilder.Entity<KetQua>()
-            .HasOne(kq => kq.HocSinh)
-            .WithMany(hs => hs.KetQuas)
-            .HasForeignKey(kq => kq.HocSinhId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<DeThi>()
+            .HasCheckConstraint("exams_duration_minutes_check", "duration_minutes > 0");
 
-        // KetQua - DeThi relationship
-        modelBuilder.Entity<KetQua>()
-            .HasOne(kq => kq.DeThi)
-            .WithMany()
-            .HasForeignKey(kq => kq.DeThiId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<DeThi>()
+            .HasCheckConstraint("exams_grade_check", "grade = ANY (ARRAY[10, 11, 12])");
+
+        modelBuilder.Entity<DeThi>()
+            .HasCheckConstraint("exams_status_check", "status::text = ANY (ARRAY['DRAFT'::character varying, 'PUBLISHED'::character varying, 'COMPLETED'::character varying, 'ARCHIVED'::character varying])");
+
+        modelBuilder.Entity<DeThi>()
+            .HasCheckConstraint("exams_total_score_check", "total_score > 0");
+
+        modelBuilder.Entity<LuaChon>()
+            .HasCheckConstraint("question_choices_choice_order_check", "choice_order = ANY (ARRAY['A'::bpchar, 'B'::bpchar, 'C'::bpchar, 'D'::bpchar])");
+
+        modelBuilder.Entity<CauHoi>()
+            .HasCheckConstraint("questions_difficulty_check", "difficulty::text = ANY (ARRAY['EASY'::character varying, 'MEDIUM'::character varying, 'HARD'::character varying, 'VERY_HARD'::character varying])");
+
+        modelBuilder.Entity<CauHoi>()
+            .HasCheckConstraint("questions_status_check", "status::text = ANY (ARRAY['ACTIVE'::character varying, 'INACTIVE'::character varying, 'ARCHIVED'::character varying])");
+
+        modelBuilder.Entity<CauHoi>()
+            .HasCheckConstraint("questions_type_check", "type::text = ANY (ARRAY['MULTIPLE_CHOICE'::character varying, 'ESSAY'::character varying, 'SHORT_ANSWER'::character varying, 'TRUE_FALSE'::character varying])");
 
         // Indexes
         modelBuilder.Entity<CauHoi>()
-            .HasIndex(ch => ch.MonHoc);
+            .HasIndex(ch => ch.MonHoc)
+            .HasDatabaseName("idx_assessment_questions_subject");
 
         modelBuilder.Entity<CauHoi>()
-            .HasIndex(ch => ch.DoKho);
+            .HasIndex(ch => ch.DoKho)
+            .HasDatabaseName("idx_assessment_questions_difficulty");
+
+        modelBuilder.Entity<CauHoi>()
+            .HasIndex(ch => ch.ChuDe)
+            .HasDatabaseName("idx_assessment_questions_topic");
+
+        modelBuilder.Entity<CauHoi>()
+            .HasIndex(ch => ch.NguoiTaoId)
+            .HasDatabaseName("idx_assessment_questions_created_by");
 
         modelBuilder.Entity<DeThi>()
-            .HasIndex(dt => dt.MonHoc);
+            .HasIndex(dt => dt.MonHoc)
+            .HasDatabaseName("idx_assessment_exams_subject");
 
         modelBuilder.Entity<DeThi>()
-            .HasIndex(dt => dt.TrangThai);
+            .HasIndex(dt => dt.GiaoVienId)
+            .HasDatabaseName("idx_assessment_exams_teacher");
 
-        modelBuilder.Entity<HocSinh>()
-            .HasIndex(hs => hs.MaSo)
-            .IsUnique();
-
-        modelBuilder.Entity<HocSinh>()
-            .HasIndex(hs => hs.GiaoVienId);
+        modelBuilder.Entity<LuaChon>()
+            .HasIndex(lc => lc.CauHoiId)
+            .HasDatabaseName("idx_assessment_question_choices_question");
     }
 }
 

@@ -28,7 +28,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _luaChonService.GetChoicesByQuestionIdAsync(cauHoiId, teacherId);
-            if (!result.ThanhCong) return NotFound(result);
+            if (result.MaTrangThai != 200) return NotFound(result);
             return Ok(result);
         }
 
@@ -42,7 +42,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _luaChonService.CreateAsync(dto, teacherId);
-            if (!result.ThanhCong) return BadRequest(result);
+            if (result.MaTrangThai != 200) return BadRequest(result);
             // Không trả về CreatedAtAction vì không có endpoint GetById cho lựa chọn
             return Ok(result);
         }
@@ -57,7 +57,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _luaChonService.UpdateAsync(id, dto, teacherId);
-            if (!result.ThanhCong) return NotFound(result);
+            if (result.MaTrangThai != 200) return NotFound(result);
             return Ok(result);
         }
 
@@ -71,7 +71,7 @@ namespace ExamService.Controllers
         {
             var teacherId = HttpContext.GetUserId();
             var result = await _luaChonService.DeleteAsync(id, teacherId);
-            if (!result.ThanhCong) return NotFound(result);
+            if (result.MaTrangThai != 200) return NotFound(result);
             return Ok(result);
         }
     }
