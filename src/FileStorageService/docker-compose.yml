@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  planbookai-filestorage:
+    build: .
+    container_name: planbookai-filestorage
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./data/files:/app/data/files
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=planbookai;Username=postgres;Password=password123
+      - FILE_STORAGE_ROOT=/app/data/files
+      - MAX_UPLOAD_MB=50
+      - ALLOWED_MIME=image/jpeg,image/png,image/gif,image/webp,image/bmp,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+    depends_on:
+      - postgres
+    networks:
+      - planbookai-network
+
+  postgres:
+    image: postgres:15
+    container_name: planbookai-postgres
+    environment:
+      - POSTGRES_DB=planbookai
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/planbookai.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - planbookai-network
+
+volumes:
+  postgres_data:
+
+networks:
+  planbookai-network:
+    driver: bridge
