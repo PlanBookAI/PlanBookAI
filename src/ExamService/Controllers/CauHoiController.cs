@@ -250,18 +250,11 @@ namespace ExamService.Controllers
         /// </summary>
         /// <remarks>
         /// File Excel phải có các cột theo thứ tự: 
-        /// 1. NoiDung
-        /// 2. MonHoc
-        /// 3. DoKho
-        /// 4. DapAnDung (là ký tự của lựa chọn đúng, ví dụ: 'A')
-        /// 5. LuaChonA
-        /// 6. LuaChonB
-        /// 7. LuaChonC
-        /// 8. LuaChonD
+        /// 1. NoiDung, 2. MonHoc, 3. DoKho, 4. DapAnDung (ký tự A/B/C/D), 
+        /// 5. LuaChonA, 6. LuaChonB, 7. LuaChonC, 8. LuaChonD, 9. GiaiThich.
         /// Dòng đầu tiên được coi là header và sẽ bị bỏ qua.
         /// </remarks>
         /// <param name="file">File Excel (.xlsx) chứa danh sách câu hỏi.</param>
-        /// <returns>Kết quả của quá trình import.</returns>
         [HttpPost("import-excel")]
         [ProducesResponseType(typeof(ApiPhanHoi<ImportResultDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiPhanHoi<object>), StatusCodes.Status400BadRequest)]
@@ -271,8 +264,6 @@ namespace ExamService.Controllers
             {
                 return BadRequest(ApiPhanHoi<ImportResultDTO>.ThatBai("Không có file nào được tải lên."));
             }
-
-            // Kiểm tra định dạng file
             if (Path.GetExtension(file.FileName).ToLower() != ".xlsx")
             {
                 return BadRequest(ApiPhanHoi<ImportResultDTO>.ThatBai("Chỉ hỗ trợ file định dạng .xlsx."));
@@ -292,10 +283,9 @@ namespace ExamService.Controllers
         /// <summary>
         /// Xuất toàn bộ ngân hàng câu hỏi của giáo viên ra file Excel.
         /// </summary>
-        /// <returns>Một file .xlsx chứa dữ liệu câu hỏi.</returns>
         [HttpGet("export-excel")]
         [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiPhanHoi<object>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ExportToExcel()
         {
             var teacherId = HttpContext.GetUserId();
@@ -306,14 +296,10 @@ namespace ExamService.Controllers
                 return NotFound(ApiPhanHoi<object>.ThatBai("Không có dữ liệu câu hỏi để xuất file."));
             }
 
-            // Tạo tên file động với ngày giờ hiện tại
             string fileName = $"NganHangCauHoi_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-
-            // Kiểu MIME cho file Excel
             string mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-            // Trả về file cho client
             return File(fileBytes, mimeType, fileName);
-        }  
+        }
     }
 }

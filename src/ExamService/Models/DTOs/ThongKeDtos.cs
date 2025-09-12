@@ -3,56 +3,45 @@
 namespace ExamService.Models.DTOs
 {
     /// <summary>
-    /// DTO chứa kết quả thống kê chung.
+    /// DTO chứa kết quả báo cáo thống kê tổng quan của một giáo viên.
+    /// Đây là DTO cấp cao nhất, bao gồm tất cả các thông tin thống kê.
     /// </summary>
-    public class ThongKeTongQuanDTO
+    public class BaoCaoThongKeGiaoVienDTO
     {
-        public int TongSoCauHoi { get; set; }
-        public int TongSoDeThi { get; set; }
-        public List<ThongKeTheoNhomDTO> ThongKeTheoMonHoc { get; set; } = new();
-        public List<ThongKeTheoNhomDTO> ThongKeTheoDoKho { get; set; } = new();
-        public List<ThongKeTheoNhomDTO> ThongKeTheoChuDe { get; set; } = new();
+        public Guid TeacherId { get; set; }
+        public ThongKeTongQuanCauHoiDTO ThongKeCauHoi { get; set; } = new();
+        public ThongKeTongQuanDeThiDTO ThongKeDeThi { get; set; } = new();
     }
 
     /// <summary>
-    /// DTO đại diện cho một nhóm thống kê (ví dụ: Môn học 'Hóa học' có 100 câu hỏi).
+    /// DTO chứa thống kê chi tiết chỉ về Câu hỏi.
+    /// </summary>
+    public class ThongKeTongQuanCauHoiDTO
+    {
+        public int TongSo { get; set; }
+        public List<ThongKeTheoNhomDTO> TheoMonHoc { get; set; } = new();
+        public List<ThongKeTheoNhomDTO> TheoDoKho { get; set; } = new();
+        public List<ThongKeTheoNhomDTO> TheoChuDe { get; set; } = new();
+    }
+
+    /// <summary>
+    /// DTO chứa thống kê chi tiết chỉ về Đề thi.
+    /// </summary>
+    public class ThongKeTongQuanDeThiDTO
+    {
+        public int TongSo { get; set; }
+        public List<ThongKeTheoNhomDTO> TheoTrangThai { get; set; } = new();
+        public List<ThongKeTheoNhomDTO> TheoMonHoc { get; set; } = new();
+        public List<ThongKeTheoNhomDTO> TheoKhoiLop { get; set; } = new();
+    }
+
+    /// <summary>
+    /// DTO chung để biểu diễn một nhóm thống kê (Tên nhóm và số lượng).
+    /// Ví dụ: { TenNhom: "Hóa học", SoLuong: 150 }
     /// </summary>
     public class ThongKeTheoNhomDTO
     {
         public string TenNhom { get; set; } = string.Empty;
         public int SoLuong { get; set; }
-    }
-
-    /// <summary>
-    /// DTO chứa kết quả thống kê chi tiết chỉ về Câu hỏi.
-    /// </summary>
-    public class CauHoiThongKeTongQuanDTO
-    {
-        public int TongSoCauHoi { get; set; }
-        public List<ThongKeTheoNhomDTO> ThongKeTheoMonHoc { get; set; } = new();
-        public List<ThongKeTheoNhomDTO> ThongKeTheoDoKho { get; set; } = new();
-        public List<ThongKeTheoNhomDTO> ThongKeTheoChuDe { get; set; } = new();
-    }
-
-    /// <summary>
-    /// DTO chứa kết quả thống kê chi tiết chỉ về Đề thi.
-    /// </summary>
-    public class DeThiThongKeTongQuanDTO
-    {
-        public int TongSoDeThi { get; set; }
-        public List<ThongKeTheoNhomDTO> ThongKeTheoTrangThai { get; set; } = new();
-        public List<ThongKeTheoNhomDTO> ThongKeTheoMonHoc { get; set; } = new();
-        public List<ThongKeTheoNhomDTO> ThongKeTheoKhoiLop { get; set; } = new();
-    }
-
-    /// <summary>
-    /// DTO chứa kết quả thống kê về hoạt động của một người dùng cụ thể.
-    /// </summary>
-    public class NguoiDungThongKeDTO
-    {
-        public Guid UserId { get; set; }
-        public int TongSoCauHoiDaTao { get; set; }
-        public int TongSoDeThiDaTao { get; set; }
-        public int TongSoMauDeThiDaTao { get; set; }
     }
 }
