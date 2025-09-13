@@ -1,3 +1,7 @@
+# ==================== DOCKER COMPOSE - RUN DLL ====================
+# Docker Compose để chạy DLL đã build sẵn
+version: '3.8'
+
 services:
   # === INFRASTRUCTURE SERVICES ===
   postgres:
@@ -11,6 +15,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ../scripts:/scripts:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U test -d planbookai"]
       interval: 30s
@@ -47,6 +52,7 @@ services:
       "
     networks:
       - planbookai-network
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: planbookai_rabbitmq
@@ -67,92 +73,145 @@ services:
       retries: 3
     networks:
       - planbookai-network
-  # === APPLICATION SERVICES ===
+
+  # === APPLICATION SERVICES (RUN DLL) ===
   authservice:
-    image: ${DOCKER_REGISTRY-}authservice
-    build:
-      context: AuthService
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+    container_name: planbookai_authservice
+    working_dir: /app
+    volumes:
+      - ./AuthService/bin/Release/net9.0/publish:/app:ro
     ports:
       - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - planbookai-network
+    command: ["dotnet", "AuthService.dll"]
+
   gatewayservice:
-    image: ${DOCKER_REGISTRY-}gatewayservice
-    build:
-      context: GatewayService
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+    container_name: planbookai_gatewayservice
+    working_dir: /app
+    volumes:
+      - ./GatewayService/bin/Release/net9.0/publish:/app:ro
     ports:
       - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
     depends_on:
       authservice:
         condition: service_started
     networks:
       - planbookai-network
+    command: ["dotnet", "GatewayService.dll"]
+
   planservice:
-    image: ${DOCKER_REGISTRY-}planservice
-    build:
-      context: PlanService
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+    container_name: planbookai_planservice
+    working_dir: /app
+    volumes:
+      - ./PlanService/bin/Release/net9.0/publish:/app:ro
     ports:
       - "8083:8083"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8083
     depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
       - planbookai-network
+    command: ["dotnet", "PlanService.dll"]
+
   userservice:
-    image: ${DOCKER_REGISTRY-}userservice
-    build:
-      context: UserService
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+    container_name: planbookai_userservice
+    working_dir: /app
+    volumes:
+      - ./UserService/bin/Release/net9.0/publish:/app:ro
     ports:
       - "8082:8082"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8082
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - planbookai-network
+    command: ["dotnet", "UserService.dll"]
+
   examservice:
-    image: ${DOCKER_REGISTRY-}examservice
-    build:
-      context: ExamService
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+    container_name: planbookai_examservice
+    working_dir: /app
+    volumes:
+      - ./ExamService/bin/Release/net9.0/publish:/app:ro
     ports:
       - "8084:8084"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8084
     depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
       - planbookai-network
+    command: ["dotnet", "ExamService.dll"]
+
   classroomservice:
-    image: ${DOCKER_REGISTRY-}classroomservice
-    build:
-      context: ClassroomService
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+    container_name: planbookai_classroomservice
+    working_dir: /app
+    volumes:
+      - ./ClassroomService/bin/Release/net9.0/publish:/app:ro
     ports:
       - "8085:8085"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8085
     depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
       - planbookai-network
+    command: ["dotnet", "ClassroomService.dll"]
+
   filestorageservice:
-    image: ${DOCKER_REGISTRY-}filestorageservice
-    build:
-      context: FileStorageService
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+    container_name: planbookai_filestorageservice
+    working_dir: /app
+    volumes:
+      - ./FileStorageService/bin/Release/net9.0/publish:/app:ro
     ports:
       - "8086:8086"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8086
     depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
       - planbookai-network
+    command: ["dotnet", "FileStorageService.dll"]
+
   notificationservice:
-    image: ${DOCKER_REGISTRY-}notificationservice
-    build:
-      context: NotificationService
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+    container_name: planbookai_notificationservice
+    working_dir: /app
+    volumes:
+      - ./NotificationService/bin/Release/net9.0/publish:/app:ro
     ports:
       - "8087:8087"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8087
     depends_on:
       postgres:
         condition: service_healthy
@@ -160,33 +219,48 @@ services:
         condition: service_healthy
     networks:
       - planbookai-network
+    command: ["dotnet", "NotificationService.dll"]
+
   studentgradingservice:
-    image: ${DOCKER_REGISTRY-}studentgradingservice
-    build:
-      context: StudentGradingService
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+    container_name: planbookai_studentgradingservice
+    working_dir: /app
+    volumes:
+      - ./StudentGradingService/bin/Release/net9.0/publish:/app:ro
     ports:
       - "8089:8089"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8089
     depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
       - planbookai-network
+    command: ["dotnet", "StudentGradingService.dll"]
+
   logservice:
-    image: ${DOCKER_REGISTRY-}logservice
-    build:
-      context: LogService
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+    container_name: planbookai_logservice
+    working_dir: /app
+    volumes:
+      - ./LogService/bin/Release/net9.0/publish:/app:ro
     ports:
       - "8091:8091"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8091
     depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
       - planbookai-network
+    command: ["dotnet", "LogService.dll"]
+
 volumes:
   rabbitmq_data:
   postgres_data:
+
 networks:
   planbookai-network:
     driver: bridge

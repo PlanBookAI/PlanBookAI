@@ -91,17 +91,17 @@ public class MonitoringController : ControllerBase
         // Danh sách tất cả 11 services cần kiểm tra
         var serviceEndpoints = new Dictionary<string, string>
         {
-            { "auth-service", "http://host.docker.internal:8081/api/v1/health" },
-            { "user-service", "http://host.docker.internal:8082/api/v1/health" },
-            { "plan-service", "http://host.docker.internal:8083/api/v1/health" },
-            { "exam-service", "http://host.docker.internal:8084/api/v1/health" },
-            { "classroom-service", "http://host.docker.internal:8085/api/v1/health" },
-            { "file-storage-service", "http://host.docker.internal:8086/api/v1/health" },
-            { "notification-service", "http://host.docker.internal:8087/api/v1/health" },
-            { "ocr-service", "http://host.docker.internal:8088/api/v1/health" },
-            { "student-grading-service", "http://host.docker.internal:8089/api/v1/health" },
-            { "ai-plan-service", "http://host.docker.internal:8090/api/v1/health" },
-            { "log-service", "http://host.docker.internal:8091/api/v1/health" }
+            { "auth-service", "http://authservice:8081/api/v1/health" },
+            { "user-service", "http://userservice:8082/api/v1/health" },
+            { "plan-service", "http://planservice:8083/api/v1/health" },
+            { "exam-service", "http://examservice:8084/api/v1/health" },
+            { "classroom-service", "http://classroomservice:8085/api/v1/health" },
+            { "file-storage-service", "http://filestorageservice:8086/api/v1/health" },
+            { "notification-service", "http://notificationservice:8087/api/v1/health" },
+            { "ocr-service", "http://ocrservice:8088/api/v1/health" },
+            { "student-grading-service", "http://studentgradingservice:8089/api/v1/health" },
+            { "ai-plan-service", "http://aiplanservice:8090/api/v1/health" },
+            { "log-service", "http://logservice:8091/api/v1/health" }
         };
 
         foreach (var service in serviceEndpoints)
@@ -249,17 +249,17 @@ public class MonitoringController : ControllerBase
     {
         return new List<ServiceEndpoint>
         {
-            new ServiceEndpoint { Name = "xac-thuc", Url = "http://host.docker.internal:8081", Path = "/api/v1/xac-thuc", Port = 8081 },
-            new ServiceEndpoint { Name = "nguoi-dung", Url = "http://host.docker.internal:8082", Path = "/api/v1/nguoi-dung", Port = 8082 },
-            new ServiceEndpoint { Name = "giao-an", Url = "http://host.docker.internal:8083", Path = "/api/v1/giao-an", Port = 8083 },
-            new ServiceEndpoint { Name = "de-thi", Url = "http://host.docker.internal:8084", Path = "/api/v1/de-thi", Port = 8084 },
-            new ServiceEndpoint { Name = "lop-hoc", Url = "http://host.docker.internal:8085", Path = "/api/v1/lop-hoc", Port = 8085 },
-            new ServiceEndpoint { Name = "file-storage", Url = "http://host.docker.internal:8086", Path = "/api/v1/file-storage", Port = 8086 },
-            new ServiceEndpoint { Name = "thong-bao", Url = "http://host.docker.internal:8087", Path = "/api/v1/thong-bao", Port = 8087 },
-            new ServiceEndpoint { Name = "ocr", Url = "http://host.docker.internal:8088", Path = "/api/v1/ocr", Port = 8088 },
-            new ServiceEndpoint { Name = "hoc-sinh", Url = "http://host.docker.internal:8089", Path = "/api/v1/hoc-sinh", Port = 8089 },
-            new ServiceEndpoint { Name = "ai-plan", Url = "http://host.docker.internal:8090", Path = "/api/v1/ai-plan", Port = 8090 },
-            new ServiceEndpoint { Name = "log-service", Url = "http://host.docker.internal:8091", Path = "/api/v1/log-service", Port = 8091 }
+            new ServiceEndpoint { Name = "xac-thuc", Url = "http://authservice:8081", Path = "/api/v1/xac-thuc", Port = 8081 },
+            new ServiceEndpoint { Name = "nguoi-dung", Url = "http://userservice:8082", Path = "/api/v1/nguoi-dung", Port = 8082 },
+            new ServiceEndpoint { Name = "giao-an", Url = "http://planservice:8083", Path = "/api/v1/giao-an", Port = 8083 },
+            new ServiceEndpoint { Name = "de-thi", Url = "http://examservice:8084", Path = "/api/v1/de-thi", Port = 8084 },
+            new ServiceEndpoint { Name = "lop-hoc", Url = "http://classroomservice:8085", Path = "/api/v1/lop-hoc", Port = 8085 },
+            new ServiceEndpoint { Name = "file-storage", Url = "http://filestorageservice:8086", Path = "/api/v1/file-storage", Port = 8086 },
+            new ServiceEndpoint { Name = "thong-bao", Url = "http://notificationservice:8087", Path = "/api/v1/thong-bao", Port = 8087 },
+            new ServiceEndpoint { Name = "ocr", Url = "http://ocrservice:8088", Path = "/api/v1/ocr", Port = 8088 },
+            new ServiceEndpoint { Name = "hoc-sinh", Url = "http://studentgradingservice:8089", Path = "/api/v1/hoc-sinh", Port = 8089 },
+            new ServiceEndpoint { Name = "ai-plan", Url = "http://aiplanservice:8090", Path = "/api/v1/ai-plan", Port = 8090 },
+            new ServiceEndpoint { Name = "log-service", Url = "http://logservice:8091", Path = "/api/v1/log-service", Port = 8091 }
         };
     }
 }
