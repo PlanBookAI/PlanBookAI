@@ -54,6 +54,16 @@ namespace ExamService.Services
 
         public async Task<ApiPhanHoi<CauHoiResponseDTO>> CreateAsync(CauHoiRequestDTO dto, Guid teacherId)
         {
+            // Normalize case sensitivity
+            if (!string.IsNullOrEmpty(dto.LoaiCauHoi))
+            {
+                dto.LoaiCauHoi = dto.LoaiCauHoi.ToUpper();
+            }
+            if (!string.IsNullOrEmpty(dto.DoKho))
+            {
+                dto.DoKho = dto.DoKho.ToUpper();
+            }
+
             var cauHoi = dto.Adapt<CauHoi>();
             cauHoi.NguoiTaoId = teacherId;
             cauHoi.Id = Guid.NewGuid();

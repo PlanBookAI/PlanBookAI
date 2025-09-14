@@ -25,6 +25,12 @@ namespace ExamService.Services
             mauDeThi.Id = Guid.NewGuid();
             mauDeThi.NguoiTaoId = teacherId;
 
+            // Serialize CauTruc object to JSON string
+            if (dto.CauTruc != null)
+            {
+                mauDeThi.CauTruc = JsonSerializer.Serialize(dto.CauTruc);
+            }
+
             // Sửa lại để gọi Repository
             await _repo.CreateAsync(mauDeThi);
 
@@ -45,7 +51,24 @@ namespace ExamService.Services
                                    .AsNoTracking()
                                    .ToListAsync();
 
-            var dtos = items.Adapt<List<MauDeThiResponseDTO>>();
+            var dtos = items.Select(item => 
+            {
+                var dto = item.Adapt<MauDeThiResponseDTO>();
+                // Deserialize CauTruc JSON string to object
+                if (!string.IsNullOrEmpty(item.CauTruc))
+                {
+                    try
+                    {
+                        dto.CauTruc = JsonSerializer.Deserialize<object>(item.CauTruc) ?? item.CauTruc;
+                    }
+                    catch (JsonException)
+                    {
+                        dto.CauTruc = item.CauTruc; // Fallback to string if deserialization fails
+                    }
+                }
+                return dto;
+            }).ToList();
+            
             var pagedResult = new PagedResult<MauDeThiResponseDTO>(dtos, totalItems, paging.PageNumber, paging.PageSize);
 
             return ApiPhanHoi<PagedResult<MauDeThiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);

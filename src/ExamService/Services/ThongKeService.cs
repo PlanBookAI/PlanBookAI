@@ -451,5 +451,128 @@ namespace ExamService.Services
             // Return next start row
             return startRow + 2; // Add 2 empty rows for spacing
         }
+
+        public async Task<ApiPhanHoi<byte[]>> ExportTeacherReportAsync(Guid teacherId)
+        {
+            try
+            {
+                var excelData = await ExportTeacherReportToExcelAsync(teacherId);
+                return ApiPhanHoi<byte[]>.ThanhCongVoiDuLieu(excelData);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<byte[]>.ThatBai($"Lỗi khi xuất báo cáo Excel: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiPhanHoi<object>> GetQuestionStatsAsync(Guid teacherId)
+        {
+            try
+            {
+                var questionQuery = _cauHoiRepo.GetQueryable().Where(q => q.NguoiTaoId == teacherId);
+                
+                var stats = new
+                {
+                    TongSo = await questionQuery.CountAsync(),
+                    TheoMonHoc = await questionQuery.GroupBy(q => q.MonHoc)
+                        .Select(g => new { MonHoc = g.Key, SoLuong = g.Count() })
+                        .ToListAsync(),
+                    TheoDoKho = await questionQuery.GroupBy(q => q.DoKho)
+                        .Select(g => new { DoKho = g.Key, SoLuong = g.Count() })
+                        .ToListAsync(),
+                    TheoChuDe = await questionQuery.GroupBy(q => q.ChuDe)
+                        .Select(g => new { ChuDe = g.Key, SoLuong = g.Count() })
+                        .ToListAsync()
+                };
+
+                return ApiPhanHoi<object>.ThanhCongVoiDuLieu(stats);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<object>.ThatBai($"Lỗi khi lấy thống kê câu hỏi: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiPhanHoi<object>> GetExamStatsAsync(Guid teacherId)
+        {
+            try
+            {
+                var examQuery = _deThiRepo.GetQueryable().Where(d => d.NguoiTaoId == teacherId);
+                
+                var stats = new
+                {
+                    TongSo = await examQuery.CountAsync(),
+                    TheoTrangThai = await examQuery.GroupBy(d => d.TrangThai)
+                        .Select(g => new { TrangThai = g.Key, SoLuong = g.Count() })
+                        .ToListAsync(),
+                    TheoMonHoc = await examQuery.GroupBy(d => d.MonHoc)
+                        .Select(g => new { MonHoc = g.Key, SoLuong = g.Count() })
+                        .ToListAsync(),
+                    TheoKhoiLop = await examQuery.GroupBy(d => d.KhoiLop)
+                        .Select(g => new { KhoiLop = g.Key, SoLuong = g.Count() })
+                        .ToListAsync()
+                };
+
+                return ApiPhanHoi<object>.ThanhCongVoiDuLieu(stats);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<object>.ThatBai($"Lỗi khi lấy thống kê đề thi: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiPhanHoi<object>> GetStatsByDifficultyAsync(Guid teacherId)
+        {
+            try
+            {
+                var stats = await _cauHoiRepo.GetQueryable()
+                    .Where(q => q.NguoiTaoId == teacherId)
+                    .GroupBy(q => q.DoKho)
+                    .Select(g => new { DoKho = g.Key, SoLuong = g.Count() })
+                    .ToListAsync();
+
+                return ApiPhanHoi<object>.ThanhCongVoiDuLieu(stats);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<object>.ThatBai($"Lỗi khi lấy thống kê theo độ khó: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiPhanHoi<object>> GetStatsByTopicAsync(Guid teacherId)
+        {
+            try
+            {
+                var stats = await _cauHoiRepo.GetQueryable()
+                    .Where(q => q.NguoiTaoId == teacherId)
+                    .GroupBy(q => q.ChuDe)
+                    .Select(g => new { ChuDe = g.Key, SoLuong = g.Count() })
+                    .ToListAsync();
+
+                return ApiPhanHoi<object>.ThanhCongVoiDuLieu(stats);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<object>.ThatBai($"Lỗi khi lấy thống kê theo chủ đề: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiPhanHoi<object>> GetStatsBySubjectAsync(Guid teacherId)
+        {
+            try
+            {
+                var stats = await _cauHoiRepo.GetQueryable()
+                    .Where(q => q.NguoiTaoId == teacherId)
+                    .GroupBy(q => q.MonHoc)
+                    .Select(g => new { MonHoc = g.Key, SoLuong = g.Count() })
+                    .ToListAsync();
+
+                return ApiPhanHoi<object>.ThanhCongVoiDuLieu(stats);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<object>.ThatBai($"Lỗi khi lấy thống kê theo môn học: {ex.Message}");
+            }
+        }
     }
 }

@@ -14,6 +14,31 @@ namespace ExamService.Interfaces
         /// <summary>
         /// Xuất báo cáo thống kê của một giáo viên ra file Excel.
         /// </summary>
-        Task<byte[]> ExportTeacherReportToExcelAsync(Guid teacherId);
+        Task<ApiPhanHoi<byte[]>> ExportTeacherReportAsync(Guid teacherId);
+
+        /// <summary>
+        /// Lấy thống kê câu hỏi.
+        /// </summary>
+        Task<ApiPhanHoi<object>> GetQuestionStatsAsync(Guid teacherId);
+
+        /// <summary>
+        /// Lấy thống kê đề thi.
+        /// </summary>
+        Task<ApiPhanHoi<object>> GetExamStatsAsync(Guid teacherId);
+
+        /// <summary>
+        /// Lấy thống kê theo độ khó.
+        /// </summary>
+        Task<ApiPhanHoi<object>> GetStatsByDifficultyAsync(Guid teacherId);
+
+        /// <summary>
+        /// Lấy thống kê theo chủ đề.
+        /// </summary>
+        Task<ApiPhanHoi<object>> GetStatsByTopicAsync(Guid teacherId);
+
+        /// <summary>
+        /// Lấy thống kê theo môn học.
+        /// </summary>
+        Task<ApiPhanHoi<object>> GetStatsBySubjectAsync(Guid teacherId);
     }
 }
