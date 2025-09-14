@@ -101,7 +101,7 @@ public class ExamDbContext : DbContext
             .HasDatabaseName("idx_assessment_exams_subject");
 
         modelBuilder.Entity<DeThi>()
-            .HasIndex(dt => dt.GiaoVienId)
+            .HasIndex(dt => dt.NguoiTaoId)
             .HasDatabaseName("idx_assessment_exams_teacher");
 
         modelBuilder.Entity<LuaChon>()

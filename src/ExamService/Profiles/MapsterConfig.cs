@@ -34,7 +34,6 @@ public static class MapsterConfig
             .Map(dest => dest.TaoLuc, src => DateTime.UtcNow)
             .Map(dest => dest.CapNhatLuc, src => DateTime.UtcNow)
             .Map(dest => dest.TrangThai, src => "DRAFT")
-            .Map(dest => dest.GiaoVienId, src => Guid.Empty) // Sẽ được set trong service
             .Map(dest => dest.NguoiTaoId, src => Guid.Empty); // Sẽ được set trong service
 
         // ExamQuestion Mappings
