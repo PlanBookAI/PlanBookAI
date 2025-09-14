@@ -37,9 +37,6 @@ namespace ExamService.Models.Entities
         [Required]
         [Column("teacher_id")]
         public Guid NguoiTaoId { get; set; }
-        
-        [Column("instructions")]
-        public string? HuongDan { get; set; }
 
         [Column("status")]
         public string TrangThai { get; set; } = "DRAFT";

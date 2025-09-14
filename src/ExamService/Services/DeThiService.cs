@@ -405,7 +405,7 @@ namespace ExamService.Services
                 MonHoc = originalDeThi.MonHoc,
                 KhoiLop = originalDeThi.KhoiLop,
                 ThoiGianLamBai = originalDeThi.ThoiGianLamBai,
-                HuongDan = originalDeThi.HuongDan,
+                MoTa = originalDeThi.MoTa,
                 NguoiTaoId = teacherId,
                 TrangThai = TrangThaiDeThi.Draft.ToString(), // Bản sao luôn là bản nháp
                 TaoLuc = DateTime.UtcNow,
@@ -501,7 +501,7 @@ namespace ExamService.Services
 
                 if (!string.IsNullOrEmpty(keyword))
                 {
-                    query = query.Where(d => d.TieuDe.Contains(keyword) || d.HuongDan.Contains(keyword));
+                    query = query.Where(d => d.TieuDe.Contains(keyword) || d.MoTa.Contains(keyword));
                 }
 
                 query = query.OrderByDescending(d => d.CapNhatLuc);

@@ -331,7 +331,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"tieuDe\": \"Đề thi Hóa học 10 - Axit Bazơ Muối\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 45,\n  \"huongDan\": \"Thời gian làm bài: 45 phút. Học sinh đọc kỹ đề trước khi làm bài.\",\n  \"templateId\": null,\n  \"topicId\": null\n}"
+							"raw": "{\n  \"tieuDe\": \"Đề thi Hóa học 10 - Axit Bazơ Muối\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 45,\n  \"moTa\": \"Thời gian làm bài: 45 phút. Học sinh đọc kỹ đề trước khi làm bài.\",\n  \"templateId\": null,\n  \"topicId\": null\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/de-thi",
@@ -360,7 +360,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"tieuDe\": \"Đề thi từ mẫu - Axit Bazơ Muối\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 45,\n  \"huongDan\": \"Đề thi được tạo từ mẫu có sẵn\",\n  \"templateId\": \"{{template_id}}\",\n  \"topicId\": null\n}"
+							"raw": "{\n  \"tieuDe\": \"Đề thi từ mẫu - Axit Bazơ Muối\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 45,\n  \"moTa\": \"Đề thi được tạo từ mẫu có sẵn\",\n  \"templateId\": \"{{template_id}}\",\n  \"topicId\": null\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/de-thi",

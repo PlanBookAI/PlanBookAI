@@ -21,7 +21,7 @@ namespace ExamService.Models.DTOs
         [Range(15, 180, ErrorMessage = "Thời gian làm bài phải từ 15 đến 180 phút.")]
         public int? ThoiGianLamBai { get; set; }
 
-        public string? HuongDan { get; set; }
+        public string? MoTa { get; set; }
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ namespace ExamService.Models.DTOs
         public string MonHoc { get; set; } = string.Empty;
         public int KhoiLop { get; set; }
         public int ThoiGianLamBai { get; set; }
-        public string? HuongDan { get; set; }
+        public string? MoTa { get; set; }
         public string TrangThai { get; set; } = "draft";
         public DateTime TaoLuc { get; set; }
         public DateTime CapNhatLuc { get; set; }
