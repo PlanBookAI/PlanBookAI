@@ -48,13 +48,13 @@ public static class MapsterConfig
             .Map(dest => dest.CauTruc, src => 
                 string.IsNullOrEmpty(src.CauTruc) 
                     ? new List<YeuCauCauHoiDTO>() 
-                    : JsonSerializer.Deserialize<List<YeuCauCauHoiDTO>>(src.CauTruc) ?? new List<YeuCauCauHoiDTO>());
+                    : JsonSerializer.Deserialize<List<YeuCauCauHoiDTO>>(src.CauTruc, (JsonSerializerOptions?)null) ?? new List<YeuCauCauHoiDTO>());
 
         TypeAdapterConfig<MauDeThiRequestDTO, MauDeThi>.NewConfig()
             .IgnoreNullValues(true)
             .Map(dest => dest.CauTruc, src => 
                 src.CauTruc != null 
-                    ? JsonSerializer.Serialize(src.CauTruc) 
+                    ? JsonSerializer.Serialize(src.CauTruc, (JsonSerializerOptions?)null) 
                     : "[]")
             .Map(dest => dest.TaoLuc, src => DateTime.UtcNow)
             .Map(dest => dest.CapNhatLuc, src => DateTime.UtcNow)

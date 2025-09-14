@@ -92,7 +92,7 @@ namespace ExamService.Services
                 return ApiPhanHoi<DeThiResponseDTO>.ThatBai("Không tìm thấy đề thi hoặc không có quyền truy cập.");
             }
 
-            .Adapt(dto, existingDeThi);
+            dto.Adapt(existingDeThi);
             existingDeThi.CapNhatLuc = DateTime.UtcNow;
 
             await _deThiRepo.UpdateAsync(existingDeThi);
