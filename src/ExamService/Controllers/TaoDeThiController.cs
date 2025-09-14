@@ -26,6 +26,11 @@ namespace ExamService.Controllers
         [ProducesResponseType(typeof(ApiPhanHoi<object>), 400)]
         public async Task<IActionResult> CreateAutomatic([FromBody] TaoDeThiTuDongDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiPhanHoi<object>.ThatBai("Dữ liệu đầu vào không hợp lệ", 400));
+            }
+            
             var teacherId = HttpContext.GetUserId();
             var result = await _service.CreateAutomaticAsync(dto, teacherId);
             if (result.MaTrangThai != 200) return BadRequest(result);
@@ -40,6 +45,11 @@ namespace ExamService.Controllers
         [ProducesResponseType(typeof(ApiPhanHoi<object>), 400)]
         public async Task<IActionResult> CreateFromTemplate([FromBody] TaoDeThiTuMauDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiPhanHoi<object>.ThatBai("Dữ liệu đầu vào không hợp lệ", 400));
+            }
+            
             var teacherId = HttpContext.GetUserId();
             var result = await _service.CreateFromTemplateAsync(dto, teacherId);
             if (result.MaTrangThai != 200) return BadRequest(result);
@@ -54,6 +64,11 @@ namespace ExamService.Controllers
         [ProducesResponseType(typeof(ApiPhanHoi<object>), 400)]
         public async Task<IActionResult> CreateRandom([FromBody] TaoDeThiNgauNhienDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiPhanHoi<object>.ThatBai("Dữ liệu đầu vào không hợp lệ", 400));
+            }
+            
             var teacherId = HttpContext.GetUserId();
             var result = await _service.CreateRandomAsync(dto, teacherId);
             if (result.MaTrangThai != 200) return BadRequest(result);
@@ -69,6 +84,11 @@ namespace ExamService.Controllers
         [ProducesResponseType(typeof(ApiPhanHoi<object>), 400)]
         public async Task<IActionResult> CreateFromBank([FromBody] TaoDeThiTuNganHangDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiPhanHoi<object>.ThatBai("Dữ liệu đầu vào không hợp lệ", 400));
+            }
+            
             var teacherId = HttpContext.GetUserId();
             var result = await _service.CreateFromBankAsync(dto, teacherId);
             if (result.MaTrangThai != 200) return BadRequest(result);

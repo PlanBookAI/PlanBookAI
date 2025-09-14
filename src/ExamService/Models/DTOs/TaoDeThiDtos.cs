@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using ExamService.Converters;
 
 namespace ExamService.Models.DTOs
 {
@@ -49,6 +51,7 @@ namespace ExamService.Models.DTOs
     {
         [Required]
         [MinLength(1, ErrorMessage = "Phải chọn ít nhất một câu hỏi.")]
+        [JsonConverter(typeof(GuidListConverter))]
         public List<Guid> DanhSachCauHoiId { get; set; } = new();
     }
 

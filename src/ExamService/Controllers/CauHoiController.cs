@@ -64,6 +64,11 @@ namespace ExamService.Controllers
         [ProducesResponseType(typeof(ApiPhanHoi<object>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] CauHoiRequestDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiPhanHoi<object>.ThatBai("Dữ liệu đầu vào không hợp lệ", 400));
+            }
+            
             var teacherId = HttpContext.GetUserId();
             var result = await _cauHoiService.CreateAsync(dto, teacherId);
             if (result.MaTrangThai != 200)
