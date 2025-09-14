@@ -87,7 +87,7 @@ builder.Services.AddSwaggerGen(c =>
 // Add repositories - sử dụng database thực
 builder.Services.AddScoped<ICauHoiRepository, CauHoiRepository>();  
 builder.Services.AddScoped<IDeThiRepository, DeThiRepository>();
-// builder.Services.AddScoped<IMauDeThiRepository, MauDeThiRepository>(); // TODO: Comment vì entity không khớp với DB
+builder.Services.AddScoped<IMauDeThiRepository, MauDeThiRepository>();
 
 // Add services (Business Logic Layer) - Now enabled with Mapster
 builder.Services.AddScoped<ICauHoiService, CauHoiService>();
@@ -95,7 +95,7 @@ builder.Services.AddScoped<IDeThiService, DeThiService>();
 builder.Services.AddScoped<ILuaChonService, LuaChonService>();
 builder.Services.AddScoped<IDeThiCauHoiService, DeThiCauHoiService>();
 builder.Services.AddScoped<ITaoDeThiService, TaoDeThiService>();
-// builder.Services.AddScoped<IMauDeThiService, MauDeThiService>(); // TODO: Comment vì entity không khớp với DB
+builder.Services.AddScoped<IMauDeThiService, MauDeThiService>();
 builder.Services.AddScoped<IThongKeService, ThongKeService>();
 
 // Add Mapster - Replace AutoMapper

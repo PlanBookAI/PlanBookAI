@@ -1,6 +1,4 @@
-﻿// TODO: MauDeThiRepository tạm thời bị comment vì entity không khớp với database schema
-/*
-using ExamService.Data;
+﻿using ExamService.Data;
 using ExamService.Interfaces;
 using ExamService.Models.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -33,9 +31,11 @@ namespace ExamService.Repositories
             return mauDeThi;
         }
 
-        public async Task UpdateAsync(MauDeThi mauDeThi)
+        public async Task<MauDeThi> UpdateAsync(MauDeThi mauDeThi)
         {
+            _context.MauDeThis.Update(mauDeThi);
             await _context.SaveChangesAsync();
+            return mauDeThi;
         }
 
         public async Task<bool> DeleteAsync(Guid id)
@@ -46,10 +46,22 @@ namespace ExamService.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
+        public async Task<List<MauDeThi>> GetByCreatedByAsync(Guid createdBy)
+        {
+            return await _context.MauDeThis
+                .Where(m => m.NguoiTaoId == createdBy)
+                .OrderByDescending(m => m.TaoLuc)
+                .ToListAsync();
+        }
+
+        public async Task<bool> ExistsAsync(Guid id)
+        {
+            return await _context.MauDeThis.AnyAsync(m => m.Id == id);
+        }
+
         public async Task<bool> IsOwnerAsync(Guid id, Guid teacherId)
         {
             return await _context.MauDeThis.AnyAsync(m => m.Id == id && m.NguoiTaoId == teacherId);
         }
     }
 }
-*/

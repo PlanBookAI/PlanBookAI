@@ -46,15 +46,15 @@ public static class MapsterConfig
         TypeAdapterConfig<MauDeThi, MauDeThiResponseDTO>.NewConfig()
             .Map(dest => dest.CauTruc, src => 
                 string.IsNullOrEmpty(src.CauTruc) 
-                    ? new List<YeuCauCauHoiDTO>() 
-                    : JsonSerializer.Deserialize<List<YeuCauCauHoiDTO>>(src.CauTruc, (JsonSerializerOptions?)null) ?? new List<YeuCauCauHoiDTO>());
+                    ? new Dictionary<string, object>() 
+                    : JsonSerializer.Deserialize<Dictionary<string, object>>(src.CauTruc, (JsonSerializerOptions?)null) ?? new Dictionary<string, object>());
 
         TypeAdapterConfig<MauDeThiRequestDTO, MauDeThi>.NewConfig()
             .IgnoreNullValues(true)
             .Map(dest => dest.CauTruc, src => 
                 src.CauTruc != null 
                     ? JsonSerializer.Serialize(src.CauTruc, (JsonSerializerOptions?)null) 
-                    : "[]")
+                    : null)
             .Map(dest => dest.TaoLuc, src => DateTime.UtcNow)
             .Map(dest => dest.CapNhatLuc, src => DateTime.UtcNow)
             .Map(dest => dest.NguoiTaoId, src => Guid.Empty); // Sẽ được set trong service
