@@ -206,11 +206,11 @@ namespace ExamService.Services
                     {
                         try
                         {
-                            dto.CauTruc = JsonSerializer.Deserialize<object>(item.CauTruc);
+                            dto.CauTruc = JsonSerializer.Deserialize<object>(item.CauTruc) ?? new { };
                         }
-                        catch
+                        catch (JsonException)
                         {
-                            dto.CauTruc = new { };
+                            dto.CauTruc = new { }; // Fallback to empty object
                         }
                     }
                     return dto;
@@ -220,6 +220,7 @@ namespace ExamService.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Lỗi khi lấy danh sách mẫu đề thi cho teacher {TeacherId}", teacherId);
                 throw new Exception($"Lỗi khi lấy danh sách mẫu đề thi: {ex.Message}");
             }
         }

@@ -60,6 +60,7 @@ namespace ExamService.Models.DTOs
     /// </summary>
     public class TaoDeThiNgauNhienDTO : TaoDeThiBaseDTO
     {
+        [Required(ErrorMessage = "Số lượng câu hỏi không được để trống.")]
         [Range(1, 100, ErrorMessage = "Số lượng câu hỏi phải từ 1 đến 100.")]
         public int SoLuongCauHoi { get; set; }
         public string? ChuDe { get; set; }

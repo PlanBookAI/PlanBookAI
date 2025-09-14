@@ -7,9 +7,14 @@ namespace ExamService.Converters
     {
         public override List<Guid> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
+            if (reader.TokenType == JsonTokenType.Null)
+            {
+                return new List<Guid>();
+            }
+
             if (reader.TokenType != JsonTokenType.StartArray)
             {
-                throw new JsonException("Expected start of array");
+                throw new JsonException("Expected start of array or null");
             }
 
             var guidList = new List<Guid>();
@@ -24,14 +29,11 @@ namespace ExamService.Converters
                 if (reader.TokenType == JsonTokenType.String)
                 {
                     var stringValue = reader.GetString();
-                    if (Guid.TryParse(stringValue, out var guid))
+                    if (!string.IsNullOrEmpty(stringValue) && Guid.TryParse(stringValue, out var guid))
                     {
                         guidList.Add(guid);
                     }
-                    else
-                    {
-                        throw new JsonException($"Invalid GUID format: {stringValue}");
-                    }
+                    // Skip empty strings instead of throwing error
                 }
             }
 
