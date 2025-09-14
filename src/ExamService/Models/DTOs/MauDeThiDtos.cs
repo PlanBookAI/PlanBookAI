@@ -28,8 +28,9 @@ namespace ExamService.Models.DTOs
         
         /// <summary>
         /// Cấu trúc đề thi dạng Dictionary: {"easy": 5, "medium": 10, "hard": 3, "topics": ["topic1", "topic2"]}
+        /// Hoặc dạng Array: [{"chuDe": "topic1", "doKho": "EASY", "soLuong": 5}]
         /// </summary>
-        public Dictionary<string, object>? CauTruc { get; set; }
+        public object? CauTruc { get; set; }
     }
 
     /// <summary>
@@ -44,7 +45,7 @@ namespace ExamService.Models.DTOs
         public int? KhoiLop { get; set; }
         public int? ThoiGianLam { get; set; }
         public decimal? TongDiem { get; set; }
-        public Dictionary<string, object> CauTruc { get; set; } = new();
+        public object CauTruc { get; set; } = new();
         public string TrangThai { get; set; } = "ACTIVE";
         public Guid NguoiTaoId { get; set; }
         public DateTime TaoLuc { get; set; }

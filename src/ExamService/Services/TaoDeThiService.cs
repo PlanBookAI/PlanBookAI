@@ -56,6 +56,12 @@ namespace ExamService.Services
 
         public async Task<ApiPhanHoi<DeThiResponseDTO>> CreateRandomAsync(TaoDeThiNgauNhienDTO dto, Guid teacherId)
         {
+            // Normalize case sensitivity cho DoKho
+            if (!string.IsNullOrEmpty(dto.DoKho))
+            {
+                dto.DoKho = dto.DoKho.ToUpper();
+            }
+
             var query = _cauHoiRepo.GetQueryable()
                 .Where(q => q.NguoiTaoId == teacherId && q.MonHoc == dto.MonHoc);
 

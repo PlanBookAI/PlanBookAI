@@ -14,95 +14,89 @@ namespace ExamService.Controllers
     public class ThongKeController : ControllerBase
     {
         private readonly ILogger<ThongKeController> _logger;
+        private readonly IThongKeService _thongKeService;
 
-        public ThongKeController(ILogger<ThongKeController> logger)
+        public ThongKeController(ILogger<ThongKeController> logger, IThongKeService thongKeService)
         {
             _logger = logger;
+            _thongKeService = thongKeService;
         }
 
         /// <summary>
         /// Lấy báo cáo thống kê tổng quan về hoạt động của người dùng đang đăng nhập.
         /// </summary>
         [HttpGet("nguoi-dung")]
-        public IActionResult GetTeacherReport()
+        public async Task<IActionResult> GetTeacherReport()
         {
             _logger.LogInformation("Đã nhận yêu cầu thống kê người dùng");
-            return Ok(new ApiPhanHoi<object>
-            {
-                ThongBao = "Chức năng đang được hoàn thiện",
-                DuLieu = new { TrangThai = "Đang phát triển" }
-            });
+            var teacherId = HttpContext.GetUserId();
+            var result = await _thongKeService.GetTeacherReportAsync(teacherId);
+            return Ok(result);
         }
 
         /// <summary>
         /// Xuất báo cáo thống kê của giáo viên ra file Excel.
         /// </summary>
         [HttpGet("nguoi-dung/export-excel")]
-        public IActionResult ExportTeacherReport()
+        public async Task<IActionResult> ExportTeacherReport()
         {
             _logger.LogInformation("Đã nhận yêu cầu xuất Excel thống kê người dùng");
-            return Ok(new ApiPhanHoi<object>
+            var teacherId = HttpContext.GetUserId();
+            var result = await _thongKeService.ExportTeacherReportAsync(teacherId);
+            
+            if (result.MaTrangThai != 200)
             {
-                ThongBao = "Chức năng đang được hoàn thiện",
-                DuLieu = new { TrangThai = "Đang phát triển" }
-            });
+                return BadRequest(result);
+            }
+            
+            return File(result.DuLieu, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "thong-ke-giao-vien.xlsx");
         }
 
         // === CÁC ENDPOINT CHI TIẾT ===
 
         [HttpGet("cau-hoi")]
-        public IActionResult GetQuestionStats()
+        public async Task<IActionResult> GetQuestionStats()
         {
             _logger.LogInformation("Đã nhận yêu cầu thống kê câu hỏi");
-            return Ok(new ApiPhanHoi<object>
-            {
-                ThongBao = "Chức năng đang được hoàn thiện",
-                DuLieu = new { TrangThai = "Đang phát triển" }
-            });
+            var teacherId = HttpContext.GetUserId();
+            var result = await _thongKeService.GetQuestionStatsAsync(teacherId);
+            return Ok(result);
         }
 
         [HttpGet("de-thi")]
-        public IActionResult GetExamStats()
+        public async Task<IActionResult> GetExamStats()
         {
             _logger.LogInformation("Đã nhận yêu cầu thống kê đề thi");
-            return Ok(new ApiPhanHoi<object>
-            {
-                ThongBao = "Chức năng đang được hoàn thiện",
-                DuLieu = new { TrangThai = "Đang phát triển" }
-            });
+            var teacherId = HttpContext.GetUserId();
+            var result = await _thongKeService.GetExamStatsAsync(teacherId);
+            return Ok(result);
         }
 
         [HttpGet("do-kho")]
-        public IActionResult GetStatsByDifficulty()
+        public async Task<IActionResult> GetStatsByDifficulty()
         {
             _logger.LogInformation("Đã nhận yêu cầu thống kê theo độ khó");
-            return Ok(new ApiPhanHoi<object>
-            {
-                ThongBao = "Chức năng đang được hoàn thiện",
-                DuLieu = new { TrangThai = "Đang phát triển" }
-            });
+            var teacherId = HttpContext.GetUserId();
+            var result = await _thongKeService.GetStatsByDifficultyAsync(teacherId);
+            return Ok(result);
         }
 
         [HttpGet("chu-de")]
-        public IActionResult GetStatsByTopic()
+        public async Task<IActionResult> GetStatsByTopic()
         {
             _logger.LogInformation("Đã nhận yêu cầu thống kê theo chủ đề");
-            return Ok(new ApiPhanHoi<object>
-            {
-                ThongBao = "Chức năng đang được hoàn thiện",
-                DuLieu = new { TrangThai = "Đang phát triển" }
-            });
+            var teacherId = HttpContext.GetUserId();
+            var result = await _thongKeService.GetStatsByTopicAsync(teacherId);
+            return Ok(result);
         }
 
         [HttpGet("mon-hoc")]
-        public IActionResult GetStatsBySubject()
+        public async Task<IActionResult> GetStatsBySubject()
         {
             _logger.LogInformation("Đã nhận yêu cầu thống kê theo môn học");
-            return Ok(new ApiPhanHoi<object>
-            {
-                ThongBao = "Chức năng đang được hoàn thiện",
-                DuLieu = new { TrangThai = "Đang phát triển" }
-            });
+            var teacherId = HttpContext.GetUserId();
+            var result = await _thongKeService.GetStatsBySubjectAsync(teacherId);
+            return Ok(result);
         }
     }
 }

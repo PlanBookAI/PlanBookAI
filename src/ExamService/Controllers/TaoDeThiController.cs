@@ -64,6 +64,7 @@ namespace ExamService.Controllers
         /// Tạo đề thi từ một danh sách câu hỏi được chọn thủ công.
         /// </summary>
         [HttpPost("tu-ngan-hang")]
+        [HttpPost("tu-cau-hoi")] // Alias để match với Postman
         [ProducesResponseType(typeof(ApiPhanHoi<DeThiResponseDTO>), 201)]
         [ProducesResponseType(typeof(ApiPhanHoi<object>), 400)]
         public async Task<IActionResult> CreateFromBank([FromBody] TaoDeThiTuNganHangDTO dto)
