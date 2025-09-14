@@ -422,9 +422,9 @@ namespace ExamService.Services
                 DeThiId = deThi.Id,
                 TieuDe = deThi.TieuDe,
                 SoLuongNopBai = results.Count,
-                DiemTrungBinh = results.Average(r => r.Diem),
-                DiemCaoNhat = results.Max(r => r.Diem),
-                DiemThapNhat = results.Min(r => r.Diem)
+                DiemTrungBinh = results.Where(r => r.Diem.HasValue).Average(r => r.Diem!.Value),
+                DiemCaoNhat = results.Where(r => r.Diem.HasValue).Max(r => r.Diem!.Value),
+                DiemThapNhat = results.Where(r => r.Diem.HasValue).Min(r => r.Diem!.Value)
             };
 
             // 3. Phân tích từng câu hỏi

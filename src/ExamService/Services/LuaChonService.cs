@@ -30,7 +30,7 @@ namespace ExamService.Services
 
             var choices = await _context.LuaChons
                 .Where(lc => lc.CauHoiId == cauHoiId)
-                .OrderBy(lc => lc.ThuTu)
+                .OrderBy(lc => lc.MaLuaChon)
                 .AsNoTracking()
                 .ToListAsync();
 

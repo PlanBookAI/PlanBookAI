@@ -60,7 +60,7 @@ namespace ExamService.Documents
                     });
 
                     // Hiển thị các lựa chọn A, B, C, D
-                    var sortedChoices = cauHoi.LuaChons.OrderBy(c => c.ThuTu).ToList();
+                    var sortedChoices = cauHoi.LuaChons.OrderBy(c => c.MaLuaChon).ToList();
                     column.Item().PaddingLeft(20).Grid(grid =>
                     {
                         grid.Columns(2); // Chia thành 2 cột

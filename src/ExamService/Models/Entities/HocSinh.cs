@@ -20,7 +20,7 @@ namespace ExamService.Models.Entities
         [Column("full_name")]
         public string HoTen { get; set; } = string.Empty;
 
-        [Column("date_of_birth")]
+        [Column("birth_date")]
         public DateTime? NgaySinh { get; set; }
 
         [Column("gender")]
@@ -30,7 +30,7 @@ namespace ExamService.Models.Entities
         public Guid? LopId { get; set; }
 
         [Required]
-        [Column("teacher_id")]
+        [Column("owner_teacher_id")]
         public Guid GiaoVienId { get; set; }
 
         [Column("parent_contact")]

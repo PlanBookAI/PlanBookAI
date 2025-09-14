@@ -22,9 +22,6 @@ namespace ExamService.Models.Entities
         [Required]
         [Column("choice_order")]
         public string MaLuaChon { get; set; } = "A";
-        
-        [Column("display_order")]
-        public int ThuTu { get; set; } = 0;
 
         [Column("created_at")]
         public DateTime TaoLuc { get; set; } = DateTime.UtcNow;

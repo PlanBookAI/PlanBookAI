@@ -19,12 +19,23 @@ namespace ExamService.Models.Entities
         [Column("exam_id")]
         public Guid DeThiId { get; set; }
 
-        [Required]
-        [Column("answers")]
-        public string DapAn { get; set; } = string.Empty;
+        [Column("image_url")]
+        public string? AnhBaiLam { get; set; }
 
-        [Column("submitted_at")]
-        public DateTime NopLuc { get; set; } = DateTime.UtcNow;
+        [Column("ocr_result", TypeName = "jsonb")]
+        public string? KetQuaOCR { get; set; }
+
+        [Column("ocr_status")]
+        public string TrangThaiOCR { get; set; } = "PENDING";
+
+        [Column("ocr_accuracy")]
+        public decimal? DoChinhXacOCR { get; set; }
+
+        [Column("processed_at")]
+        public DateTime? XuLyLuc { get; set; }
+
+        [Column("created_at")]
+        public DateTime TaoLuc { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
         [ForeignKey("HocSinhId")]

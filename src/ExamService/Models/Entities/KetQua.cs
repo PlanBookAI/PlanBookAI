@@ -19,32 +19,26 @@ namespace ExamService.Models.Entities
         [Column("exam_id")]
         public Guid DeThiId { get; set; }
 
-        [Column("answer_sheet_id")]
-        public Guid BaiLamId { get; set; }
-
         [Column("score")]
-        public decimal Diem { get; set; }
+        public decimal? Diem { get; set; }
 
-        [Column("max_score")]
-        public decimal DiemToiDa { get; set; }
+        [Column("actual_duration")]
+        public int? ThoiGianLam { get; set; }
 
-        [Column("percentage")]
-        public decimal TyLe { get; set; }
+        [Column("answer_details", TypeName = "jsonb")]
+        public string? ChiTietDapAn { get; set; }
 
-        [Column("time_taken_minutes")]
-        public int ThoiGianLam { get; set; }
+        [Column("grading_method")]
+        public string? PhuongPhapCham { get; set; }
 
-        [Column("submitted_at")]
-        public DateTime NopLuc { get; set; }
+        [Column("notes")]
+        public string? GhiChu { get; set; }
+
+        [Column("exam_date")]
+        public DateTime? NgayThi { get; set; }
 
         [Column("graded_at")]
-        public DateTime? ChamLuc { get; set; }
-
-        [Column("grader_id")]
-        public Guid? NguoiChamId { get; set; }
-
-        [Column("feedback")]
-        public string? NhanXet { get; set; }
+        public DateTime ChamLuc { get; set; } = DateTime.UtcNow;
 
         [Column("created_at")]
         public DateTime TaoLuc { get; set; } = DateTime.UtcNow;
@@ -59,7 +53,5 @@ namespace ExamService.Models.Entities
         [ForeignKey("DeThiId")]
         public virtual DeThi DeThi { get; set; } = null!;
 
-        [ForeignKey("BaiLamId")]
-        public virtual BaiLam BaiLam { get; set; } = null!;
     }
 }

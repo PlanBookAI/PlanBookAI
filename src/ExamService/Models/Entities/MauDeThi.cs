@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ExamService.Models.Entities
 {
-    [Table("exam_templates", Schema = "assessment")]
+    // TODO: MauDeThi entity không khớp với database schema hiện tại
+    // [Table("exam_templates", Schema = "assessment")]
     public class MauDeThi
     {
         [Key]

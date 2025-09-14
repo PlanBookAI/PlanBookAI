@@ -1,4 +1,6 @@
-﻿using ExamService.Data;
+﻿// TODO: MauDeThiRepository tạm thời bị comment vì entity không khớp với database schema
+/*
+using ExamService.Data;
 using ExamService.Interfaces;
 using ExamService.Models.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -50,3 +52,4 @@ namespace ExamService.Repositories
         }
     }
 }
+*/

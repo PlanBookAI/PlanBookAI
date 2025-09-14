@@ -17,7 +17,7 @@ public class ExamDbContext : DbContext
     public DbSet<BaiLam> BaiLams { get; set; }
     public DbSet<KetQua> KetQuas { get; set; }
     public DbSet<HocSinh> HocSinhs { get; set; }
-    public DbSet<MauDeThi> MauDeThis { get; set; }
+    // public DbSet<MauDeThi> MauDeThis { get; set; } // TODO: Entity không khớp với DB schema
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
