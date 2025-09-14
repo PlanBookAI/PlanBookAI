@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+python-multipart
+google-generativeai
+google-cloud-vision
+pypdf
+tenacity
