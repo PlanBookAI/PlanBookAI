@@ -29,59 +29,74 @@ namespace ExamService.Services
 
         public async Task<ApiPhanHoi<DeThiResponseDTO>> CreateFromBankAsync(TaoDeThiTuNganHangDTO dto, Guid teacherId)
         {
-            var deThi = dto.Adapt<DeThi>();
-            deThi.Id = Guid.NewGuid();
-            deThi.NguoiTaoId = teacherId;
-            deThi.TrangThai = TrangThaiDeThi.Draft.ToString();
-
-            var questions = _cauHoiRepo.GetQueryable()
-                                       .Where(q => q.NguoiTaoId == teacherId && dto.DanhSachCauHoiId.Contains(q.Id))
-                                       .ToList();
-
-            if (questions.Count != dto.DanhSachCauHoiId.Count)
+            try
             {
-                return ApiPhanHoi<DeThiResponseDTO>.ThatBai("Một hoặc nhiều câu hỏi không tồn tại hoặc không thuộc sở hữu của bạn.");
+                var deThi = dto.Adapt<DeThi>();
+                deThi.Id = Guid.NewGuid();
+                deThi.NguoiTaoId = teacherId;
+                deThi.TrangThai = TrangThaiDeThi.Draft.ToString();
+
+                var questions = await _cauHoiRepo.GetQueryable()
+                                           .Where(q => q.NguoiTaoId == teacherId && dto.DanhSachCauHoiId.Contains(q.Id))
+                                           .ToListAsync();
+
+                if (questions.Count != dto.DanhSachCauHoiId.Count)
+                {
+                    var missingIds = dto.DanhSachCauHoiId.Except(questions.Select(q => q.Id)).ToList();
+                    return ApiPhanHoi<DeThiResponseDTO>.ThatBai($"Một hoặc nhiều câu hỏi không tồn tại hoặc không thuộc sở hữu của bạn. Missing IDs: {string.Join(", ", missingIds)}");
+                }
+
+                deThi.ExamQuestions = questions.Select((q, index) => new ExamQuestion
+                {
+                    CauHoiId = q.Id,
+                    ThuTu = index + 1,
+                    Diem = 1 // Mặc định
+                }).ToList();
+
+                await _deThiRepo.CreateAsync(deThi);
+                return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(deThi.Adapt<DeThiResponseDTO>());
             }
-
-            deThi.ExamQuestions = questions.Select((q, index) => new ExamQuestion
+            catch (Exception ex)
             {
-                CauHoiId = q.Id,
-                ThuTu = index + 1,
-                Diem = 1 // Mặc định
-            }).ToList();
-
-            await _deThiRepo.CreateAsync(deThi);
-            return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(deThi.Adapt<DeThiResponseDTO>());
+                return ApiPhanHoi<DeThiResponseDTO>.ThatBai($"Lỗi khi tạo đề thi từ ngân hàng câu hỏi: {ex.Message}");
+            }
         }
 
         public async Task<ApiPhanHoi<DeThiResponseDTO>> CreateRandomAsync(TaoDeThiNgauNhienDTO dto, Guid teacherId)
         {
-            // Normalize case sensitivity cho DoKho
-            if (!string.IsNullOrEmpty(dto.DoKho))
+            try
             {
-                dto.DoKho = dto.DoKho.ToUpper();
+                // Normalize case sensitivity cho DoKho
+                if (!string.IsNullOrEmpty(dto.DoKho))
+                {
+                    dto.DoKho = dto.DoKho.ToUpper();
+                }
+
+                var query = _cauHoiRepo.GetQueryable()
+                    .Where(q => q.NguoiTaoId == teacherId && q.MonHoc == dto.MonHoc);
+
+                if (!string.IsNullOrEmpty(dto.ChuDe)) query = query.Where(q => q.ChuDe == dto.ChuDe);
+                if (!string.IsNullOrEmpty(dto.DoKho)) query = query.Where(q => q.DoKho == dto.DoKho);
+
+                var availableQuestions = await query.Select(q => q.Id).ToListAsync();
+
+                if (availableQuestions.Count < dto.SoLuongCauHoi)
+                {
+                    return ApiPhanHoi<DeThiResponseDTO>.ThatBai($"Không đủ câu hỏi trong ngân hàng để tạo đề thi. Chỉ có {availableQuestions.Count} câu hỏi phù hợp với tiêu chí: MonHoc={dto.MonHoc}, ChuDe={dto.ChuDe}, DoKho={dto.DoKho}");
+                }
+
+                var random = new Random();
+                var selectedIds = availableQuestions.OrderBy(x => random.Next()).Take(dto.SoLuongCauHoi).ToList();
+
+                var createFromBankDto = dto.Adapt<TaoDeThiTuNganHangDTO>();
+                createFromBankDto.DanhSachCauHoiId = selectedIds;
+
+                return await CreateFromBankAsync(createFromBankDto, teacherId);
             }
-
-            var query = _cauHoiRepo.GetQueryable()
-                .Where(q => q.NguoiTaoId == teacherId && q.MonHoc == dto.MonHoc);
-
-            if (!string.IsNullOrEmpty(dto.ChuDe)) query = query.Where(q => q.ChuDe == dto.ChuDe);
-            if (!string.IsNullOrEmpty(dto.DoKho)) query = query.Where(q => q.DoKho == dto.DoKho);
-
-            var availableQuestions = await query.Select(q => q.Id).ToListAsync();
-
-            if (availableQuestions.Count < dto.SoLuongCauHoi)
+            catch (Exception ex)
             {
-                return ApiPhanHoi<DeThiResponseDTO>.ThatBai($"Không đủ câu hỏi trong ngân hàng để tạo đề thi. Chỉ có {availableQuestions.Count} câu hỏi phù hợp.");
+                return ApiPhanHoi<DeThiResponseDTO>.ThatBai($"Lỗi khi tạo đề thi ngẫu nhiên: {ex.Message}");
             }
-
-            var random = new Random();
-            var selectedIds = availableQuestions.OrderBy(x => random.Next()).Take(dto.SoLuongCauHoi).ToList();
-
-            var createFromBankDto = dto.Adapt<TaoDeThiTuNganHangDTO>();
-            createFromBankDto.DanhSachCauHoiId = selectedIds;
-
-            return await CreateFromBankAsync(createFromBankDto, teacherId);
         }
 
         public async Task<ApiPhanHoi<DeThiResponseDTO>> CreateAutomaticAsync(TaoDeThiTuDongDTO dto, Guid teacherId)

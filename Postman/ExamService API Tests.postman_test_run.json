@@ -1,21 +1,201 @@
 {
-	"id": "d0b15653-e3a6-43b8-b783-d5a042df4321",
+	"id": "f768105f-7274-4200-ba4c-aa5bf2a88f5b",
 	"name": "ExamService API Tests",
-	"timestamp": "2025-09-14T08:36:09.958Z",
-	"collection_id": "39580650-1ed92aa7-0c41-46ba-a963-c1233e469746",
+	"timestamp": "2025-09-14T10:21:00.406Z",
+	"collection_id": "39580650-ff3878a8-caa8-4b6c-bdd6-50a0b9107755",
 	"folder_id": 0,
 	"environment_id": "0",
 	"totalPass": 0,
 	"delay": "500",
 	"persist": true,
 	"status": "finished",
-	"startedAt": "2025-09-14T08:35:49.791Z",
+	"startedAt": "2025-09-14T10:20:32.758Z",
 	"totalFail": 0,
 	"results": [
 		{
-			"id": "d90c9367-de53-49ee-8001-51ca35a8e612",
+			"id": "f4cae2e0-268a-4e89-926b-e0260dcee665",
 			"name": "Tạo câu hỏi mới",
 			"url": "https://pba.khqi.site/api/v1/cau-hoi",
+			"time": 1323,
+			"responseCode": {
+				"code": 500,
+				"name": "Internal Server Error"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				1323
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "a45ab62c-e3d1-4418-b1e8-9e06061c1d16",
+			"name": "Lấy danh sách câu hỏi",
+			"url": "https://pba.khqi.site/api/v1/cau-hoi?PageNumber=1&PageSize=10",
+			"time": 1069,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				1069
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "9992ad15-27b0-4cd0-8329-9d9ab889d39f",
+			"name": "Tìm kiếm câu hỏi",
+			"url": "https://pba.khqi.site/api/v1/cau-hoi/tim-kiem?Keyword=axit&MonHoc=HOA_HOC&PageNumber=1&PageSize=10",
+			"time": 260,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				260
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "827212dc-2c2b-42dc-9605-9014b2f54a7e",
+			"name": "Lọc câu hỏi theo độ khó",
+			"url": "https://pba.khqi.site/api/v1/cau-hoi/loc-do-kho?DoKho=EASY&PageNumber=1&PageSize=10",
+			"time": 147,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				147
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "62bdac33-8b0b-46b9-aeec-fb47eb52d03a",
+			"name": "Tạo mẫu đề thi",
+			"url": "https://pba.khqi.site/api/v1/mau-de-thi",
+			"time": 371,
+			"responseCode": {
+				"code": 500,
+				"name": "Internal Server Error"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				371
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "0ca3ba0c-3e84-41e4-9917-6a2b79a0d7b8",
+			"name": "Lấy danh sách mẫu đề thi",
+			"url": "https://pba.khqi.site/api/v1/mau-de-thi?PageNumber=1&PageSize=10",
+			"time": 241,
+			"responseCode": {
+				"code": 500,
+				"name": "Internal Server Error"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				241
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b29a546d-7390-4e89-826b-33ef9ae54fef",
+			"name": "Tạo đề thi thủ công",
+			"url": "https://pba.khqi.site/api/v1/de-thi",
+			"time": 273,
+			"responseCode": {
+				"code": 500,
+				"name": "Internal Server Error"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				273
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "ccf2987b-9c5a-4d66-9229-b475ceacd422",
+			"name": "Tạo đề thi từ mẫu",
+			"url": "https://pba.khqi.site/api/v1/de-thi",
+			"time": 186,
+			"responseCode": {
+				"code": 500,
+				"name": "Internal Server Error"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				186
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "3195b59f-62fc-4eaf-b6b0-665c63281dfc",
+			"name": "Tạo đề thi ngẫu nhiên",
+			"url": "https://pba.khqi.site/api/v1/tao-de-thi/ngau-nhien",
+			"time": 348,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				348
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "7f73bdca-1802-4713-9a28-86460059d2dc",
+			"name": "Tạo đề thi từ ngân hàng câu hỏi",
+			"url": "https://pba.khqi.site/api/v1/tao-de-thi/tu-cau-hoi",
+			"time": 184,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				184
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "be292d07-369e-4514-ba23-24b3826819da",
+			"name": "Lấy danh sách đề thi",
+			"url": "https://pba.khqi.site/api/v1/de-thi?PageNumber=1&PageSize=10",
 			"time": 248,
 			"responseCode": {
 				"code": 500,
@@ -31,13 +211,103 @@
 			]
 		},
 		{
-			"id": "55fd5967-fb53-45b3-bb30-d8e242d03bdf",
-			"name": "Lấy danh sách câu hỏi",
-			"url": "https://pba.khqi.site/api/v1/cau-hoi?PageNumber=1&PageSize=10",
+			"id": "a8ee0ab6-906a-406d-823a-09f79b362ee4",
+			"name": "Tìm kiếm đề thi",
+			"url": "https://pba.khqi.site/api/v1/de-thi/tim-kiem?Keyword=axit&PageNumber=1&PageSize=10",
+			"time": 148,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				148
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "14f1186b-1688-4d48-8a3c-6f27180c4826",
+			"name": "Lọc đề thi theo môn học",
+			"url": "https://pba.khqi.site/api/v1/de-thi/loc-mon-hoc?subject=HOA_HOC&PageNumber=1&PageSize=10",
+			"time": 172,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				172
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "6ac4a585-a05a-46c6-95ce-9401742ea6a0",
+			"name": "Lọc đề thi theo khối lớp",
+			"url": "https://pba.khqi.site/api/v1/de-thi/loc-khoi-lop?grade=10&PageNumber=1&PageSize=10",
+			"time": 152,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				152
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "55c9a2fb-e075-495b-8216-5146a0b71fe8",
+			"name": "Lọc đề thi theo trạng thái",
+			"url": "https://pba.khqi.site/api/v1/de-thi/loc-trang-thai?status=DRAFT&PageNumber=1&PageSize=10",
+			"time": 205,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				205
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "49632eb7-7652-402e-9bdf-f4112a1a15a5",
+			"name": "Xem chi tiết đề thi",
+			"url": "https://pba.khqi.site/api/v1/de-thi/",
+			"time": 268,
+			"responseCode": {
+				"code": 500,
+				"name": "Internal Server Error"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				268
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "227b40a1-9e69-48fc-895d-36d0f5ad6d45",
+			"name": "Cập nhật đề thi",
+			"url": "https://pba.khqi.site/api/v1/de-thi/",
 			"time": 150,
 			"responseCode": {
-				"code": 200,
-				"name": "OK"
+				"code": 405,
+				"name": "Method Not Allowed"
 			},
 			"tests": {},
 			"testPassFailCounts": {},
@@ -49,280 +319,10 @@
 			]
 		},
 		{
-			"id": "66d2d09a-f9ec-4c86-ba72-f9cd80e46bc8",
-			"name": "Tìm kiếm câu hỏi",
-			"url": "https://pba.khqi.site/api/v1/cau-hoi/tim-kiem?Keyword=axit&MonHoc=HOA_HOC&PageNumber=1&PageSize=10",
-			"time": 126,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				126
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "26b3d84b-a1b0-4b25-893c-46d244351a14",
-			"name": "Lọc câu hỏi theo độ khó",
-			"url": "https://pba.khqi.site/api/v1/cau-hoi/loc-do-kho?DoKho=EASY&PageNumber=1&PageSize=10",
-			"time": 111,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				111
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "d29e05c4-c89c-48df-8f4d-90c39a00982a",
-			"name": "Tạo mẫu đề thi",
-			"url": "https://pba.khqi.site/api/v1/mau-de-thi",
-			"time": 104,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				104
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "95512638-5a29-4384-8c76-bfd68838cc1b",
-			"name": "Lấy danh sách mẫu đề thi",
-			"url": "https://pba.khqi.site/api/v1/mau-de-thi?PageNumber=1&PageSize=10",
-			"time": 109,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				109
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "c9f8a6c4-2b26-4b88-b6ae-3618ca49cd6f",
-			"name": "Tạo đề thi thủ công",
-			"url": "https://pba.khqi.site/api/v1/de-thi",
-			"time": 134,
-			"responseCode": {
-				"code": 500,
-				"name": "Internal Server Error"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				134
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "4ba8dce8-0826-411f-933c-a75edaa4283e",
-			"name": "Tạo đề thi từ mẫu",
-			"url": "https://pba.khqi.site/api/v1/de-thi",
-			"time": 164,
-			"responseCode": {
-				"code": 500,
-				"name": "Internal Server Error"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				164
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "daff39f6-e379-4d9e-bf49-ecc97766354f",
-			"name": "Tạo đề thi ngẫu nhiên",
-			"url": "https://pba.khqi.site/api/v1/tao-de-thi/ngau-nhien",
-			"time": 280,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				280
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "e9429a25-831d-4204-a194-11fd3f700864",
-			"name": "Tạo đề thi từ ngân hàng câu hỏi",
-			"url": "https://pba.khqi.site/api/v1/tao-de-thi/tu-cau-hoi",
-			"time": 195,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				195
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "1715d16a-1bd8-4d08-8df9-82382e24f8de",
-			"name": "Lấy danh sách đề thi",
-			"url": "https://pba.khqi.site/api/v1/de-thi?PageNumber=1&PageSize=10",
-			"time": 192,
-			"responseCode": {
-				"code": 500,
-				"name": "Internal Server Error"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				192
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "ec8caeca-2058-4f64-90ce-b7050cad15d2",
-			"name": "Tìm kiếm đề thi",
-			"url": "https://pba.khqi.site/api/v1/de-thi/tim-kiem?Keyword=axit&PageNumber=1&PageSize=10",
-			"time": 121,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				121
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "d649580d-11be-4e08-aa26-2e4976f1617a",
-			"name": "Lọc đề thi theo môn học",
-			"url": "https://pba.khqi.site/api/v1/de-thi/loc-mon-hoc?subject=HOA_HOC&PageNumber=1&PageSize=10",
-			"time": 130,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				130
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "eeaa8770-ba3f-465a-8820-93017cdc80ae",
-			"name": "Lọc đề thi theo khối lớp",
-			"url": "https://pba.khqi.site/api/v1/de-thi/loc-khoi-lop?grade=10&PageNumber=1&PageSize=10",
-			"time": 124,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				124
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "44b8a344-6342-4c98-a1cc-2d01681b3629",
-			"name": "Lọc đề thi theo trạng thái",
-			"url": "https://pba.khqi.site/api/v1/de-thi/loc-trang-thai?status=DRAFT&PageNumber=1&PageSize=10",
-			"time": 128,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				128
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "9f3cbccc-b8bc-4267-b3eb-a5f8660ef26a",
-			"name": "Xem chi tiết đề thi",
-			"url": "https://pba.khqi.site/api/v1/de-thi/",
-			"time": 146,
-			"responseCode": {
-				"code": 500,
-				"name": "Internal Server Error"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				146
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "f65faf16-63b5-43ea-8a0b-fa77ad9d9f31",
-			"name": "Cập nhật đề thi",
-			"url": "https://pba.khqi.site/api/v1/de-thi/",
-			"time": 106,
-			"responseCode": {
-				"code": 405,
-				"name": "Method Not Allowed"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				106
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "52624d71-60e7-40cf-8c00-1196b0fff7bb",
+			"id": "70c6c183-b963-46b7-8fbe-899e5574725e",
 			"name": "Thêm câu hỏi vào đề thi",
 			"url": "https://pba.khqi.site/api/v1/de-thi//cau-hoi",
-			"time": 110,
+			"time": 224,
 			"responseCode": {
 				"code": 404,
 				"name": "Not Found"
@@ -330,17 +330,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				110
+				224
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "aad336f5-3f42-4e54-93b4-e99aedba6795",
+			"id": "7b64a762-ca4c-4924-b7aa-79a3d96bb4c6",
 			"name": "Xuất bản đề thi",
 			"url": "https://pba.khqi.site/api/v1/de-thi//xuat-ban",
-			"time": 107,
+			"time": 140,
 			"responseCode": {
 				"code": 404,
 				"name": "Not Found"
@@ -348,17 +348,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				107
+				140
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "60156914-d8b6-4760-a0d8-2a5c0c87ac2d",
+			"id": "7d25cd66-1382-4899-9797-8427848ae125",
 			"name": "Xuất đề thi ra PDF",
 			"url": "https://pba.khqi.site/api/v1/de-thi//xuat-pdf",
-			"time": 201,
+			"time": 156,
 			"responseCode": {
 				"code": 404,
 				"name": "Not Found"
@@ -366,17 +366,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				201
+				156
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "7df71621-f76f-4915-8442-6d845f68f637",
+			"id": "40119213-3062-47c6-9079-674f8a1efcf8",
 			"name": "Xuất đề thi ra Word",
 			"url": "https://pba.khqi.site/api/v1/de-thi//xuat-word",
-			"time": 168,
+			"time": 165,
 			"responseCode": {
 				"code": 404,
 				"name": "Not Found"
@@ -384,17 +384,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				168
+				165
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "2099bcb8-92b3-412e-8aba-c2a908994f76",
+			"id": "231f6028-4fc8-46e3-a0e7-bbcd49b7fb6c",
 			"name": "Sao chép đề thi",
 			"url": "https://pba.khqi.site/api/v1/de-thi//sao-chep",
-			"time": 208,
+			"time": 154,
 			"responseCode": {
 				"code": 404,
 				"name": "Not Found"
@@ -402,143 +402,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				208
+				154
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "104cb882-0884-4804-b860-3a8caabb5980",
+			"id": "c82467c0-ca4b-4325-8c7a-586000631dd2",
 			"name": "Thống kê tổng quan giáo viên",
 			"url": "https://pba.khqi.site/api/v1/thong-ke/nguoi-dung",
-			"time": 104,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				104
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "0e32da6f-589b-4b4a-9bfc-3e5d952f32ed",
-			"name": "Thống kê câu hỏi",
-			"url": "https://pba.khqi.site/api/v1/thong-ke/cau-hoi",
-			"time": 105,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				105
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "4bde7fdf-9b72-4b5d-a9ff-b9dc6aa88d48",
-			"name": "Thống kê đề thi",
-			"url": "https://pba.khqi.site/api/v1/thong-ke/de-thi",
-			"time": 119,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				119
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "66489285-20bb-43e4-921f-f4e82e054253",
-			"name": "Thống kê theo độ khó",
-			"url": "https://pba.khqi.site/api/v1/thong-ke/do-kho",
-			"time": 139,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				139
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "84939864-3c5f-429a-b2ee-1889e7c37bce",
-			"name": "Thống kê theo chủ đề",
-			"url": "https://pba.khqi.site/api/v1/thong-ke/chu-de",
-			"time": 121,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				121
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "de3f4eee-71e0-4c13-89cc-5f18289ff83a",
-			"name": "Thống kê theo môn học",
-			"url": "https://pba.khqi.site/api/v1/thong-ke/mon-hoc",
-			"time": 146,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				146
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "91129126-5c95-48ff-a3b8-542920af6e1b",
-			"name": "Export thống kê ra Excel",
-			"url": "https://pba.khqi.site/api/v1/thong-ke/nguoi-dung/export-excel",
-			"time": 221,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				221
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "8acca310-e9e3-485a-bd64-fa8faf9b4ea7",
-			"name": "Health Check",
-			"url": "https://pba.khqi.site/health",
-			"time": 127,
+			"time": 1018,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -546,7 +420,133 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				127
+				1018
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "2fe9c91a-579e-44f0-92a0-7a2ae81b05aa",
+			"name": "Thống kê câu hỏi",
+			"url": "https://pba.khqi.site/api/v1/thong-ke/cau-hoi",
+			"time": 268,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				268
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "4fbb4bad-9957-45d9-974f-75d68ffe03b8",
+			"name": "Thống kê đề thi",
+			"url": "https://pba.khqi.site/api/v1/thong-ke/de-thi",
+			"time": 191,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				191
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "0aea6514-0f54-43fb-9b88-2ba0cf1412db",
+			"name": "Thống kê theo độ khó",
+			"url": "https://pba.khqi.site/api/v1/thong-ke/do-kho",
+			"time": 162,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				162
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "40848c12-974e-46dc-9edf-1448e0e66037",
+			"name": "Thống kê theo chủ đề",
+			"url": "https://pba.khqi.site/api/v1/thong-ke/chu-de",
+			"time": 181,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				181
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "9e4f6e2f-fe4b-448a-8936-40cf05c2d583",
+			"name": "Thống kê theo môn học",
+			"url": "https://pba.khqi.site/api/v1/thong-ke/mon-hoc",
+			"time": 159,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				159
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "1dbdabea-98fe-4602-8eab-7d1e32e8f209",
+			"name": "Export thống kê ra Excel",
+			"url": "https://pba.khqi.site/api/v1/thong-ke/nguoi-dung/export-excel",
+			"time": 349,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				349
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "def8903f-e4ae-4291-9f39-128b3793242e",
+			"name": "Health Check",
+			"url": "https://pba.khqi.site/health",
+			"time": 149,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				149
 			],
 			"allTests": [
 				{}
@@ -554,127 +554,127 @@
 		}
 	],
 	"count": 1,
-	"totalTime": 4444,
+	"totalTime": 9061,
 	"collection": {
 		"requests": [
 			{
-				"id": "d90c9367-de53-49ee-8001-51ca35a8e612",
+				"id": "f4cae2e0-268a-4e89-926b-e0260dcee665",
 				"method": "POST"
 			},
 			{
-				"id": "55fd5967-fb53-45b3-bb30-d8e242d03bdf",
+				"id": "a45ab62c-e3d1-4418-b1e8-9e06061c1d16",
 				"method": "GET"
 			},
 			{
-				"id": "66d2d09a-f9ec-4c86-ba72-f9cd80e46bc8",
+				"id": "9992ad15-27b0-4cd0-8329-9d9ab889d39f",
 				"method": "GET"
 			},
 			{
-				"id": "26b3d84b-a1b0-4b25-893c-46d244351a14",
+				"id": "827212dc-2c2b-42dc-9605-9014b2f54a7e",
 				"method": "GET"
 			},
 			{
-				"id": "d29e05c4-c89c-48df-8f4d-90c39a00982a",
+				"id": "62bdac33-8b0b-46b9-aeec-fb47eb52d03a",
 				"method": "POST"
 			},
 			{
-				"id": "95512638-5a29-4384-8c76-bfd68838cc1b",
+				"id": "0ca3ba0c-3e84-41e4-9917-6a2b79a0d7b8",
 				"method": "GET"
 			},
 			{
-				"id": "c9f8a6c4-2b26-4b88-b6ae-3618ca49cd6f",
+				"id": "b29a546d-7390-4e89-826b-33ef9ae54fef",
 				"method": "POST"
 			},
 			{
-				"id": "4ba8dce8-0826-411f-933c-a75edaa4283e",
+				"id": "ccf2987b-9c5a-4d66-9229-b475ceacd422",
 				"method": "POST"
 			},
 			{
-				"id": "daff39f6-e379-4d9e-bf49-ecc97766354f",
+				"id": "3195b59f-62fc-4eaf-b6b0-665c63281dfc",
 				"method": "POST"
 			},
 			{
-				"id": "e9429a25-831d-4204-a194-11fd3f700864",
+				"id": "7f73bdca-1802-4713-9a28-86460059d2dc",
 				"method": "POST"
 			},
 			{
-				"id": "1715d16a-1bd8-4d08-8df9-82382e24f8de",
+				"id": "be292d07-369e-4514-ba23-24b3826819da",
 				"method": "GET"
 			},
 			{
-				"id": "ec8caeca-2058-4f64-90ce-b7050cad15d2",
+				"id": "a8ee0ab6-906a-406d-823a-09f79b362ee4",
 				"method": "GET"
 			},
 			{
-				"id": "d649580d-11be-4e08-aa26-2e4976f1617a",
+				"id": "14f1186b-1688-4d48-8a3c-6f27180c4826",
 				"method": "GET"
 			},
 			{
-				"id": "eeaa8770-ba3f-465a-8820-93017cdc80ae",
+				"id": "6ac4a585-a05a-46c6-95ce-9401742ea6a0",
 				"method": "GET"
 			},
 			{
-				"id": "44b8a344-6342-4c98-a1cc-2d01681b3629",
+				"id": "55c9a2fb-e075-495b-8216-5146a0b71fe8",
 				"method": "GET"
 			},
 			{
-				"id": "9f3cbccc-b8bc-4267-b3eb-a5f8660ef26a",
+				"id": "49632eb7-7652-402e-9bdf-f4112a1a15a5",
 				"method": "GET"
 			},
 			{
-				"id": "f65faf16-63b5-43ea-8a0b-fa77ad9d9f31",
+				"id": "227b40a1-9e69-48fc-895d-36d0f5ad6d45",
 				"method": "PUT"
 			},
 			{
-				"id": "52624d71-60e7-40cf-8c00-1196b0fff7bb",
+				"id": "70c6c183-b963-46b7-8fbe-899e5574725e",
 				"method": "POST"
 			},
 			{
-				"id": "aad336f5-3f42-4e54-93b4-e99aedba6795",
+				"id": "7b64a762-ca4c-4924-b7aa-79a3d96bb4c6",
 				"method": "PUT"
 			},
 			{
-				"id": "60156914-d8b6-4760-a0d8-2a5c0c87ac2d",
+				"id": "7d25cd66-1382-4899-9797-8427848ae125",
 				"method": "GET"
 			},
 			{
-				"id": "7df71621-f76f-4915-8442-6d845f68f637",
+				"id": "40119213-3062-47c6-9079-674f8a1efcf8",
 				"method": "GET"
 			},
 			{
-				"id": "2099bcb8-92b3-412e-8aba-c2a908994f76",
+				"id": "231f6028-4fc8-46e3-a0e7-bbcd49b7fb6c",
 				"method": "POST"
 			},
 			{
-				"id": "104cb882-0884-4804-b860-3a8caabb5980",
+				"id": "c82467c0-ca4b-4325-8c7a-586000631dd2",
 				"method": "GET"
 			},
 			{
-				"id": "0e32da6f-589b-4b4a-9bfc-3e5d952f32ed",
+				"id": "2fe9c91a-579e-44f0-92a0-7a2ae81b05aa",
 				"method": "GET"
 			},
 			{
-				"id": "4bde7fdf-9b72-4b5d-a9ff-b9dc6aa88d48",
+				"id": "4fbb4bad-9957-45d9-974f-75d68ffe03b8",
 				"method": "GET"
 			},
 			{
-				"id": "66489285-20bb-43e4-921f-f4e82e054253",
+				"id": "0aea6514-0f54-43fb-9b88-2ba0cf1412db",
 				"method": "GET"
 			},
 			{
-				"id": "84939864-3c5f-429a-b2ee-1889e7c37bce",
+				"id": "40848c12-974e-46dc-9edf-1448e0e66037",
 				"method": "GET"
 			},
 			{
-				"id": "de3f4eee-71e0-4c13-89cc-5f18289ff83a",
+				"id": "9e4f6e2f-fe4b-448a-8936-40cf05c2d583",
 				"method": "GET"
 			},
 			{
-				"id": "91129126-5c95-48ff-a3b8-542920af6e1b",
+				"id": "1dbdabea-98fe-4602-8eab-7d1e32e8f209",
 				"method": "GET"
 			},
 			{
-				"id": "8acca310-e9e3-485a-bd64-fa8faf9b4ea7",
+				"id": "def8903f-e4ae-4291-9f39-128b3793242e",
 				"method": "GET"
 			}
 		]

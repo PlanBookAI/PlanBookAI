@@ -170,29 +170,53 @@ namespace ExamService.Services
             Guid teacherId, int pageNumber, int pageSize, string? monHoc = null, 
             int? khoiLop = null, string? trangThai = null)
         {
-            var query = _repo.GetQueryable().Where(m => m.NguoiTaoId == teacherId);
+            try
+            {
+                var query = _repo.GetQueryable().Where(m => m.NguoiTaoId == teacherId);
 
-            // Apply filters
-            if (!string.IsNullOrEmpty(monHoc))
-                query = query.Where(m => m.MonHoc == monHoc);
-            
-            if (khoiLop.HasValue)
-                query = query.Where(m => m.KhoiLop == khoiLop.Value);
-            
-            if (!string.IsNullOrEmpty(trangThai))
-                query = query.Where(m => m.TrangThai == trangThai);
+                // Apply filters
+                if (!string.IsNullOrEmpty(monHoc))
+                    query = query.Where(m => m.MonHoc == monHoc);
+                
+                if (khoiLop.HasValue)
+                    query = query.Where(m => m.KhoiLop == khoiLop.Value);
+                
+                if (!string.IsNullOrEmpty(trangThai))
+                    query = query.Where(m => m.TrangThai == trangThai);
 
-            // Order by updated date
-            query = query.OrderByDescending(m => m.CapNhatLuc);
+                // Order by updated date
+                query = query.OrderByDescending(m => m.CapNhatLuc);
 
-            var totalItems = await query.CountAsync();
-            var items = await query.Skip((pageNumber - 1) * pageSize)
-                                   .Take(pageSize)
-                                   .AsNoTracking()
-                                   .ToListAsync();
+                var totalItems = await query.CountAsync();
+                var items = await query.Skip((pageNumber - 1) * pageSize)
+                                       .Take(pageSize)
+                                       .AsNoTracking()
+                                       .ToListAsync();
 
-            var dtos = items.Adapt<List<MauDeThiResponseDTO>>();
-            return new PagedResult<MauDeThiResponseDTO>(dtos, totalItems, pageNumber, pageSize);
+                var dtos = items.Select(item => 
+                {
+                    var dto = item.Adapt<MauDeThiResponseDTO>();
+                    // Deserialize CauTruc JSON string to object
+                    if (!string.IsNullOrEmpty(item.CauTruc))
+                    {
+                        try
+                        {
+                            dto.CauTruc = JsonSerializer.Deserialize<object>(item.CauTruc);
+                        }
+                        catch
+                        {
+                            dto.CauTruc = new { };
+                        }
+                    }
+                    return dto;
+                }).ToList();
+
+                return new PagedResult<MauDeThiResponseDTO>(dtos, totalItems, pageNumber, pageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy danh sách mẫu đề thi: {ex.Message}");
+            }
         }
 
         public async Task<MauDeThiResponseDTO?> LayChiTietMauDeThiAsync(Guid id, Guid teacherId)
@@ -212,6 +236,12 @@ namespace ExamService.Services
             mauDeThi.NguoiTaoId = teacherId;
             mauDeThi.TaoLuc = DateTime.UtcNow;
             mauDeThi.CapNhatLuc = DateTime.UtcNow;
+
+            // Serialize CauTruc object to JSON string
+            if (request.CauTruc != null)
+            {
+                mauDeThi.CauTruc = JsonSerializer.Serialize(request.CauTruc);
+            }
 
             var createdMauDeThi = await _repo.CreateAsync(mauDeThi);
             return createdMauDeThi.Adapt<MauDeThiResponseDTO>();

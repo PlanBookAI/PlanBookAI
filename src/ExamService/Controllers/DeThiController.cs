@@ -333,5 +333,54 @@ namespace ExamService.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Tìm kiếm đề thi theo từ khóa
+        /// </summary>
+        [HttpGet("tim-kiem")]
+        [ProducesResponseType(typeof(ApiPhanHoi<PagedResult<DeThiResponseDTO>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> SearchExams([FromQuery] string keyword, [FromQuery] PagingDTO pagingParams)
+        {
+            var teacherId = HttpContext.GetUserId();
+            var result = await _deThiService.SearchExamsAsync(teacherId, keyword, pagingParams);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Lọc đề thi theo môn học
+        /// </summary>
+        [HttpGet("loc-mon-hoc")]
+        [ProducesResponseType(typeof(ApiPhanHoi<PagedResult<DeThiResponseDTO>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FilterBySubject([FromQuery] string subject, [FromQuery] PagingDTO pagingParams)
+        {
+            var teacherId = HttpContext.GetUserId();
+            var result = await _deThiService.FilterBySubjectAsync(teacherId, subject, pagingParams);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Lọc đề thi theo khối lớp
+        /// </summary>
+        [HttpGet("loc-khoi-lop")]
+        [ProducesResponseType(typeof(ApiPhanHoi<PagedResult<DeThiResponseDTO>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FilterByGrade([FromQuery] int grade, [FromQuery] PagingDTO pagingParams)
+        {
+            var teacherId = HttpContext.GetUserId();
+            var result = await _deThiService.FilterByGradeAsync(teacherId, grade, pagingParams);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Lọc đề thi theo trạng thái
+        /// </summary>
+        [HttpGet("loc-trang-thai")]
+        [ProducesResponseType(typeof(ApiPhanHoi<PagedResult<DeThiResponseDTO>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FilterByStatus([FromQuery] string status, [FromQuery] PagingDTO pagingParams)
+        {
+            var teacherId = HttpContext.GetUserId();
+            var result = await _deThiService.FilterByStatusAsync(teacherId, status, pagingParams);
+            return Ok(result);
+        }
+
+
     }
 }

@@ -248,9 +248,9 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"tieuDe\": \"Mẫu đề thi Hóa học 10 - Axit Bazơ Muối\",\n  \"moTa\": \"Mẫu đề thi cơ bản về chủ đề axit, bazơ, muối cho học sinh lớp 10\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"cauTruc\": [\n    {\n      \"chuDe\": \"Axit - Bazơ - Muối\",\n      \"doKho\": \"EASY\",\n      \"soLuong\": 5\n    },\n    {\n      \"chuDe\": \"Axit - Bazơ - Muối\",\n      \"doKho\": \"MEDIUM\",\n      \"soLuong\": 3\n    },\n    {\n      \"chuDe\": \"Axit - Bazơ - Muối\",\n      \"doKho\": \"HARD\",\n      \"soLuong\": 2\n    }\n  ]\n}"
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"tieuDe\": \"Mẫu đề thi Hóa học 10 - Axit Bazơ Muối\",\n  \"moTa\": \"Mẫu đề thi cơ bản về chủ đề axit, bazơ, muối cho học sinh lớp 10\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"cauTruc\": {\n    \"easy\": 5,\n    \"medium\": 3,\n    \"hard\": 2,\n    \"topics\": [\"Axit - Bazơ - Muối\"]\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/mau-de-thi",
@@ -387,9 +387,9 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"tieuDe\": \"Đề thi ngẫu nhiên Hóa học 10\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 60,\n  \"soLuongCauHoi\": 10,\n  \"chuDe\": \"Axit - Bazơ - Muối\",\n  \"doKho\": \"medium\"\n}"
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"tieuDe\": \"Đề thi ngẫu nhiên Hóa học 10\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 60,\n  \"soLuongCauHoi\": 10,\n  \"chuDe\": \"Axit - Bazơ - Muối\",\n  \"doKho\": \"MEDIUM\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/tao-de-thi/ngau-nhien",

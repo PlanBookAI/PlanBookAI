@@ -54,33 +54,48 @@ namespace ExamService.Services
 
         public async Task<ApiPhanHoi<CauHoiResponseDTO>> CreateAsync(CauHoiRequestDTO dto, Guid teacherId)
         {
-            // Normalize case sensitivity
-            if (!string.IsNullOrEmpty(dto.LoaiCauHoi))
+            try
             {
-                dto.LoaiCauHoi = dto.LoaiCauHoi.ToUpper();
+                // Normalize case sensitivity
+                if (!string.IsNullOrEmpty(dto.LoaiCauHoi))
+                {
+                    dto.LoaiCauHoi = dto.LoaiCauHoi.ToUpper();
+                }
+                if (!string.IsNullOrEmpty(dto.DoKho))
+                {
+                    dto.DoKho = dto.DoKho.ToUpper();
+                }
+
+                var cauHoi = dto.Adapt<CauHoi>();
+                cauHoi.NguoiTaoId = teacherId;
+                cauHoi.Id = Guid.NewGuid();
+
+                var newCauHoi = await _repo.CreateAsync(cauHoi);
+                var responseDto = newCauHoi.Adapt<CauHoiResponseDTO>();
+
+                // Publish sự kiện sau khi tạo thành công (skip nếu có lỗi)
+                try
+                {
+                    await _publishEndpoint.Publish<CauHoiMoiCreated>(new
+                    {
+                        CauHoiId = newCauHoi.Id,
+                        NguoiTaoId = teacherId,
+                        MonHoc = newCauHoi.MonHoc,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+                catch (Exception ex)
+                {
+                    // Log error nhưng không fail toàn bộ operation
+                    Console.WriteLine($"Lỗi khi publish event: {ex.Message}");
+                }
+
+                return ApiPhanHoi<CauHoiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Tạo câu hỏi thành công.");
             }
-            if (!string.IsNullOrEmpty(dto.DoKho))
+            catch (Exception ex)
             {
-                dto.DoKho = dto.DoKho.ToUpper();
+                return ApiPhanHoi<CauHoiResponseDTO>.ThatBai($"Lỗi khi tạo câu hỏi: {ex.Message}");
             }
-
-            var cauHoi = dto.Adapt<CauHoi>();
-            cauHoi.NguoiTaoId = teacherId;
-            cauHoi.Id = Guid.NewGuid();
-
-            var newCauHoi = await _repo.CreateAsync(cauHoi);
-            var responseDto = newCauHoi.Adapt<CauHoiResponseDTO>();
-
-            // Publish sự kiện sau khi tạo thành công
-            await _publishEndpoint.Publish<CauHoiMoiCreated>(new
-            {
-                CauHoiId = newCauHoi.Id,
-                NguoiTaoId = teacherId,
-                MonHoc = newCauHoi.MonHoc,
-                Timestamp = DateTime.UtcNow
-            });
-
-            return ApiPhanHoi<CauHoiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Tạo câu hỏi thành công.");
         }
 
         public async Task<ApiPhanHoi<CauHoiResponseDTO>> UpdateAsync(Guid id, CauHoiRequestDTO dto, Guid teacherId)
@@ -603,7 +618,33 @@ namespace ExamService.Services
             }
         }
 
+        public async Task<ApiPhanHoi<PagedResult<CauHoiResponseDTO>>> FilterByDifficultyAsync(Guid teacherId, string doKho, PagingDTO pagingParams)
+        {
+            try
+            {
+                var query = _repo.GetQueryable().Where(c => c.NguoiTaoId == teacherId);
 
+                if (!string.IsNullOrEmpty(doKho))
+                {
+                    query = query.Where(c => c.DoKho == doKho.ToUpper());
+                }
 
+                var totalItems = await query.CountAsync();
+                var items = await query.Skip((pagingParams.PageNumber - 1) * pagingParams.PageSize)
+                                       .Take(pagingParams.PageSize)
+                                       .Include(c => c.LuaChons)
+                                       .AsNoTracking()
+                                       .ToListAsync();
+
+                var dtos = items.Adapt<List<CauHoiResponseDTO>>();
+                var pagedResult = new PagedResult<CauHoiResponseDTO>(dtos, totalItems, pagingParams.PageNumber, pagingParams.PageSize);
+
+                return ApiPhanHoi<PagedResult<CauHoiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<PagedResult<CauHoiResponseDTO>>.ThatBai($"Lỗi khi lọc câu hỏi theo độ khó: {ex.Message}");
+            }
+        }
     }
 }

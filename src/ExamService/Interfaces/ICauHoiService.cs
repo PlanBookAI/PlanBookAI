@@ -11,6 +11,7 @@ public interface ICauHoiService
     Task<ApiPhanHoi<CauHoiResponseDTO>> UpdateAsync(Guid id, CauHoiRequestDTO dto, Guid teacherId);
     Task<ApiPhanHoi<bool>> DeleteAsync(Guid id, Guid teacherId);
     Task<ApiPhanHoi<PagedResult<CauHoiResponseDTO>>> SearchAsync(Guid teacherId, CauHoiSearchParametersDTO searchParams);
+    Task<ApiPhanHoi<PagedResult<CauHoiResponseDTO>>> FilterByDifficultyAsync(Guid teacherId, string doKho, PagingDTO pagingParams);
     Task<ApiPhanHoi<ImportResultDTO>> ImportFromExcelAsync(IFormFile file, Guid teacherId);
     Task<byte[]> ExportToExcelAsync(Guid teacherId);
 }

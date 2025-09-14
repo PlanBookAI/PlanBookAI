@@ -301,5 +301,17 @@ namespace ExamService.Controllers
 
             return File(fileBytes, mimeType, fileName);
         }
+
+        /// <summary>
+        /// Lọc câu hỏi theo độ khó
+        /// </summary>
+        [HttpGet("loc-do-kho")]
+        [ProducesResponseType(typeof(ApiPhanHoi<PagedResult<CauHoiResponseDTO>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FilterByDifficulty([FromQuery] string doKho, [FromQuery] PagingDTO pagingParams)
+        {
+            var teacherId = HttpContext.GetUserId();
+            var result = await _cauHoiService.FilterByDifficultyAsync(teacherId, doKho, pagingParams);
+            return Ok(result);
+        }
     }
 }

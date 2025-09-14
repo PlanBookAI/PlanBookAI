@@ -27,61 +27,92 @@ namespace ExamService.Services
 
         public async Task<ApiPhanHoi<PagedResult<DeThiResponseDTO>>> GetAllAsync(Guid teacherId, PagingDTO pagingParams)
         {
-            var query = _deThiRepo.GetQueryable().Where(d => d.NguoiTaoId == teacherId);
+            try
+            {
+                var query = _deThiRepo.GetQueryable().Where(d => d.NguoiTaoId == teacherId);
 
-            // TODO: Filtering, Sorting
-            query = query.OrderByDescending(d => d.CapNhatLuc);
+                // TODO: Filtering, Sorting
+                query = query.OrderByDescending(d => d.CapNhatLuc);
 
-            var totalItems = await query.CountAsync();
-            var items = await query.Skip((pagingParams.PageNumber - 1) * pagingParams.PageSize)
-                                   .Take(pagingParams.PageSize)
-                                   .Include(d => d.ExamQuestions)
-                                   .AsNoTracking()
-                                   .ToListAsync();
+                var totalItems = await query.CountAsync();
+                var items = await query.Skip((pagingParams.PageNumber - 1) * pagingParams.PageSize)
+                                       .Take(pagingParams.PageSize)
+                                       .Include(d => d.ExamQuestions)
+                                       .AsNoTracking()
+                                       .ToListAsync();
 
-            var dtos = items.Adapt<List<DeThiResponseDTO>>();
-            var pagedResult = new PagedResult<DeThiResponseDTO>(dtos, totalItems, pagingParams.PageNumber, pagingParams.PageSize);
+                var dtos = items.Adapt<List<DeThiResponseDTO>>();
+                var pagedResult = new PagedResult<DeThiResponseDTO>(dtos, totalItems, pagingParams.PageNumber, pagingParams.PageSize);
 
-            return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
+                return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThatBai($"Lỗi khi lấy danh sách đề thi: {ex.Message}");
+            }
         }
 
         public async Task<ApiPhanHoi<DeThiResponseDTO>> GetByIdAsync(Guid id, Guid teacherId)
         {
-            var deThi = await _deThiRepo.GetByIdAsync(id);
-            if (deThi == null || deThi.NguoiTaoId != teacherId)
+            try
             {
-                return ApiPhanHoi<DeThiResponseDTO>.ThatBai("Không tìm thấy đề thi hoặc không có quyền truy cập.");
+                var deThi = await _deThiRepo.GetByIdAsync(id);
+                if (deThi == null || deThi.NguoiTaoId != teacherId)
+                {
+                    return ApiPhanHoi<DeThiResponseDTO>.ThatBai("Không tìm thấy đề thi hoặc không có quyền truy cập.");
+                }
+
+                var responseDto = deThi.Adapt<DeThiResponseDTO>();
+
+                // Sắp xếp câu hỏi theo thứ tự
+                if (responseDto.CauHois != null)
+                {
+                    responseDto.CauHois = responseDto.CauHois.OrderBy(q => q.ThuTu).ToList();
+                }
+
+                return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto);
             }
-
-            var responseDto = deThi.Adapt<DeThiResponseDTO>();
-
-            // Sắp xếp câu hỏi theo thứ tự
-            responseDto.CauHois = responseDto.CauHois.OrderBy(q => q.ThuTu).ToList();
-
-            return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto);
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<DeThiResponseDTO>.ThatBai($"Lỗi khi lấy chi tiết đề thi: {ex.Message}");
+            }
         }
 
         public async Task<ApiPhanHoi<DeThiResponseDTO>> CreateAsync(DeThiRequestDTO dto, Guid teacherId)
         {
-            var deThi = dto.Adapt<DeThi>();
-            deThi.Id = Guid.NewGuid();
-            deThi.NguoiTaoId = teacherId;
-            deThi.TrangThai = "draft"; // Trạng thái mặc định
-
-            var newDeThi = await _deThiRepo.CreateAsync(deThi);
-
-            // Publish sự kiện
-            await _publishEndpoint.Publish<DeThiMoiCreated>(new
+            try
             {
-                DeThiId = newDeThi.Id,
-                TieuDe = newDeThi.TieuDe,
-                NguoiTaoId = teacherId,
-                Timestamp = DateTime.UtcNow
-            });
+                var deThi = dto.Adapt<DeThi>();
+                deThi.Id = Guid.NewGuid();
+                deThi.NguoiTaoId = teacherId;
+                deThi.TrangThai = "draft"; // Trạng thái mặc định
 
-            var responseDto = newDeThi.Adapt<DeThiResponseDTO>();
+                var newDeThi = await _deThiRepo.CreateAsync(deThi);
 
-            return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Tạo đề thi thành công.");
+                // Publish sự kiện (skip nếu có lỗi)
+                try
+                {
+                    await _publishEndpoint.Publish<DeThiMoiCreated>(new
+                    {
+                        DeThiId = newDeThi.Id,
+                        TieuDe = newDeThi.TieuDe,
+                        NguoiTaoId = teacherId,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Lỗi khi publish event: {ex.Message}");
+                }
+
+                var responseDto = newDeThi.Adapt<DeThiResponseDTO>();
+
+                return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Tạo đề thi thành công.");
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<DeThiResponseDTO>.ThatBai($"Lỗi khi tạo đề thi: {ex.Message}");
+            }
         }
 
         public async Task<ApiPhanHoi<DeThiResponseDTO>> UpdateAsync(Guid id, DeThiRequestDTO dto, Guid teacherId)
@@ -457,6 +488,131 @@ namespace ExamService.Services
 
             return ApiPhanHoi<DeThiThongKeDTO>.ThanhCongVoiDuLieu(thongKe);
         }
+
+        public async Task<ApiPhanHoi<PagedResult<DeThiResponseDTO>>> SearchExamsAsync(Guid teacherId, string keyword, PagingDTO pagingParams)
+        {
+            try
+            {
+                var query = _deThiRepo.GetQueryable().Where(d => d.NguoiTaoId == teacherId);
+
+                if (!string.IsNullOrEmpty(keyword))
+                {
+                    query = query.Where(d => d.TieuDe.Contains(keyword) || d.HuongDan.Contains(keyword));
+                }
+
+                query = query.OrderByDescending(d => d.CapNhatLuc);
+
+                var totalItems = await query.CountAsync();
+                var items = await query.Skip((pagingParams.PageNumber - 1) * pagingParams.PageSize)
+                                       .Take(pagingParams.PageSize)
+                                       .Include(d => d.ExamQuestions)
+                                       .AsNoTracking()
+                                       .ToListAsync();
+
+                var dtos = items.Adapt<List<DeThiResponseDTO>>();
+                var pagedResult = new PagedResult<DeThiResponseDTO>(dtos, totalItems, pagingParams.PageNumber, pagingParams.PageSize);
+
+                return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThatBai($"Lỗi khi tìm kiếm đề thi: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiPhanHoi<PagedResult<DeThiResponseDTO>>> FilterBySubjectAsync(Guid teacherId, string subject, PagingDTO pagingParams)
+        {
+            try
+            {
+                var query = _deThiRepo.GetQueryable().Where(d => d.NguoiTaoId == teacherId);
+
+                if (!string.IsNullOrEmpty(subject))
+                {
+                    query = query.Where(d => d.MonHoc == subject);
+                }
+
+                query = query.OrderByDescending(d => d.CapNhatLuc);
+
+                var totalItems = await query.CountAsync();
+                var items = await query.Skip((pagingParams.PageNumber - 1) * pagingParams.PageSize)
+                                       .Take(pagingParams.PageSize)
+                                       .Include(d => d.ExamQuestions)
+                                       .AsNoTracking()
+                                       .ToListAsync();
+
+                var dtos = items.Adapt<List<DeThiResponseDTO>>();
+                var pagedResult = new PagedResult<DeThiResponseDTO>(dtos, totalItems, pagingParams.PageNumber, pagingParams.PageSize);
+
+                return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThatBai($"Lỗi khi lọc đề thi theo môn học: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiPhanHoi<PagedResult<DeThiResponseDTO>>> FilterByGradeAsync(Guid teacherId, int grade, PagingDTO pagingParams)
+        {
+            try
+            {
+                var query = _deThiRepo.GetQueryable().Where(d => d.NguoiTaoId == teacherId);
+
+                if (grade > 0)
+                {
+                    query = query.Where(d => d.KhoiLop == grade);
+                }
+
+                query = query.OrderByDescending(d => d.CapNhatLuc);
+
+                var totalItems = await query.CountAsync();
+                var items = await query.Skip((pagingParams.PageNumber - 1) * pagingParams.PageSize)
+                                       .Take(pagingParams.PageSize)
+                                       .Include(d => d.ExamQuestions)
+                                       .AsNoTracking()
+                                       .ToListAsync();
+
+                var dtos = items.Adapt<List<DeThiResponseDTO>>();
+                var pagedResult = new PagedResult<DeThiResponseDTO>(dtos, totalItems, pagingParams.PageNumber, pagingParams.PageSize);
+
+                return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThatBai($"Lỗi khi lọc đề thi theo khối lớp: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiPhanHoi<PagedResult<DeThiResponseDTO>>> FilterByStatusAsync(Guid teacherId, string status, PagingDTO pagingParams)
+        {
+            try
+            {
+                var query = _deThiRepo.GetQueryable().Where(d => d.NguoiTaoId == teacherId);
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    query = query.Where(d => d.TrangThai == status);
+                }
+
+                query = query.OrderByDescending(d => d.CapNhatLuc);
+
+                var totalItems = await query.CountAsync();
+                var items = await query.Skip((pagingParams.PageNumber - 1) * pagingParams.PageSize)
+                                       .Take(pagingParams.PageSize)
+                                       .Include(d => d.ExamQuestions)
+                                       .AsNoTracking()
+                                       .ToListAsync();
+
+                var dtos = items.Adapt<List<DeThiResponseDTO>>();
+                var pagedResult = new PagedResult<DeThiResponseDTO>(dtos, totalItems, pagingParams.PageNumber, pagingParams.PageSize);
+
+                return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThatBai($"Lỗi khi lọc đề thi theo trạng thái: {ex.Message}");
+            }
+        }
+
 
     }
 }

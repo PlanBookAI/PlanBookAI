@@ -20,5 +20,9 @@ namespace ExamService.Interfaces
         Task<ApiPhanHoi<byte[]>> ExportToWordAsync(Guid deThiId, Guid teacherId);
         Task<ApiPhanHoi<DeThiResponseDTO>> CloneExamAsync(Guid deThiId, Guid teacherId);
         Task<ApiPhanHoi<DeThiThongKeDTO>> GetExamStatisticsAsync(Guid deThiId, Guid teacherId);
+        Task<ApiPhanHoi<PagedResult<DeThiResponseDTO>>> SearchExamsAsync(Guid teacherId, string keyword, PagingDTO pagingParams);
+        Task<ApiPhanHoi<PagedResult<DeThiResponseDTO>>> FilterBySubjectAsync(Guid teacherId, string subject, PagingDTO pagingParams);
+        Task<ApiPhanHoi<PagedResult<DeThiResponseDTO>>> FilterByGradeAsync(Guid teacherId, int grade, PagingDTO pagingParams);
+        Task<ApiPhanHoi<PagedResult<DeThiResponseDTO>>> FilterByStatusAsync(Guid teacherId, string status, PagingDTO pagingParams);
     }
 }
