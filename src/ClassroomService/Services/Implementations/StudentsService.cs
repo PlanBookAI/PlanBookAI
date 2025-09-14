@@ -6,6 +6,9 @@ using ClassroomService.Services.Interfaces;
 
 namespace ClassroomService.Services.Implementations
 {
+    /// <summary>
+    /// Service implementation for managing students
+    /// </summary>
     public class StudentsService : IStudentsService
     {
         private readonly IStudentsRepository _studentsRepository;
@@ -13,6 +16,9 @@ namespace ClassroomService.Services.Implementations
         private readonly IMapper _mapper;
         private readonly ILogger<StudentsService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of StudentsService
+        /// </summary>
         public StudentsService(
             IStudentsRepository studentsRepository,
             IClassesRepository classesRepository,
@@ -25,6 +31,9 @@ namespace ClassroomService.Services.Implementations
             _logger = logger;
         }
 
+        /// <summary>
+        /// Gets paginated list of students
+        /// </summary>
         public async Task<(IEnumerable<StudentDto> Items, int TotalCount)> LayDanhSachHocSinh(int? ownerTeacherId = null, int page = 1, int pageSize = 10)
         {
             _logger.LogInformation("Lấy danh sách học sinh với owner teacher ID: {OwnerTeacherId}", ownerTeacherId);
@@ -36,6 +45,9 @@ namespace ClassroomService.Services.Implementations
             return (studentDtos, totalCount);
         }
 
+        /// <summary>
+        /// Gets a student by ID
+        /// </summary>
         public async Task<StudentDto> LayHocSinhTheoId(int id, int? ownerTeacherId = null)
         {
             _logger.LogInformation("Lấy thông tin học sinh ID: {Id}", id);
@@ -49,11 +61,14 @@ namespace ClassroomService.Services.Implementations
             return _mapper.Map<StudentDto>(student);
         }
 
+        /// <summary>
+        /// Gets students by class ID with pagination
+        /// </summary>
         public async Task<(IEnumerable<StudentDto> Items, int TotalCount)> LayHocSinhTheoLop(int classId, int? ownerTeacherId = null, int page = 1, int pageSize = 10)
         {
             _logger.LogInformation("Lấy danh sách học sinh theo lớp ID: {ClassId}", classId);
 
-            // Kiểm tra lớp học có tồn tại và thuộc quyền quản lý không
+            // Check if class exists and belongs to owner teacher
             if (ownerTeacherId.HasValue)
             {
                 var classEntity = await _classesRepository.GetByIdAsync(classId, ownerTeacherId);
@@ -70,18 +85,21 @@ namespace ClassroomService.Services.Implementations
             return (studentDtos, totalCount);
         }
 
+        /// <summary>
+        /// Creates a new student
+        /// </summary>
         public async Task<StudentDto> ThemHocSinh(CreateStudentDto dto)
         {
             _logger.LogInformation("Thêm học sinh mới: {FullName}", dto.FullName);
 
-            // Kiểm tra mã học sinh đã tồn tại chưa
+            // Check if student code already exists
             var existsByCode = await _studentsRepository.ExistsByStudentCodeAsync(dto.StudentCode);
             if (existsByCode)
             {
                 throw new InvalidOperationException($"Mã học sinh '{dto.StudentCode}' đã tồn tại");
             }
 
-            // Kiểm tra lớp học có tồn tại và thuộc quyền quản lý không
+            // Check if class exists and belongs to owner teacher
             var classEntity = await _classesRepository.GetByIdAsync(dto.ClassId, dto.OwnerTeacherId);
             if (classEntity == null)
             {
@@ -91,13 +109,16 @@ namespace ClassroomService.Services.Implementations
             var student = _mapper.Map<Students>(dto);
             var createdStudent = await _studentsRepository.CreateAsync(student);
 
-            // Cập nhật số lượng học sinh trong lớp
+            // Update student count in class
             await UpdateClassStudentCount(dto.ClassId);
 
             return _mapper.Map<StudentDto>(createdStudent);
         }
 
-        async Task<StudentDto> IStudentsService.CapNhatHocSinh(int id, UpdateStudentDto dto, int ownerTeacherId)
+        /// <summary>
+        /// Updates an existing student
+        /// </summary>
+        public async Task<StudentDto> CapNhatHocSinh(int id, UpdateStudentDto dto, int ownerTeacherId)
         {
             _logger.LogInformation("Cập nhật học sinh ID: {Id}", id);
 
@@ -107,7 +128,7 @@ namespace ClassroomService.Services.Implementations
                 throw new KeyNotFoundException($"Không tìm thấy học sinh với ID: {id}");
             }
 
-            // Kiểm tra mã học sinh đã tồn tại chưa (ngoại trừ học sinh hiện tại)
+            // Check if student code already exists (excluding current student)
             if (dto.StudentCode != existingStudent.StudentCode)
             {
                 var existsByCode = await _studentsRepository.ExistsByStudentCodeAsync(dto.StudentCode, id);
@@ -117,7 +138,7 @@ namespace ClassroomService.Services.Implementations
                 }
             }
 
-            // Kiểm tra lớp học mới có tồn tại và thuộc quyền quản lý không
+            // Check if new class exists and belongs to owner teacher
             if (dto.ClassId != existingStudent.ClassId)
             {
                 var newClassEntity = await _classesRepository.GetByIdAsync(dto.ClassId, ownerTeacherId);
@@ -131,7 +152,7 @@ namespace ClassroomService.Services.Implementations
             _mapper.Map(dto, existingStudent);
             var updatedStudent = await _studentsRepository.UpdateAsync(existingStudent);
 
-            // Cập nhật số lượng học sinh nếu đổi lớp
+            // Update student count if class changed
             if (oldClassId != dto.ClassId)
             {
                 await UpdateClassStudentCount(oldClassId);
@@ -141,6 +162,9 @@ namespace ClassroomService.Services.Implementations
             return _mapper.Map<StudentDto>(updatedStudent);
         }
 
+        /// <summary>
+        /// Deletes a student
+        /// </summary>
         public async Task<bool> XoaHocSinh(int id, int ownerTeacherId)
         {
             _logger.LogInformation("Xóa học sinh ID: {Id}", id);
@@ -156,7 +180,7 @@ namespace ClassroomService.Services.Implementations
 
             if (result)
             {
-                // Cập nhật số lượng học sinh trong lớp
+                // Update student count in class
                 await UpdateClassStudentCount(classId);
             }
 
@@ -179,7 +203,7 @@ namespace ClassroomService.Services.Implementations
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Không thể cập nhật số lượng học sinh cho lớp {ClassId}", classId);
-                // Không throw exception để không ảnh hưởng đến operation chính
+                // Don't throw exception to avoid affecting main operation
             }
         }
     }

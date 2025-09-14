@@ -2,37 +2,117 @@ using FluentValidation;
 
 namespace ClassroomService.Models.DTOs
 {
+    /// <summary>
+    /// DTO for creating class
+    /// </summary>
     public class CreateClassDto
     {
-        public string Name { get; set; }
+        /// <summary>
+        /// Class name
+        /// </summary>
+        public required string Name { get; set; }
+        
+        /// <summary>
+        /// Grade level
+        /// </summary>
         public int Grade { get; set; }
+        
+        /// <summary>
+        /// Homeroom teacher ID
+        /// </summary>
         public int HomeroomTeacherId { get; set; }
-        public string AcademicYear { get; set; }
+        
+        /// <summary>
+        /// Academic year
+        /// </summary>
+        public required string AcademicYear { get; set; }
     }
 
+    /// <summary>
+    /// DTO for updating class
+    /// </summary>
     public class UpdateClassDto
     {
-        public string Name { get; set; }
+        /// <summary>
+        /// Class name
+        /// </summary>
+        public required string Name { get; set; }
+        
+        /// <summary>
+        /// Grade level
+        /// </summary>
         public int Grade { get; set; }
-        public string AcademicYear { get; set; }
+        
+        /// <summary>
+        /// Academic year
+        /// </summary>
+        public required string AcademicYear { get; set; }
+        
+        /// <summary>
+        /// Active status
+        /// </summary>
         public bool IsActive { get; set; }
     }
 
+    /// <summary>
+    /// DTO for class response
+    /// </summary>
     public class ClassDto
     {
+        /// <summary>
+        /// Class ID
+        /// </summary>
         public int Id { get; set; }
-        public string Name { get; set; }
+        
+        /// <summary>
+        /// Class name
+        /// </summary>
+        public required string Name { get; set; }
+        
+        /// <summary>
+        /// Grade level
+        /// </summary>
         public int Grade { get; set; }
+        
+        /// <summary>
+        /// Number of students
+        /// </summary>
         public int StudentCount { get; set; }
+        
+        /// <summary>
+        /// Homeroom teacher ID
+        /// </summary>
         public int HomeroomTeacherId { get; set; }
-        public string AcademicYear { get; set; }
+        
+        /// <summary>
+        /// Academic year
+        /// </summary>
+        public required string AcademicYear { get; set; }
+        
+        /// <summary>
+        /// Active status
+        /// </summary>
         public bool IsActive { get; set; }
+        
+        /// <summary>
+        /// Created timestamp
+        /// </summary>
         public DateTime CreatedAt { get; set; }
+        
+        /// <summary>
+        /// Updated timestamp
+        /// </summary>
         public DateTime UpdatedAt { get; set; }
     }
 
+    /// <summary>
+    /// Validator for CreateClassDto
+    /// </summary>
     public class CreateClassDtoValidator : AbstractValidator<CreateClassDto>
     {
+        /// <summary>
+        /// Initializes validation rules
+        /// </summary>
         public CreateClassDtoValidator()
         {
             RuleFor(x => x.Name)

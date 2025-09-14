@@ -4,11 +4,17 @@ using ClassroomService.Models.Entities;
 
 namespace ClassroomService.Profiles
 {
+    /// <summary>
+    /// AutoMapper profile for mapping between entities and DTOs
+    /// </summary>
     public class MappingProfile : Profile
     {
+        /// <summary>
+        /// Initializes the mapping configurations
+        /// </summary>
         public MappingProfile()
         {
-            // Ánh xạ lớp
+            // Class mappings
             CreateMap<CreateClassDto, Classes>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.StudentCount, opt => opt.Ignore())
@@ -27,7 +33,7 @@ namespace ClassroomService.Profiles
 
             CreateMap<Classes, ClassDto>();
 
-            // Ánh xạ học sinh
+            // Student mappings
             CreateMap<CreateStudentDto, Students>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
@@ -49,7 +55,7 @@ namespace ClassroomService.Profiles
             CreateMap<Students, StudentDto>()
                 .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Class != null ? src.Class.Name : ""));
 
-            // Ánh xạ kết quả học tập
+            // Student result mappings
             CreateMap<CreateStudentResultDto, StudentResults>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.Student, opt => opt.Ignore());
@@ -57,7 +63,7 @@ namespace ClassroomService.Profiles
             CreateMap<StudentResults, StudentResultDto>()
                 .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.FullName : ""));
 
-            // Ánh xạ Phiếu trả lời
+            // Answer sheet mappings
             CreateMap<CreateAnswerSheetDto, AnswerSheets>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.OcrStatus, opt => opt.MapFrom(src => OcrStatus.PENDING))

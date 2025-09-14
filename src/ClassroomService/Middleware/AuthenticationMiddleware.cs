@@ -2,20 +2,29 @@ using System.Security.Claims;
 
 namespace ClassroomService.Middleware
 {
+    /// <summary>
+    /// Middleware for handling authentication headers from API Gateway
+    /// </summary>
     public class AuthenticationMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<AuthenticationMiddleware> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of AuthenticationMiddleware
+        /// </summary>
         public AuthenticationMiddleware(RequestDelegate next, ILogger<AuthenticationMiddleware> logger)
         {
             _next = next;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Processes authentication headers and validates user information
+        /// </summary>
         public async Task InvokeAsync(HttpContext context)
         {
-            // Bỏ qua xác thực để kiểm tra health và swagger
+            // Skip authentication for health checks and swagger
             if (context.Request.Path.StartsWithSegments("/health") ||
                 context.Request.Path.StartsWithSegments("/swagger"))
             {
@@ -35,7 +44,7 @@ namespace ClassroomService.Middleware
                 return;
             }
 
-            // Thêm thông tin người dùng vào HttpContext
+            // Add user information to HttpContext
             var claims = new List<Claim>
             {
                 new Claim("userId", userId),

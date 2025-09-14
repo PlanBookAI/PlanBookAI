@@ -5,6 +5,9 @@ using FluentValidation;
 
 namespace ClassroomService.Controllers
 {
+    /// <summary>
+    /// Controller for managing school classes
+    /// </summary>
     [ApiController]
     [Route("api/v1/lop-hoc")]
     public class ClassesController : ControllerBase
@@ -14,6 +17,13 @@ namespace ClassroomService.Controllers
         private readonly IValidator<UpdateClassDto> _updateValidator;
         private readonly ILogger<ClassesController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of ClassesController
+        /// </summary>
+        /// <param name="classesService">Classes service</param>
+        /// <param name="createValidator">Create class validator</param>
+        /// <param name="updateValidator">Update class validator</param>
+        /// <param name="logger">Logger instance</param>
         public ClassesController(
             IClassesService classesService, 
             IValidator<CreateClassDto> createValidator,
@@ -26,6 +36,12 @@ namespace ClassroomService.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Gets paginated list of classes
+        /// </summary>
+        /// <param name="page">Page number</param>
+        /// <param name="pageSize">Page size</param>
+        /// <returns>Paginated list of classes</returns>
         [HttpGet]
         public async Task<ActionResult<object>> LayDanhSachLopHoc([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -59,6 +75,11 @@ namespace ClassroomService.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets a specific class by ID
+        /// </summary>
+        /// <param name="id">Class ID</param>
+        /// <returns>Class details</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> LayLopHocTheoId(int id)
         {
@@ -89,6 +110,11 @@ namespace ClassroomService.Controllers
             }
         }
 
+        /// <summary>
+        /// Creates a new class
+        /// </summary>
+        /// <param name="dto">Class creation data</param>
+        /// <returns>Created class</returns>
         [HttpPost]
         public async Task<ActionResult<object>> TaoLopHoc([FromBody] CreateClassDto dto)
         {
@@ -133,7 +159,7 @@ namespace ClassroomService.Controllers
             return Request.Headers["X-User-Role"].FirstOrDefault() ?? "TEACHER";
         }
 
-        private string GetUserEmailFromHeader()
+        private string? GetUserEmailFromHeader()
         {
             return Request.Headers["X-User-Email"].FirstOrDefault();
         }

@@ -3,43 +3,147 @@ using ClassroomService.Models.Entities;
 
 namespace ClassroomService.Models.DTOs
 {
+    /// <summary>
+    /// DTO for creating student
+    /// </summary>
     public class CreateStudentDto
     {
-        public string FullName { get; set; }
-        public string StudentCode { get; set; }
+        /// <summary>
+        /// Student full name
+        /// </summary>
+        public required string FullName { get; set; }
+        
+        /// <summary>
+        /// Student code
+        /// </summary>
+        public required string StudentCode { get; set; }
+        
+        /// <summary>
+        /// Birth date
+        /// </summary>
         public DateOnly BirthDate { get; set; }
+        
+        /// <summary>
+        /// Gender
+        /// </summary>
         public Gender Gender { get; set; }
+        
+        /// <summary>
+        /// Class ID
+        /// </summary>
         public int ClassId { get; set; }
+        
+        /// <summary>
+        /// Owner teacher ID
+        /// </summary>
         public int OwnerTeacherId { get; set; }
     }
 
+    /// <summary>
+    /// DTO for updating student
+    /// </summary>
     public class UpdateStudentDto
     {
-        public string FullName { get; set; }
-        public string StudentCode { get; set; }
+        /// <summary>
+        /// Student full name
+        /// </summary>
+        public required string FullName { get; set; }
+        
+        /// <summary>
+        /// Student code
+        /// </summary>
+        public required string StudentCode { get; set; }
+        
+        /// <summary>
+        /// Birth date
+        /// </summary>
         public DateOnly BirthDate { get; set; }
+        
+        /// <summary>
+        /// Gender
+        /// </summary>
         public Gender Gender { get; set; }
+        
+        /// <summary>
+        /// Class ID
+        /// </summary>
         public int ClassId { get; set; }
+        
+        /// <summary>
+        /// Active status
+        /// </summary>
         public bool IsActive { get; set; }
     }
 
+    /// <summary>
+    /// DTO for student response
+    /// </summary>
     public class StudentDto
     {
+        /// <summary>
+        /// Student ID
+        /// </summary>
         public int Id { get; set; }
-        public string FullName { get; set; }
-        public string StudentCode { get; set; }
+        
+        /// <summary>
+        /// Student full name
+        /// </summary>
+        public required string FullName { get; set; }
+        
+        /// <summary>
+        /// Student code
+        /// </summary>
+        public required string StudentCode { get; set; }
+        
+        /// <summary>
+        /// Birth date
+        /// </summary>
         public DateOnly BirthDate { get; set; }
+        
+        /// <summary>
+        /// Gender
+        /// </summary>
         public Gender Gender { get; set; }
+        
+        /// <summary>
+        /// Class ID
+        /// </summary>
         public int ClassId { get; set; }
-        public string ClassName { get; set; }
+        
+        /// <summary>
+        /// Class name
+        /// </summary>
+        public required string ClassName { get; set; }
+        
+        /// <summary>
+        /// Owner teacher ID
+        /// </summary>
         public int OwnerTeacherId { get; set; }
+        
+        /// <summary>
+        /// Active status
+        /// </summary>
         public bool IsActive { get; set; }
+        
+        /// <summary>
+        /// Created timestamp
+        /// </summary>
         public DateTime CreatedAt { get; set; }
+        
+        /// <summary>
+        /// Updated timestamp
+        /// </summary>
         public DateTime UpdatedAt { get; set; }
     }
 
+    /// <summary>
+    /// Validator for CreateStudentDto
+    /// </summary>
     public class CreateStudentDtoValidator : AbstractValidator<CreateStudentDto>
     {
+        /// <summary>
+        /// Initializes validation rules
+        /// </summary>
         public CreateStudentDtoValidator()
         {
             RuleFor(x => x.FullName)
