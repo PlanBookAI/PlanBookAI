@@ -1,5 +1,6 @@
 namespace PlanbookAI.FileStorageService.Services
 {
+    using System.Linq;
     using System.Security.Cryptography;
     using System.Text.Json;
     using PlanbookAI.FileStorageService.Models.DTOs;
@@ -136,7 +137,8 @@ namespace PlanbookAI.FileStorageService.Services
             if (file == null || file.Status == "DELETED")
                 return null;
                 
-            if (!isAdmin && userId.HasValue && file.UploadedBy != userId.Value)
+            // Only admins can see all files, others can only see their own files
+            if (!isAdmin && (!userId.HasValue || file.UploadedBy != userId.Value))
                 return null;
                 
             return file;
@@ -147,9 +149,15 @@ namespace PlanbookAI.FileStorageService.Services
             var searchUserId = isAdmin ? null : userId;
             var (files, total) = await _repository.GetPagedAsync(page, size, fileType, status, searchUserId);
             
+            var danhSachResult = new List<PhanHoiTepTin>();
+            foreach (var file in files)
+            {
+                danhSachResult.Add(MapToResponse(file));
+            }
+            
             return new PhanHoiDanhSachTepTin
             {
-                DanhSach = files.Select(MapToResponse).ToList(),
+                DanhSach = danhSachResult,
                 TongSo = total,
                 Trang = page,
                 KichThuoc = size,
@@ -161,7 +169,14 @@ namespace PlanbookAI.FileStorageService.Services
         {
             var searchUserId = isAdmin ? null : userId;
             var files = await _repository.SearchByMetadataAsync(key, value, searchUserId);
-            return files.Select(MapToResponse).ToList();
+            
+            var result = new List<PhanHoiTepTin>();
+            foreach (var file in files)
+            {
+                result.Add(MapToResponse(file));
+            }
+            
+            return result;
         }
         
         public async Task<bool> SoftDeleteAsync(Guid id, Guid userId, bool isAdmin)
@@ -209,7 +224,15 @@ namespace PlanbookAI.FileStorageService.Services
             var fullPath = Path.Combine(_storageRoot, file.FilePath);
             if (File.Exists(fullPath))
             {
-                File.Delete(fullPath);
+                try
+                {
+                    File.Delete(fullPath);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning("Could not delete physical file {FilePath}: {Error}", fullPath, ex.Message);
+                    // Continue with database deletion even if physical file cannot be deleted
+                }
             }
             
             // Delete from database
@@ -230,6 +253,10 @@ namespace PlanbookAI.FileStorageService.Services
                 
             foreach (var kvp in metadata)
             {
+                // Validate metadata key and value
+                if (string.IsNullOrWhiteSpace(kvp.Key) || string.IsNullOrWhiteSpace(kvp.Value))
+                    continue;
+                    
                 await _repository.UpsertMetadataAsync(id, kvp.Key, kvp.Value);
             }
             
@@ -239,7 +266,7 @@ namespace PlanbookAI.FileStorageService.Services
         
         public bool IsValidMimeType(string mimeType, string? fileType)
         {
-            if (!_allowedMimes.Contains(mimeType))
+            if (string.IsNullOrWhiteSpace(mimeType) || !_allowedMimes.Contains(mimeType))
                 return false;
                 
             if (!string.IsNullOrEmpty(fileType) && _fileTypeMimes.ContainsKey(fileType))
@@ -254,21 +281,29 @@ namespace PlanbookAI.FileStorageService.Services
         
         public bool IsValidFileSize(long size)
         {
-            return size <= _maxUploadMB * 1024 * 1024;
+            return size > 0 && size <= _maxUploadMB * 1024 * 1024;
         }
         
         public string ComputeFileHash(Stream stream)
         {
+            stream.Position = 0; // Ensure stream is at the beginning
             using var sha256 = SHA256.Create();
             var hash = sha256.ComputeHash(stream);
+            stream.Position = 0; // Reset position for subsequent operations
             return Convert.ToHexString(hash).ToLowerInvariant();
         }
         
         private string DetectFileType(string mimeType, string? requestedType)
         {
+            // Use requested type if valid
             if (!string.IsNullOrEmpty(requestedType) && _fileTypeMimes.ContainsKey(requestedType))
-                return requestedType;
+            {
+                var typeMimes = _fileTypeMimes[requestedType];
+                if (!typeMimes.Any() || typeMimes.Contains(mimeType))
+                    return requestedType;
+            }
                 
+            // Auto-detect based on MIME type
             foreach (var kvp in _fileTypeMimes)
             {
                 if (kvp.Value.Contains(mimeType))
@@ -278,18 +313,22 @@ namespace PlanbookAI.FileStorageService.Services
             return "OTHER";
         }
         
-        private bool IsUnsafeFileName(string fileName)
+        private static bool IsUnsafeFileName(string? fileName)
         {
-            var unsafeExtensions = new[] { ".exe", ".bat", ".cmd", ".scr", ".com", ".pif" };
+            if (string.IsNullOrWhiteSpace(fileName))
+                return true;
+                
+            var unsafeExtensions = new[] { ".exe", ".bat", ".cmd", ".scr", ".com", ".pif", ".vbs", ".js", ".jar", ".ps1" };
             var extension = Path.GetExtension(fileName).ToLowerInvariant();
             
             return unsafeExtensions.Contains(extension) || 
                    fileName.Contains("..") || 
                    fileName.Contains("/") || 
-                   fileName.Contains("\\");
+                   fileName.Contains("\\") ||
+                   fileName.Any(c => Path.GetInvalidFileNameChars().Contains(c));
         }
         
-        private PhanHoiTepTin MapToResponse(TepTin file, bool isDuplicate = false)
+        private static PhanHoiTepTin MapToResponse(TepTin file, bool isDuplicate = false)
         {
             return new PhanHoiTepTin
             {
