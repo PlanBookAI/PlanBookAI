@@ -183,9 +183,7 @@ app.UseMiddleware<HeaderAuthenticationMiddleware>();
 
 app.UseRouting(); // Đảm bảo UseRouting() được gọi
 
-app.UseAuthorization();
-
-// Map các endpoint health checks
+// Map các endpoint health checks TRƯỚC UseAuthorization
 app.MapHealthChecks("/api/v1/health", new HealthCheckOptions
 {
     // Tùy chỉnh response trả về
@@ -211,6 +209,8 @@ app.MapHealthChecks("/api/v1/health/live", new HealthCheckOptions
 
 // Map endpoint /metrics riêng (Prometheus library tự động làm điều này, nhưng để rõ ràng hơn)
 app.MapMetrics();
+
+app.UseAuthorization();
 
 app.MapControllers();
 

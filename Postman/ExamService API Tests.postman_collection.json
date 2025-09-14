@@ -1,0 +1,1001 @@
+{
+	"info": {
+		"_postman_id": "1ed92aa7-0c41-46ba-a963-c1233e469746",
+		"name": "ExamService API Tests",
+		"description": "Collection để test ExamService APIs từ login đến tất cả chức năng",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39580650"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login Teacher",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.success && responseJson.data && responseJson.data.token) {",
+									"        pm.collectionVariables.set('auth_token', responseJson.data.token);",
+									"        pm.collectionVariables.set('teacher_id', responseJson.data.userId);",
+									"        console.log('Token saved:', responseJson.data.token);",
+									"        console.log('Teacher ID saved:', responseJson.data.userId);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"teacher@test.com\",\n  \"matkhau\": \"teacher123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/xac-thuc/dang-nhap",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"xac-thuc",
+								"dang-nhap"
+							]
+						},
+						"description": "Đăng nhập với tài khoản teacher"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Câu hỏi Management",
+			"item": [
+				{
+					"name": "Tạo câu hỏi mới",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.success && responseJson.data && responseJson.data.id) {",
+									"        pm.collectionVariables.set('question_id', responseJson.data.id);",
+									"        console.log('Question ID saved:', responseJson.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"noiDung\": \"Hãy chọn công thức hóa học đúng của axit clohiđric:\",\n  \"monHoc\": \"HOA_HOC\",\n  \"loaiCauHoi\": \"MULTIPLE_CHOICE\",\n  \"chuDe\": \"Axit - Bazơ - Muối\",\n  \"doKho\": \"EASY\",\n  \"dapAnDung\": \"A\",\n  \"giaiThich\": \"Axit clohiđric có công thức HCl\",\n  \"luaChons\": [\n    {\n      \"noiDung\": \"HCl\",\n      \"laDapAnDung\": true\n    },\n    {\n      \"noiDung\": \"H2SO4\",\n      \"laDapAnDung\": false\n    },\n    {\n      \"noiDung\": \"HNO3\",\n      \"laDapAnDung\": false\n    },\n    {\n      \"noiDung\": \"H3PO4\",\n      \"laDapAnDung\": false\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/cau-hoi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cau-hoi"
+							]
+						},
+						"description": "Tạo câu hỏi trắc nghiệm mới"
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy danh sách câu hỏi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cau-hoi?PageNumber=1&PageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cau-hoi"
+							],
+							"query": [
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lấy danh sách câu hỏi với phân trang"
+					},
+					"response": []
+				},
+				{
+					"name": "Tìm kiếm câu hỏi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cau-hoi/tim-kiem?Keyword=axit&MonHoc=HOA_HOC&PageNumber=1&PageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cau-hoi",
+								"tim-kiem"
+							],
+							"query": [
+								{
+									"key": "Keyword",
+									"value": "axit"
+								},
+								{
+									"key": "MonHoc",
+									"value": "HOA_HOC"
+								},
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Tìm kiếm câu hỏi theo từ khóa"
+					},
+					"response": []
+				},
+				{
+					"name": "Lọc câu hỏi theo độ khó",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cau-hoi/loc-do-kho?DoKho=EASY&PageNumber=1&PageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cau-hoi",
+								"loc-do-kho"
+							],
+							"query": [
+								{
+									"key": "DoKho",
+									"value": "EASY"
+								},
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lọc câu hỏi theo độ khó"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Mẫu đề thi Management",
+			"item": [
+				{
+					"name": "Tạo mẫu đề thi",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.success && responseJson.data && responseJson.data.id) {",
+									"        pm.collectionVariables.set('template_id', responseJson.data.id);",
+									"        console.log('Template ID saved:', responseJson.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tieuDe\": \"Mẫu đề thi Hóa học 10 - Axit Bazơ Muối\",\n  \"moTa\": \"Mẫu đề thi cơ bản về chủ đề axit, bazơ, muối cho học sinh lớp 10\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"cauTruc\": [\n    {\n      \"chuDe\": \"Axit - Bazơ - Muối\",\n      \"doKho\": \"EASY\",\n      \"soLuong\": 5\n    },\n    {\n      \"chuDe\": \"Axit - Bazơ - Muối\",\n      \"doKho\": \"MEDIUM\",\n      \"soLuong\": 3\n    },\n    {\n      \"chuDe\": \"Axit - Bazơ - Muối\",\n      \"doKho\": \"HARD\",\n      \"soLuong\": 2\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-de-thi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-de-thi"
+							]
+						},
+						"description": "Tạo mẫu đề thi mới"
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy danh sách mẫu đề thi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/mau-de-thi?PageNumber=1&PageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mau-de-thi"
+							],
+							"query": [
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lấy danh sách mẫu đề thi"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Đề thi Management",
+			"item": [
+				{
+					"name": "Tạo đề thi thủ công",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.success && responseJson.data && responseJson.data.id) {",
+									"        pm.collectionVariables.set('exam_id', responseJson.data.id);",
+									"        console.log('Exam ID saved:', responseJson.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tieuDe\": \"Đề thi Hóa học 10 - Axit Bazơ Muối\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 45,\n  \"huongDan\": \"Thời gian làm bài: 45 phút. Học sinh đọc kỹ đề trước khi làm bài.\",\n  \"templateId\": null,\n  \"topicId\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi"
+							]
+						},
+						"description": "Tạo đề thi thủ công"
+					},
+					"response": []
+				},
+				{
+					"name": "Tạo đề thi từ mẫu",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tieuDe\": \"Đề thi từ mẫu - Axit Bazơ Muối\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 45,\n  \"huongDan\": \"Đề thi được tạo từ mẫu có sẵn\",\n  \"templateId\": \"{{template_id}}\",\n  \"topicId\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi"
+							]
+						},
+						"description": "Tạo đề thi từ mẫu đã có"
+					},
+					"response": []
+				},
+				{
+					"name": "Tạo đề thi ngẫu nhiên",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tieuDe\": \"Đề thi ngẫu nhiên Hóa học 10\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 60,\n  \"soLuongCauHoi\": 10,\n  \"chuDe\": \"Axit - Bazơ - Muối\",\n  \"doKho\": \"medium\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/tao-de-thi/ngau-nhien",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tao-de-thi",
+								"ngau-nhien"
+							]
+						},
+						"description": "Tạo đề thi ngẫu nhiên từ ngân hàng câu hỏi"
+					},
+					"response": []
+				},
+				{
+					"name": "Tạo đề thi từ ngân hàng câu hỏi",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tieuDe\": \"Đề thi từ ngân hàng câu hỏi\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 45,\n  \"danhSachCauHoiId\": [\"{{question_id}}\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/tao-de-thi/tu-cau-hoi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tao-de-thi",
+								"tu-cau-hoi"
+							]
+						},
+						"description": "Tạo đề thi từ danh sách câu hỏi cụ thể"
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy danh sách đề thi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi?PageNumber=1&PageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi"
+							],
+							"query": [
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lấy danh sách đề thi với phân trang"
+					},
+					"response": []
+				},
+				{
+					"name": "Tìm kiếm đề thi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/tim-kiem?Keyword=axit&PageNumber=1&PageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"tim-kiem"
+							],
+							"query": [
+								{
+									"key": "Keyword",
+									"value": "axit"
+								},
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Tìm kiếm đề thi theo từ khóa"
+					},
+					"response": []
+				},
+				{
+					"name": "Lọc đề thi theo môn học",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/loc-mon-hoc?subject=HOA_HOC&PageNumber=1&PageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"loc-mon-hoc"
+							],
+							"query": [
+								{
+									"key": "subject",
+									"value": "HOA_HOC"
+								},
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lọc đề thi theo môn học"
+					},
+					"response": []
+				},
+				{
+					"name": "Lọc đề thi theo khối lớp",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/loc-khoi-lop?grade=10&PageNumber=1&PageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"loc-khoi-lop"
+							],
+							"query": [
+								{
+									"key": "grade",
+									"value": "10"
+								},
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lọc đề thi theo khối lớp"
+					},
+					"response": []
+				},
+				{
+					"name": "Lọc đề thi theo trạng thái",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/loc-trang-thai?status=DRAFT&PageNumber=1&PageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"loc-trang-thai"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "DRAFT"
+								},
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lọc đề thi theo trạng thái"
+					},
+					"response": []
+				},
+				{
+					"name": "Xem chi tiết đề thi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/{{exam_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"{{exam_id}}"
+							]
+						},
+						"description": "Xem chi tiết đề thi theo ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Cập nhật đề thi",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tieuDe\": \"Đề thi Hóa học 10 - Axit Bazơ Muối (Đã cập nhật)\",\n  \"monHoc\": \"HOA_HOC\",\n  \"khoiLop\": 10,\n  \"thoiGianLamBai\": 50,\n  \"huongDan\": \"Thời gian làm bài: 50 phút. Học sinh đọc kỹ đề trước khi làm bài.\",\n  \"templateId\": null,\n  \"topicId\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/{{exam_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"{{exam_id}}"
+							]
+						},
+						"description": "Cập nhật thông tin đề thi"
+					},
+					"response": []
+				},
+				{
+					"name": "Thêm câu hỏi vào đề thi",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cauHoiId\": \"{{question_id}}\",\n  \"diem\": 1.0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/{{exam_id}}/cau-hoi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"{{exam_id}}",
+								"cau-hoi"
+							]
+						},
+						"description": "Thêm câu hỏi vào đề thi"
+					},
+					"response": []
+				},
+				{
+					"name": "Xuất bản đề thi",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/{{exam_id}}/xuat-ban",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"{{exam_id}}",
+								"xuat-ban"
+							]
+						},
+						"description": "Xuất bản đề thi"
+					},
+					"response": []
+				},
+				{
+					"name": "Xuất đề thi ra PDF",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/{{exam_id}}/xuat-pdf",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"{{exam_id}}",
+								"xuat-pdf"
+							]
+						},
+						"description": "Xuất đề thi ra file PDF"
+					},
+					"response": []
+				},
+				{
+					"name": "Xuất đề thi ra Word",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/{{exam_id}}/xuat-word",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"{{exam_id}}",
+								"xuat-word"
+							]
+						},
+						"description": "Xuất đề thi ra file Word"
+					},
+					"response": []
+				},
+				{
+					"name": "Sao chép đề thi",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/de-thi/{{exam_id}}/sao-chep",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"de-thi",
+								"{{exam_id}}",
+								"sao-chep"
+							]
+						},
+						"description": "Sao chép đề thi"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Thống kê",
+			"item": [
+				{
+					"name": "Thống kê tổng quan giáo viên",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/thong-ke/nguoi-dung",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"thong-ke",
+								"nguoi-dung"
+							]
+						},
+						"description": "Lấy thống kê tổng quan của giáo viên"
+					},
+					"response": []
+				},
+				{
+					"name": "Thống kê câu hỏi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/thong-ke/cau-hoi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"thong-ke",
+								"cau-hoi"
+							]
+						},
+						"description": "Lấy thống kê câu hỏi"
+					},
+					"response": []
+				},
+				{
+					"name": "Thống kê đề thi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/thong-ke/de-thi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"thong-ke",
+								"de-thi"
+							]
+						},
+						"description": "Lấy thống kê đề thi"
+					},
+					"response": []
+				},
+				{
+					"name": "Thống kê theo độ khó",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/thong-ke/do-kho",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"thong-ke",
+								"do-kho"
+							]
+						},
+						"description": "Lấy thống kê theo độ khó"
+					},
+					"response": []
+				},
+				{
+					"name": "Thống kê theo chủ đề",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/thong-ke/chu-de",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"thong-ke",
+								"chu-de"
+							]
+						},
+						"description": "Lấy thống kê theo chủ đề"
+					},
+					"response": []
+				},
+				{
+					"name": "Thống kê theo môn học",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/thong-ke/mon-hoc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"thong-ke",
+								"mon-hoc"
+							]
+						},
+						"description": "Lấy thống kê theo môn học"
+					},
+					"response": []
+				},
+				{
+					"name": "Export thống kê ra Excel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/thong-ke/nguoi-dung/export-excel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"thong-ke",
+								"nguoi-dung",
+								"export-excel"
+							]
+						},
+						"description": "Xuất thống kê ra file Excel"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Kiểm tra sức khỏe của service"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "teacher_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "exam_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "question_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "template_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
