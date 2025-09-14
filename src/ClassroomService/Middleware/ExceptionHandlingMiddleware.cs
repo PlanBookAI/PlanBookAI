@@ -3,17 +3,26 @@ using System.Text.Json;
 
 namespace ClassroomService.Middleware
 {
+    /// <summary>
+    /// Middleware for handling unhandled exceptions globally
+    /// </summary>
     public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of ExceptionHandlingMiddleware
+        /// </summary>
         public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
             _next = next;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Processes requests and handles any unhandled exceptions
+        /// </summary>
         public async Task InvokeAsync(HttpContext context)
         {
             try

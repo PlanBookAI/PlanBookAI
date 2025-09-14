@@ -3,29 +3,91 @@ using ClassroomService.Models.Entities;
 
 namespace ClassroomService.Models.DTOs
 {
+    /// <summary>
+    /// DTO for creating answer sheet
+    /// </summary>
     public class CreateAnswerSheetDto
     {
+        /// <summary>
+        /// Student ID
+        /// </summary>
         public int StudentId { get; set; }
+        
+        /// <summary>
+        /// Exam ID
+        /// </summary>
         public int ExamId { get; set; }
-        public string ImageUrl { get; set; }
+        
+        /// <summary>
+        /// Image URL
+        /// </summary>
+        public required string ImageUrl { get; set; }
     }
 
+    /// <summary>
+    /// DTO for answer sheet response
+    /// </summary>
     public class AnswerSheetDto
     {
+        /// <summary>
+        /// Answer sheet ID
+        /// </summary>
         public int Id { get; set; }
+        
+        /// <summary>
+        /// Student ID
+        /// </summary>
         public int StudentId { get; set; }
-        public string StudentName { get; set; }
+        
+        /// <summary>
+        /// Student name
+        /// </summary>
+        public required string StudentName { get; set; }
+        
+        /// <summary>
+        /// Exam ID
+        /// </summary>
         public int ExamId { get; set; }
-        public string ImageUrl { get; set; }
-        public string OcrResult { get; set; }
+        
+        /// <summary>
+        /// Image URL
+        /// </summary>
+        public required string ImageUrl { get; set; }
+        
+        /// <summary>
+        /// OCR result
+        /// </summary>
+        public required string OcrResult { get; set; }
+        
+        /// <summary>
+        /// OCR status
+        /// </summary>
         public OcrStatus OcrStatus { get; set; }
+        
+        /// <summary>
+        /// OCR accuracy percentage
+        /// </summary>
         public decimal? OcrAccuracy { get; set; }
+        
+        /// <summary>
+        /// Processed timestamp
+        /// </summary>
         public DateTime? ProcessedAt { get; set; }
+        
+        /// <summary>
+        /// Created timestamp
+        /// </summary>
         public DateTime CreatedAt { get; set; }
     }
 
+    /// <summary>
+    /// Validator for CreateAnswerSheetDto
+    /// </summary>
     public class CreateAnswerSheetDtoValidator : AbstractValidator<CreateAnswerSheetDto>
     {
+        /// <summary>
+        /// Initializes validation rules
+        /// </summary>
         public CreateAnswerSheetDtoValidator()
         {
             RuleFor(x => x.StudentId)

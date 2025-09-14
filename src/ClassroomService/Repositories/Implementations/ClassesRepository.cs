@@ -5,18 +5,25 @@ using ClassroomService.Repositories.Interfaces;
 
 namespace ClassroomService.Repositories.Implementations
 {
-    // Lớp repository để quản lý các thao tác với bảng Classes trong cơ sở dữ liệu.
+    /// <summary>
+    /// Repository class for managing Classes entity database operations
+    /// </summary>
     public class ClassesRepository : IClassesRepository
     {
         private readonly ApplicationDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of ClassesRepository
+        /// </summary>
         public ClassesRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        /// Lấy một lớp học dựa trên ID, có thể lọc thêm theo ID của giáo viên chủ nhiệm.
-        public async Task<Classes> GetByIdAsync(int id, int? homeroomTeacherId = null)
+        /// <summary>
+        /// Gets a class by ID, optionally filtered by homeroom teacher ID
+        /// </summary>
+        public async Task<Classes?> GetByIdAsync(int id, int? homeroomTeacherId = null)
         {
             var query = _context.Classes.AsQueryable();
             
@@ -28,7 +35,9 @@ namespace ClassroomService.Repositories.Implementations
             return await query.FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        /// Lấy danh sách tất cả các lớp học, hỗ trợ phân trang và lọc theo giáo viên chủ nhiệm.
+        /// <summary>
+        /// Gets all classes with pagination and optional homeroom teacher filter
+        /// </summary>
         public async Task<IEnumerable<Classes>> GetAllAsync(int? homeroomTeacherId = null, int page = 1, int pageSize = 10)
         {
             var query = _context.Classes.AsQueryable();
@@ -46,9 +55,9 @@ namespace ClassroomService.Repositories.Implementations
                 .ToListAsync();
         }
 
-        
-        /// Lấy danh sách các lớp học do một giáo viên cụ thể làm chủ nhiệm, hỗ trợ phân trang.
-        
+        /// <summary>
+        /// Gets classes by homeroom teacher ID with pagination
+        /// </summary>
         public async Task<IEnumerable<Classes>> GetByHomeroomTeacherIdAsync(int homeroomTeacherId, int page = 1, int pageSize = 10)
         {
             return await _context.Classes
@@ -60,9 +69,9 @@ namespace ClassroomService.Repositories.Implementations
                 .ToListAsync();
         }
 
-        
-        /// Thêm một lớp học mới vào cơ sở dữ liệu.
-        
+        /// <summary>
+        /// Creates a new class in the database
+        /// </summary>
         public async Task<Classes> CreateAsync(Classes entity)
         {
             entity.CreatedAt = DateTime.UtcNow;
@@ -73,9 +82,9 @@ namespace ClassroomService.Repositories.Implementations
             return entity;
         }
 
-        
-        /// Cập nhật thông tin của một lớp học hiện có.
-        
+        /// <summary>
+        /// Updates an existing class in the database
+        /// </summary>
         public async Task<Classes> UpdateAsync(Classes entity)
         {
             entity.UpdatedAt = DateTime.UtcNow;
@@ -85,9 +94,9 @@ namespace ClassroomService.Repositories.Implementations
             return entity;
         }
 
-        
-        /// Xóa một lớp học dựa trên ID, đảm bảo chỉ giáo viên chủ nhiệm mới có quyền xóa.
-        
+        /// <summary>
+        /// Deletes a class by ID, ensuring only homeroom teacher can delete
+        /// </summary>
         public async Task<bool> DeleteAsync(int id, int homeroomTeacherId)
         {
             var entity = await _context.Classes
@@ -100,9 +109,9 @@ namespace ClassroomService.Repositories.Implementations
             return true;
         }
 
-        
-        /// Đếm tổng số lớp học, có thể lọc theo ID của giáo viên chủ nhiệm.
-        
+        /// <summary>
+        /// Gets total count of classes, optionally filtered by homeroom teacher ID
+        /// </summary>
         public async Task<int> GetTotalCountAsync(int? homeroomTeacherId = null)
         {
             var query = _context.Classes.AsQueryable();

@@ -5,6 +5,9 @@ using FluentValidation;
 
 namespace ClassroomService.Controllers
 {
+    /// <summary>
+    /// Controller for managing students
+    /// </summary>
     [ApiController]
     [Route("api/v1/hoc-sinh")]
     public class StudentsController : ControllerBase
@@ -14,6 +17,13 @@ namespace ClassroomService.Controllers
         private readonly IValidator<UpdateStudentDto> _updateValidator;
         private readonly ILogger<StudentsController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of StudentsController
+        /// </summary>
+        /// <param name="studentsService">Students service</param>
+        /// <param name="createValidator">Create student validator</param>
+        /// <param name="updateValidator">Update student validator</param>
+        /// <param name="logger">Logger instance</param>
         public StudentsController(
             IStudentsService studentsService,
             IValidator<CreateStudentDto> createValidator,
@@ -26,6 +36,12 @@ namespace ClassroomService.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Gets paginated list of students
+        /// </summary>
+        /// <param name="page">Page number</param>
+        /// <param name="pageSize">Page size</param>
+        /// <returns>Paginated list of students</returns>
         [HttpGet]
         public async Task<ActionResult<object>> LayDanhSachHocSinh([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -59,6 +75,11 @@ namespace ClassroomService.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets a specific student by ID
+        /// </summary>
+        /// <param name="id">Student ID</param>
+        /// <returns>Student details</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> LayHocSinhTheoId(int id)
         {
@@ -89,6 +110,13 @@ namespace ClassroomService.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets students by class ID with pagination
+        /// </summary>
+        /// <param name="classId">Class ID</param>
+        /// <param name="page">Page number</param>
+        /// <param name="pageSize">Page size</param>
+        /// <returns>Paginated list of students in class</returns>
         [HttpGet("lop/{classId}")]
         public async Task<ActionResult<object>> LayHocSinhTheoLop(int classId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -122,6 +150,11 @@ namespace ClassroomService.Controllers
             }
         }
 
+        /// <summary>
+        /// Creates a new student
+        /// </summary>
+        /// <param name="dto">Student creation data</param>
+        /// <returns>Created student</returns>
         [HttpPost]
         public async Task<ActionResult<object>> ThemHocSinh([FromBody] CreateStudentDto dto)
         {
@@ -161,6 +194,12 @@ namespace ClassroomService.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates an existing student
+        /// </summary>
+        /// <param name="id">Student ID</param>
+        /// <param name="dto">Student update data</param>
+        /// <returns>Updated student</returns>
         [HttpPut("{id}")]
         public async Task<ActionResult<object>> CapNhatHocSinh(int id, [FromBody] UpdateStudentDto dto)
         {
@@ -198,6 +237,11 @@ namespace ClassroomService.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes a student by ID
+        /// </summary>
+        /// <param name="id">Student ID</param>
+        /// <returns>Success result</returns>
         [HttpDelete("{id}")]
         public async Task<ActionResult<object>> XoaHocSinh(int id)
         {

@@ -1,25 +1,48 @@
 using Microsoft.EntityFrameworkCore;
 using ClassroomService.Models.Entities;
-using System.Text.Json;
 
 namespace ClassroomService.Data
 {
+    /// <summary>
+    /// Database context for the Classroom Service application
+    /// </summary>
     public class ApplicationDbContext : DbContext
     {
+        /// <summary>
+        /// Initializes a new instance of ApplicationDbContext
+        /// </summary>
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
+        /// <summary>
+        /// Gets or sets the Classes DbSet
+        /// </summary>
         public DbSet<Classes> Classes { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the Students DbSet
+        /// </summary>
         public DbSet<Students> Students { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the StudentResults DbSet
+        /// </summary>
         public DbSet<StudentResults> StudentResults { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the AnswerSheets DbSet
+        /// </summary>
         public DbSet<AnswerSheets> AnswerSheets { get; set; }
 
+        /// <summary>
+        /// Configures the model relationships and constraints
+        /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Cấu hình thực thể Students
+            // Configure Students entity
             modelBuilder.Entity<Students>(entity =>
             {
                 entity.Property(e => e.Gender).HasConversion<string>();
@@ -28,12 +51,12 @@ namespace ClassroomService.Data
                     .HasForeignKey(s => s.ClassId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // Cấu hình index
+                // Configure indexes
                 entity.HasIndex(s => s.StudentCode).IsUnique();
                 entity.HasIndex(s => new { s.ClassId, s.OwnerTeacherId });
             });
 
-            // Cấu hình thực thể StudentResults
+            // Configure StudentResults entity
             modelBuilder.Entity<StudentResults>(entity =>
             {
                 entity.Property(e => e.GradingMethod).HasConversion<string>();
@@ -43,11 +66,11 @@ namespace ClassroomService.Data
                     .HasForeignKey(sr => sr.StudentId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Cấu hình index
+                // Configure indexes
                 entity.HasIndex(sr => new { sr.StudentId, sr.ExamId });
             });
 
-            // Cấu hình thực thể AnswerSheets
+            // Configure AnswerSheets entity
             modelBuilder.Entity<AnswerSheets>(entity =>
             {
                 entity.Property(e => e.OcrStatus).HasConversion<string>();
@@ -57,7 +80,7 @@ namespace ClassroomService.Data
                     .HasForeignKey(asheet => asheet.StudentId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Cấu hình index
+                // Configure indexes
                 entity.HasIndex(asheet => new { asheet.StudentId, asheet.ExamId });
             });
         }
