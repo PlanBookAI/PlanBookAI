@@ -7,6 +7,159 @@
 	},
 	"item": [
 		{
+			"name": "🔐 Authentication (Xác Thực)",
+			"item": [
+				{
+					"name": "Đăng nhập",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.thanhCong && response.token) {",
+									"        pm.collectionVariables.set('authToken', response.token);",
+									"        pm.collectionVariables.set('refreshToken', response.refreshToken);",
+									"        pm.collectionVariables.set('userId', response.thongTinNguoiDung.id);",
+									"        pm.collectionVariables.set('userRole', response.thongTinNguoiDung.tenVaiTro);",
+									"        pm.collectionVariables.set('userEmail', response.thongTinNguoiDung.email);",
+									"        pm.collectionVariables.set('userName', response.thongTinNguoiDung.hoTen);",
+									"        console.log('Login successful! Token and user info saved.');",
+									"        console.log('User ID:', response.thongTinNguoiDung.id);",
+									"        console.log('User Role:', response.thongTinNguoiDung.tenVaiTro);",
+									"    } else {",
+									"        console.log('Login failed:', response.thongBao);",
+									"    }",
+									"} else {",
+									"    console.log('Login request failed with status:', pm.response.code);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"teacher@planbookai.com\",\n  \"matKhau\": \"Teacher123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/xac-thuc/dang-nhap",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"xac-thuc",
+								"dang-nhap"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Đăng ký",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"newteacher@planbookai.com\",\n  \"matKhau\": \"NewTeacher123!\",\n  \"hoTen\": \"Giáo Viên Mới\",\n  \"vaiTroId\": 4\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/xac-thuc/dang-ky",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"xac-thuc",
+								"dang-ky"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Làm mới Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/xac-thuc/lam-moi-token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"xac-thuc",
+								"lam-moi-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Đăng xuất",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/xac-thuc/dang-xuat",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"xac-thuc",
+								"dang-xuat"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Lớp Học (Classes)",
 			"item": [
 				{
@@ -14,6 +167,11 @@
 					"request": {
 						"method": "GET",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
 							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
@@ -60,6 +218,11 @@
 						"method": "GET",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
 								"type": "text"
@@ -95,6 +258,11 @@
 					"request": {
 						"method": "POST",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
 							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
@@ -139,6 +307,11 @@
 					"request": {
 						"method": "GET",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
 							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
@@ -185,6 +358,11 @@
 						"method": "GET",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
 								"type": "text"
@@ -220,6 +398,11 @@
 					"request": {
 						"method": "GET",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
 							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
@@ -268,6 +451,11 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
 								"type": "text"
@@ -306,6 +494,11 @@
 					"request": {
 						"method": "PUT",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
 							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
@@ -346,6 +539,11 @@
 					"request": {
 						"method": "DELETE",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
 							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
@@ -388,6 +586,11 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
 								"type": "text"
@@ -426,6 +629,11 @@
 					"request": {
 						"method": "GET",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
 							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
@@ -468,6 +676,11 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
 								"type": "text"
@@ -506,6 +719,11 @@
 					"request": {
 						"method": "GET",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
 							{
 								"key": "X-User-Id",
 								"value": "{{userId}}",
@@ -621,16 +839,40 @@
 			"description": "Gateway URL - tất cả requests sẽ đi qua Gateway"
 		},
 		{
+			"key": "authToken",
+			"value": "",
+			"type": "string",
+			"description": "JWT Token từ login response (tự động set sau khi login)"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string",
+			"description": "Refresh Token từ login response (tự động set sau khi login)"
+		},
+		{
 			"key": "userId",
 			"value": "1",
 			"type": "string",
-			"description": "User ID cho authentication header"
+			"description": "User ID cho authentication header (tự động set sau khi login)"
 		},
 		{
 			"key": "userRole",
 			"value": "TEACHER",
 			"type": "string",
-			"description": "User role cho authentication header"
+			"description": "User role cho authentication header (tự động set sau khi login)"
+		},
+		{
+			"key": "userEmail",
+			"value": "teacher@planbookai.com",
+			"type": "string",
+			"description": "User email (tự động set sau khi login)"
+		},
+		{
+			"key": "userName",
+			"value": "Giáo Viên",
+			"type": "string",
+			"description": "User name (tự động set sau khi login)"
 		}
 	]
 }
