@@ -70,6 +70,17 @@ namespace ExamService.Services
                 cauHoi.NguoiTaoId = teacherId;
                 cauHoi.Id = Guid.NewGuid();
 
+                // Assign choice order (A, B, C, D) to LuaChons
+                if (cauHoi.LuaChons != null && cauHoi.LuaChons.Any())
+                {
+                    var choiceOrders = new[] { "A", "B", "C", "D" };
+                    for (int i = 0; i < cauHoi.LuaChons.Count && i < choiceOrders.Length; i++)
+                    {
+                        cauHoi.LuaChons.ElementAt(i).MaLuaChon = choiceOrders[i];
+                        cauHoi.LuaChons.ElementAt(i).CauHoiId = cauHoi.Id;
+                    }
+                }
+
                 var newCauHoi = await _repo.CreateAsync(cauHoi);
                 var responseDto = newCauHoi.Adapt<CauHoiResponseDTO>();
 
@@ -111,9 +122,13 @@ namespace ExamService.Services
 
             // Handle choices update (remove old, add new)
             existingCauHoi.LuaChons.Clear();
-            foreach (var luaChonDto in dto.LuaChons)
+            var choiceOrders = new[] { "A", "B", "C", "D" };
+            for (int i = 0; i < dto.LuaChons.Count && i < choiceOrders.Length; i++)
             {
-                existingCauHoi.LuaChons.Add(luaChonDto.Adapt<LuaChon>());
+                var luaChon = dto.LuaChons[i].Adapt<LuaChon>();
+                luaChon.MaLuaChon = choiceOrders[i];
+                luaChon.CauHoiId = existingCauHoi.Id;
+                existingCauHoi.LuaChons.Add(luaChon);
             }
 
             existingCauHoi.CapNhatLuc = DateTime.UtcNow;

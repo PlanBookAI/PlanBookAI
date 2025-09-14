@@ -17,7 +17,8 @@ public static class MapsterConfig
             .IgnoreNullValues(true)
             .Map(dest => dest.TaoLuc, src => DateTime.UtcNow)
             .Map(dest => dest.CapNhatLuc, src => DateTime.UtcNow)
-            .Map(dest => dest.TrangThai, src => "ACTIVE");
+            .Map(dest => dest.TrangThai, src => "ACTIVE")
+            .Map(dest => dest.LuaChons, src => src.LuaChons);
 
         // LuaChon Mappings
         TypeAdapterConfig<LuaChon, LuaChonResponseDTO>.NewConfig();
