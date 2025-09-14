@@ -1,0 +1,636 @@
+{
+	"info": {
+		"_postman_id": "classroom-service-api-tests",
+		"name": "ClassroomService API Tests",
+		"description": "API tests for ClassroomService - Quản lý lớp học và học sinh (qua Gateway)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Lớp Học (Classes)",
+			"item": [
+				{
+					"name": "Lấy danh sách lớp học",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/lop-hoc?page=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"lop-hoc"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy lớp học theo ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/lop-hoc/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"lop-hoc",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Tạo lớp học mới",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"10A1\",\n  \"grade\": 10,\n  \"homeroomTeacherId\": 1,\n  \"academicYear\": \"2024-2025\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/lop-hoc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"lop-hoc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Học Sinh (Students)",
+			"item": [
+				{
+					"name": "Lấy danh sách học sinh",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/hoc-sinh?page=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy học sinh theo ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/hoc-sinh/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy học sinh theo lớp",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/hoc-sinh/lop/1?page=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh",
+								"lop",
+								"1"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thêm học sinh mới",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Nguyễn Văn A\",\n  \"studentCode\": \"HS001\",\n  \"birthDate\": \"2008-01-15\",\n  \"gender\": \"MALE\",\n  \"classId\": 1,\n  \"ownerTeacherId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/hoc-sinh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cập nhật học sinh",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Nguyễn Văn A (Đã cập nhật)\",\n  \"studentCode\": \"HS001\",\n  \"birthDate\": \"2008-01-15\",\n  \"gender\": \"MALE\",\n  \"classId\": 1,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/hoc-sinh/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Xóa học sinh",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/hoc-sinh/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bài Thi (Answer Sheets)",
+			"item": [
+				{
+					"name": "Tạo bài thi mới",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": 1,\n  \"examId\": 1,\n  \"imageUrl\": \"https://example.com/answer-sheet.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/bai-thi",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"answer-sheet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy bài thi theo ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/bai-thi/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"answer-sheet",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Kết Quả Thi (Student Results)",
+			"item": [
+				{
+					"name": "Tạo kết quả thi mới",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": 1,\n  \"examId\": 1,\n  \"score\": 8.5,\n  \"actualDuration\": 45,\n  \"answerDetails\": \"{\\\"question1\\\": \\\"A\\\", \\\"question2\\\": \\\"B\\\", \\\"question3\\\": \\\"C\\\"}\",\n  \"gradingMethod\": \"AUTO\",\n  \"notes\": \"Bài làm tốt\",\n  \"examDate\": \"2024-09-14T10:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/ket-qua-thi",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"student-result"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lấy kết quả thi theo ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{userId}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "{{userRole}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/ket-qua-thi/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"student-result",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "ClassroomService Health Check",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/lop-hoc-health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"lop-hoc-health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Gateway Health Check",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://pba.khqi.site",
+			"type": "string",
+			"description": "Gateway URL - tất cả requests sẽ đi qua Gateway"
+		},
+		{
+			"key": "userId",
+			"value": "1",
+			"type": "string",
+			"description": "User ID cho authentication header"
+		},
+		{
+			"key": "userRole",
+			"value": "TEACHER",
+			"type": "string",
+			"description": "User role cho authentication header"
+		}
+	]
+}
