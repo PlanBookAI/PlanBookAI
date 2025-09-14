@@ -11,9 +11,12 @@ namespace ExamService.Services
     public class MauDeThiService : IMauDeThiService
     {
         private readonly IMauDeThiRepository _repo;
-        public MauDeThiService(IMauDeThiRepository repo)
+        private readonly ILogger<MauDeThiService> _logger;
+        
+        public MauDeThiService(IMauDeThiRepository repo, ILogger<MauDeThiService> logger)
         {
             _repo = repo;
+            _logger = logger;
         }
 
         public async Task<ApiPhanHoi<MauDeThiResponseDTO>> CreateAsync(MauDeThiRequestDTO dto, Guid teacherId)
@@ -137,6 +140,114 @@ namespace ExamService.Services
 
             var responseDto = newMauDeThi.Adapt<MauDeThiResponseDTO>();
             return ApiPhanHoi<MauDeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Sao chép mẫu đề thi thành công.");
+        }
+
+        // Các methods mới cho controller
+        public async Task<PagedResult<MauDeThiResponseDTO>> LayDanhSachMauDeThiAsync(
+            Guid teacherId, int pageNumber, int pageSize, string? monHoc = null, 
+            int? khoiLop = null, string? trangThai = null)
+        {
+            var query = _repo.GetQueryable().Where(m => m.NguoiTaoId == teacherId);
+
+            // Apply filters
+            if (!string.IsNullOrEmpty(monHoc))
+                query = query.Where(m => m.MonHoc == monHoc);
+            
+            if (khoiLop.HasValue)
+                query = query.Where(m => m.KhoiLop == khoiLop.Value);
+            
+            if (!string.IsNullOrEmpty(trangThai))
+                query = query.Where(m => m.TrangThai == trangThai);
+
+            // Order by updated date
+            query = query.OrderByDescending(m => m.CapNhatLuc);
+
+            var totalItems = await query.CountAsync();
+            var items = await query.Skip((pageNumber - 1) * pageSize)
+                                   .Take(pageSize)
+                                   .AsNoTracking()
+                                   .ToListAsync();
+
+            var dtos = items.Adapt<List<MauDeThiResponseDTO>>();
+            return new PagedResult<MauDeThiResponseDTO>(dtos, totalItems, pageNumber, pageSize);
+        }
+
+        public async Task<MauDeThiResponseDTO?> LayChiTietMauDeThiAsync(Guid id, Guid teacherId)
+        {
+            var mauDeThi = await _repo.GetByIdAsync(id);
+            
+            if (mauDeThi == null || mauDeThi.NguoiTaoId != teacherId)
+                return null;
+
+            return mauDeThi.Adapt<MauDeThiResponseDTO>();
+        }
+
+        public async Task<MauDeThiResponseDTO> TaoMauDeThiAsync(MauDeThiRequestDTO request, Guid teacherId)
+        {
+            var mauDeThi = request.Adapt<MauDeThi>();
+            mauDeThi.Id = Guid.NewGuid();
+            mauDeThi.NguoiTaoId = teacherId;
+            mauDeThi.TaoLuc = DateTime.UtcNow;
+            mauDeThi.CapNhatLuc = DateTime.UtcNow;
+
+            var createdMauDeThi = await _repo.CreateAsync(mauDeThi);
+            return createdMauDeThi.Adapt<MauDeThiResponseDTO>();
+        }
+
+        public async Task<MauDeThiResponseDTO> CapNhatMauDeThiAsync(Guid id, MauDeThiRequestDTO request, Guid teacherId)
+        {
+            var existingMauDeThi = await _repo.GetByIdAsync(id);
+            
+            if (existingMauDeThi == null)
+                throw new KeyNotFoundException("Không tìm thấy mẫu đề thi");
+            
+            if (existingMauDeThi.NguoiTaoId != teacherId)
+                throw new UnauthorizedAccessException("Không có quyền cập nhật mẫu đề thi này");
+
+            // Update properties
+            request.Adapt(existingMauDeThi);
+            existingMauDeThi.CapNhatLuc = DateTime.UtcNow;
+
+            var updatedMauDeThi = await _repo.UpdateAsync(existingMauDeThi);
+            return updatedMauDeThi.Adapt<MauDeThiResponseDTO>();
+        }
+
+        public async Task<bool> XoaMauDeThiAsync(Guid id, Guid teacherId)
+        {
+            if (!await _repo.IsOwnerAsync(id, teacherId))
+                return false;
+
+            return await _repo.DeleteAsync(id);
+        }
+
+        public async Task<MauDeThiResponseDTO> SaoChepMauDeThiAsync(Guid id, SaoChepMauDeThiDTO request, Guid teacherId)
+        {
+            var originalMauDeThi = await _repo.GetByIdAsync(id);
+            
+            if (originalMauDeThi == null)
+                throw new KeyNotFoundException("Không tìm thấy mẫu đề thi");
+            
+            if (originalMauDeThi.NguoiTaoId != teacherId)
+                throw new UnauthorizedAccessException("Không có quyền sao chép mẫu đề thi này");
+
+            var clonedMauDeThi = new MauDeThi
+            {
+                Id = Guid.NewGuid(),
+                TieuDe = request.TieuDeMoi,
+                MoTa = request.MoTaMoi ?? originalMauDeThi.MoTa,
+                MonHoc = originalMauDeThi.MonHoc,
+                KhoiLop = originalMauDeThi.KhoiLop,
+                ThoiGianLam = originalMauDeThi.ThoiGianLam,
+                TongDiem = originalMauDeThi.TongDiem,
+                CauTruc = originalMauDeThi.CauTruc,
+                NguoiTaoId = teacherId,
+                TrangThai = "ACTIVE",
+                TaoLuc = DateTime.UtcNow,
+                CapNhatLuc = DateTime.UtcNow
+            };
+
+            var newMauDeThi = await _repo.CreateAsync(clonedMauDeThi);
+            return newMauDeThi.Adapt<MauDeThiResponseDTO>();
         }
     }
 }
