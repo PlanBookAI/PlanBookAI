@@ -85,7 +85,11 @@ namespace ExamService.Services
                 var deThi = dto.Adapt<DeThi>();
                 deThi.Id = Guid.NewGuid();
                 deThi.NguoiTaoId = teacherId;
-                deThi.TrangThai = "draft"; // Trạng thái mặc định
+                deThi.TrangThai = "DRAFT"; // Trạng thái mặc định
+                
+                // Set default values for nullable fields
+                if (!dto.KhoiLop.HasValue) deThi.KhoiLop = 10; // Default grade
+                if (!dto.ThoiGianLamBai.HasValue) deThi.ThoiGianLamBai = 45; // Default duration
 
                 var newDeThi = await _deThiRepo.CreateAsync(deThi);
 

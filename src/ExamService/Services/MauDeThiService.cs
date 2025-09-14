@@ -24,6 +24,11 @@ namespace ExamService.Services
             var mauDeThi = dto.Adapt<MauDeThi>();
             mauDeThi.Id = Guid.NewGuid();
             mauDeThi.NguoiTaoId = teacherId;
+            
+            // Set default values for nullable fields
+            if (!dto.KhoiLop.HasValue) mauDeThi.KhoiLop = 10; // Default grade
+            if (!dto.ThoiGianLam.HasValue) mauDeThi.ThoiGianLam = 45; // Default duration
+            if (!dto.TongDiem.HasValue) mauDeThi.TongDiem = 10; // Default total score
 
             // Serialize CauTruc object to JSON string
             if (dto.CauTruc != null)

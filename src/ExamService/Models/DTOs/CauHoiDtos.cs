@@ -14,9 +14,9 @@ namespace ExamService.Models.DTOs
         [Required(ErrorMessage = "Môn học không được để trống.")]
         public string MonHoc { get; set; } = string.Empty;
 
-        public string LoaiCauHoi { get; set; } = "multiple_choice";
+        public string LoaiCauHoi { get; set; } = "MULTIPLE_CHOICE";
         public string? ChuDe { get; set; }
-        public string DoKho { get; set; } = "medium";
+        public string DoKho { get; set; } = "MEDIUM";
 
         [Required(ErrorMessage = "Đáp án đúng không được để trống.")]
         public string DapAnDung { get; set; } = string.Empty;

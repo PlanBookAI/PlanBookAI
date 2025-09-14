@@ -34,7 +34,11 @@ namespace ExamService.Services
                 var deThi = dto.Adapt<DeThi>();
                 deThi.Id = Guid.NewGuid();
                 deThi.NguoiTaoId = teacherId;
-                deThi.TrangThai = TrangThaiDeThi.Draft.ToString();
+                deThi.TrangThai = "DRAFT";
+                
+                // Set default values for nullable fields
+                if (!dto.KhoiLop.HasValue) deThi.KhoiLop = 10; // Default grade
+                if (!dto.ThoiGianLamBai.HasValue) deThi.ThoiGianLamBai = 45; // Default duration
 
                 var questions = await _cauHoiRepo.GetQueryable()
                                            .Where(q => q.NguoiTaoId == teacherId && dto.DanhSachCauHoiId.Contains(q.Id))
@@ -71,6 +75,10 @@ namespace ExamService.Services
                 {
                     dto.DoKho = dto.DoKho.ToUpper();
                 }
+                
+                // Set default values for nullable fields
+                if (!dto.KhoiLop.HasValue) dto.KhoiLop = 10; // Default grade
+                if (!dto.ThoiGianLamBai.HasValue) dto.ThoiGianLamBai = 45; // Default duration
 
                 var query = _cauHoiRepo.GetQueryable()
                     .Where(q => q.NguoiTaoId == teacherId && q.MonHoc == dto.MonHoc);

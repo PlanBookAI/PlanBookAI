@@ -16,10 +16,10 @@ namespace ExamService.Models.DTOs
         public string MonHoc { get; set; } = string.Empty;
 
         [Range(10, 12, ErrorMessage = "Khối lớp phải từ 10 đến 12.")]
-        public int KhoiLop { get; set; }
+        public int? KhoiLop { get; set; }
 
         [Range(15, 180, ErrorMessage = "Thời gian làm bài phải từ 15 đến 180 phút.")]
-        public int ThoiGianLamBai { get; set; }
+        public int? ThoiGianLamBai { get; set; }
     }
 
     /// <summary>
