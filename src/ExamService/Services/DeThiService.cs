@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using ExamService.Interfaces;
+﻿using ExamService.Interfaces;
 using ExamService.Models.DTOs;
 using ExamService.Models.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +8,7 @@ using QuestPDF.Fluent;      // Thêm using cho QuestPDF
 using ExamService.Helpers; // Thêm using cho Helper
 using MassTransit;
 using ExamService.MessageContracts;
+using Mapster;
 
 namespace ExamService.Services
 {
@@ -16,14 +16,12 @@ namespace ExamService.Services
     {
         private readonly IDeThiRepository _deThiRepo;
         private readonly ICauHoiRepository _cauHoiRepo; // Thêm repository cho câu hỏi
-        private readonly IMapper _mapper;
         private readonly IPublishEndpoint _publishEndpoint; // Inject
 
-        public DeThiService(IDeThiRepository deThiRepo, ICauHoiRepository cauHoiRepo, IMapper mapper, IPublishEndpoint publishEndpoint)
+        public DeThiService(IDeThiRepository deThiRepo, ICauHoiRepository cauHoiRepo, IPublishEndpoint publishEndpoint)
         {
             _deThiRepo = deThiRepo;
             _cauHoiRepo = cauHoiRepo;
-            _mapper = mapper;
             _publishEndpoint = publishEndpoint;
         }
 
@@ -41,7 +39,7 @@ namespace ExamService.Services
                                    .AsNoTracking()
                                    .ToListAsync();
 
-            var dtos = _mapper.Map<List<DeThiResponseDTO>>(items);
+            var dtos = items.Adapt<List<DeThiResponseDTO>>();
             var pagedResult = new PagedResult<DeThiResponseDTO>(dtos, totalItems, pagingParams.PageNumber, pagingParams.PageSize);
 
             return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
@@ -55,7 +53,7 @@ namespace ExamService.Services
                 return ApiPhanHoi<DeThiResponseDTO>.ThatBai("Không tìm thấy đề thi hoặc không có quyền truy cập.");
             }
 
-            var responseDto = _mapper.Map<DeThiResponseDTO>(deThi);
+            var responseDto = deThi.Adapt<DeThiResponseDTO>();
 
             // Sắp xếp câu hỏi theo thứ tự
             responseDto.CauHois = responseDto.CauHois.OrderBy(q => q.ThuTu).ToList();
@@ -65,7 +63,7 @@ namespace ExamService.Services
 
         public async Task<ApiPhanHoi<DeThiResponseDTO>> CreateAsync(DeThiRequestDTO dto, Guid teacherId)
         {
-            var deThi = _mapper.Map<DeThi>(dto);
+            var deThi = dto.Adapt<DeThi>();
             deThi.Id = Guid.NewGuid();
             deThi.NguoiTaoId = teacherId;
             deThi.TrangThai = "draft"; // Trạng thái mặc định
@@ -81,7 +79,7 @@ namespace ExamService.Services
                 Timestamp = DateTime.UtcNow
             });
 
-            var responseDto = _mapper.Map<DeThiResponseDTO>(newDeThi);
+            var responseDto = newDeThi.Adapt<DeThiResponseDTO>();
 
             return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Tạo đề thi thành công.");
         }
@@ -94,11 +92,11 @@ namespace ExamService.Services
                 return ApiPhanHoi<DeThiResponseDTO>.ThatBai("Không tìm thấy đề thi hoặc không có quyền truy cập.");
             }
 
-            _mapper.Map(dto, existingDeThi);
+            .Adapt(dto, existingDeThi);
             existingDeThi.CapNhatLuc = DateTime.UtcNow;
 
             await _deThiRepo.UpdateAsync(existingDeThi);
-            var responseDto = _mapper.Map<DeThiResponseDTO>(existingDeThi);
+            var responseDto = existingDeThi.Adapt<DeThiResponseDTO>();
 
             return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Cập nhật đề thi thành công.");
         }
@@ -162,7 +160,7 @@ namespace ExamService.Services
             deThi.CapNhatLuc = DateTime.UtcNow;
             await _deThiRepo.UpdateAsync(deThi);
 
-            var responseDto = _mapper.Map<DeThiResponseDTO>(deThi);
+            var responseDto = deThi.Adapt<DeThiResponseDTO>();
             return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Thêm câu hỏi vào đề thi thành công.");
         }
 
@@ -195,7 +193,7 @@ namespace ExamService.Services
             deThi.CapNhatLuc = DateTime.UtcNow;
             await _deThiRepo.UpdateAsync(deThi);
 
-            var responseDto = _mapper.Map<DeThiResponseDTO>(deThi);
+            var responseDto = deThi.Adapt<DeThiResponseDTO>();
             return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Xóa câu hỏi khỏi đề thi thành công.");
         }
 
@@ -231,7 +229,7 @@ namespace ExamService.Services
             deThi.CapNhatLuc = DateTime.UtcNow;
             await _deThiRepo.UpdateAsync(deThi);
 
-            var responseDto = _mapper.Map<DeThiResponseDTO>(deThi);
+            var responseDto = deThi.Adapt<DeThiResponseDTO>();
             return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Cập nhật thông tin câu hỏi trong đề thi thành công.");
         }
 
@@ -273,7 +271,7 @@ namespace ExamService.Services
                 Timestamp = DateTime.UtcNow
             });
 
-            var responseDto = _mapper.Map<DeThiResponseDTO>(deThi);
+            var responseDto = deThi.Adapt<DeThiResponseDTO>();
 
             return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Xuất bản đề thi thành công.");
         }
@@ -308,7 +306,7 @@ namespace ExamService.Services
             // 5. Lưu thay đổi
             await _deThiRepo.UpdateAsync(deThi);
 
-            var responseDto = _mapper.Map<DeThiResponseDTO>(deThi);
+            var responseDto = deThi.Adapt<DeThiResponseDTO>();
             return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Hủy xuất bản đề thi thành công. Bạn có thể tiếp tục chỉnh sửa.");
         }
 
@@ -398,7 +396,7 @@ namespace ExamService.Services
             // 5. Lưu đề thi mới vào database
             var newDeThi = await _deThiRepo.CreateAsync(clonedDeThi);
 
-            var responseDto = _mapper.Map<DeThiResponseDTO>(newDeThi);
+            var responseDto = newDeThi.Adapt<DeThiResponseDTO>();
             return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Sao chép đề thi thành công.");
         }
 

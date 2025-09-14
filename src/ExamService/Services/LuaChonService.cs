@@ -1,10 +1,10 @@
-﻿using AutoMapper;
-using ExamService.Data;
+﻿using ExamService.Data;
 using ExamService.Interfaces;
 using ExamService.Models.DTOs;
 using ExamService.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
+using Mapster;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,13 +15,10 @@ namespace ExamService.Services
     {
         private readonly ExamDbContext _context;
         private readonly ICauHoiRepository _cauHoiRepo;
-        private readonly IMapper _mapper;
-
-        public LuaChonService(ExamDbContext context, ICauHoiRepository cauHoiRepo, IMapper mapper)
+        public LuaChonService(ExamDbContext context, ICauHoiRepository cauHoiRepo)
         {
             _context = context;
             _cauHoiRepo = cauHoiRepo;
-            _mapper = mapper;
         }
 
         public async Task<ApiPhanHoi<List<LuaChonResponseDTO>>> GetChoicesByQuestionIdAsync(Guid cauHoiId, Guid teacherId)
@@ -37,7 +34,7 @@ namespace ExamService.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            var dtos = _mapper.Map<List<LuaChonResponseDTO>>(choices);
+            var dtos = choices.Adapt<List<LuaChonResponseDTO>>();
             return ApiPhanHoi<List<LuaChonResponseDTO>>.ThanhCongVoiDuLieu(dtos);
         }
 
@@ -48,13 +45,13 @@ namespace ExamService.Services
                 return ApiPhanHoi<LuaChonResponseDTO>.ThatBai("Không thể thêm lựa chọn vào câu hỏi không tồn tại hoặc không thuộc sở hữu của bạn.");
             }
 
-            var luaChon = _mapper.Map<LuaChon>(dto);
+            var luaChon = dto.Adapt<LuaChon>();
             luaChon.Id = Guid.NewGuid();
 
             await _context.LuaChons.AddAsync(luaChon);
             await _context.SaveChangesAsync();
 
-            var responseDto = _mapper.Map<LuaChonResponseDTO>(luaChon);
+            var responseDto = luaChon.Adapt<LuaChonResponseDTO>();
             return ApiPhanHoi<LuaChonResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Tạo lựa chọn thành công.");
         }
 
@@ -69,10 +66,10 @@ namespace ExamService.Services
                 return ApiPhanHoi<LuaChonResponseDTO>.ThatBai("Không tìm thấy lựa chọn hoặc không có quyền truy cập.");
             }
 
-            _mapper.Map(dto, luaChon);
+            dto.Adapt(luaChon);
             await _context.SaveChangesAsync();
 
-            var responseDto = _mapper.Map<LuaChonResponseDTO>(luaChon);
+            var responseDto = luaChon.Adapt<LuaChonResponseDTO>();
             return ApiPhanHoi<LuaChonResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Cập nhật lựa chọn thành công.");
         }
 

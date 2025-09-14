@@ -5,6 +5,7 @@ using ExamService.Profiles;
 using ExamService.Repositories;
 using ExamService.Services;
 using ExamService.Validators;
+using Mapster;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -88,7 +89,7 @@ builder.Services.AddScoped<ICauHoiRepository, CauHoiRepository>();
 builder.Services.AddScoped<IDeThiRepository, DeThiRepository>();
 builder.Services.AddScoped<IMauDeThiRepository, MauDeThiRepository>();
 
-// Add services (Business Logic Layer)
+// Add services (Business Logic Layer) - Now enabled with Mapster
 builder.Services.AddScoped<ICauHoiService, CauHoiService>();
 builder.Services.AddScoped<IDeThiService, DeThiService>();
 builder.Services.AddScoped<ILuaChonService, LuaChonService>();
@@ -97,12 +98,9 @@ builder.Services.AddScoped<ITaoDeThiService, TaoDeThiService>();
 builder.Services.AddScoped<IMauDeThiService, MauDeThiService>();
 builder.Services.AddScoped<IThongKeService, ThongKeService>();
 
-
-// Add AutoMapper
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<MauDeThiRequestDTOValidator>();
+// Add Mapster - Replace AutoMapper
+builder.Services.AddMapster();
+MapsterConfig.Configure();
 
 // === Cấu hình Health Checks ===
 builder.Services.AddHealthChecks()
@@ -118,33 +116,16 @@ builder.Services.AddHealthChecks()
 
 
 // === Cấu hình MassTransit với RabbitMQ ===
-var rabbitMqHost = builder.Configuration["RABBITMQ_HOST"] ?? 
-                  Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? 
-                  "localhost";
+var rabbitMqConnectionString = builder.Configuration.GetConnectionString("RabbitMQ");
 
-var rabbitMqPort = builder.Configuration["RABBITMQ_PORT"] ?? 
-                  Environment.GetEnvironmentVariable("RABBITMQ_PORT") ?? 
-                  "5672";
-
-var rabbitMqUsername = builder.Configuration["RABBITMQ_USERNAME"] ?? 
-                      Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? 
-                      "guest";
-
-var rabbitMqPassword = builder.Configuration["RABBITMQ_PASSWORD"] ?? 
-                      Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? 
-                      "guest";
-
-// Chỉ cấu hình MassTransit nếu có thông tin RabbitMQ
-if (!string.IsNullOrEmpty(rabbitMqHost))
+// Chỉ cấu hình MassTransit nếu có connection string RabbitMQ
+if (!string.IsNullOrEmpty(rabbitMqConnectionString))
 {
     builder.Services.AddMassTransit(mt =>
     {
         mt.UsingRabbitMq((context, cfg) =>
         {
-            cfg.Host(new Uri($"rabbitmq://{rabbitMqHost}:{rabbitMqPort}"), h => {
-                h.Username(rabbitMqUsername);
-                h.Password(rabbitMqPassword);
-            });
+            cfg.Host(rabbitMqConnectionString);
 
             // Cấu hình retry policy
             cfg.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));

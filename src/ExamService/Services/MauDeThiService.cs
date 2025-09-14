@@ -1,27 +1,24 @@
-﻿using AutoMapper;
-using ExamService.Data;
+﻿using ExamService.Data;
 using ExamService.Interfaces;
 using ExamService.Models.DTOs;
 using ExamService.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Mapster;
 
 namespace ExamService.Services
 {
     public class MauDeThiService : IMauDeThiService
     {
         private readonly IMauDeThiRepository _repo;
-        private readonly IMapper _mapper;
-
-        public MauDeThiService(IMauDeThiRepository repo, IMapper mapper)
+        public MauDeThiService(IMauDeThiRepository repo)
         {
             _repo = repo;
-            _mapper = mapper;
         }
 
         public async Task<ApiPhanHoi<MauDeThiResponseDTO>> CreateAsync(MauDeThiRequestDTO dto, Guid teacherId)
         {
-            var mauDeThi = _mapper.Map<MauDeThi>(dto);
+            var mauDeThi = dto.Adapt<MauDeThi>();
             mauDeThi.Id = Guid.NewGuid();
             mauDeThi.NguoiTaoId = teacherId;
 
@@ -29,7 +26,7 @@ namespace ExamService.Services
             await _repo.CreateAsync(mauDeThi);
 
             return ApiPhanHoi<MauDeThiResponseDTO>.ThanhCongVoiDuLieu(
-                _mapper.Map<MauDeThiResponseDTO>(mauDeThi), "Tạo mẫu đề thi thành công.");
+                mauDeThi.Adapt<MauDeThiResponseDTO>(), "Tạo mẫu đề thi thành công.");
         }
 
         public async Task<ApiPhanHoi<PagedResult<MauDeThiResponseDTO>>> GetAllAsync(Guid teacherId, PagingDTO paging)
@@ -45,7 +42,7 @@ namespace ExamService.Services
                                    .AsNoTracking()
                                    .ToListAsync();
 
-            var dtos = _mapper.Map<List<MauDeThiResponseDTO>>(items);
+            var dtos = items.Adapt<List<MauDeThiResponseDTO>>();
             var pagedResult = new PagedResult<MauDeThiResponseDTO>(dtos, totalItems, paging.PageNumber, paging.PageSize);
 
             return ApiPhanHoi<PagedResult<MauDeThiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
@@ -61,7 +58,7 @@ namespace ExamService.Services
                 return ApiPhanHoi<MauDeThiResponseDTO>.ThatBai("Không tìm thấy mẫu đề thi hoặc không có quyền truy cập.");
             }
 
-            var dto = _mapper.Map<MauDeThiResponseDTO>(mauDeThi);
+            var dto = mauDeThi.Adapt<MauDeThiResponseDTO>();
             return ApiPhanHoi<MauDeThiResponseDTO>.ThanhCongVoiDuLieu(dto);
         }
 
@@ -77,13 +74,13 @@ namespace ExamService.Services
             }
 
             // 2. Map các thay đổi từ DTO vào entity đã có
-            _mapper.Map(dto, existingMauDeThi);
+            dto.Adapt(existingMauDeThi);
             existingMauDeThi.CapNhatLuc = DateTime.UtcNow;
 
             // 3. Gọi Repository để lưu
             await _repo.UpdateAsync(existingMauDeThi);
 
-            var responseDto = _mapper.Map<MauDeThiResponseDTO>(existingMauDeThi);
+            var responseDto = existingMauDeThi.Adapt<MauDeThiResponseDTO>();
             return ApiPhanHoi<MauDeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Cập nhật mẫu đề thi thành công.");
         }
 
@@ -138,7 +135,7 @@ namespace ExamService.Services
             // 4. Lưu bản sao vào database
             var newMauDeThi = await _repo.CreateAsync(clonedMauDeThi);
 
-            var responseDto = _mapper.Map<MauDeThiResponseDTO>(newMauDeThi);
+            var responseDto = newMauDeThi.Adapt<MauDeThiResponseDTO>();
             return ApiPhanHoi<MauDeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Sao chép mẫu đề thi thành công.");
         }
     }

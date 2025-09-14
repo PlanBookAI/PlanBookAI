@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using ExamService.Data;
+﻿using ExamService.Data;
 using ExamService.Interfaces;
 using ExamService.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Mapster;
 
 namespace ExamService.Services
 {
@@ -14,13 +14,10 @@ namespace ExamService.Services
     {
         private readonly ExamDbContext _context;
         private readonly IDeThiRepository _deThiRepo;
-        private readonly IMapper _mapper;
-
-        public DeThiCauHoiService(ExamDbContext context, IDeThiRepository deThiRepo, IMapper mapper)
+        public DeThiCauHoiService(ExamDbContext context, IDeThiRepository deThiRepo)
         {
             _context = context;
             _deThiRepo = deThiRepo;
-            _mapper = mapper;
         }
 
         public async Task<ApiPhanHoi<List<DeThiCauHoiResponseDTO>>> GetQuestionsByExamIdAsync(Guid deThiId, Guid teacherId)
@@ -38,7 +35,7 @@ namespace ExamService.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            var dtos = _mapper.Map<List<DeThiCauHoiResponseDTO>>(examQuestions);
+            var dtos = examQuestions.Adapt<List<DeThiCauHoiResponseDTO>>();
             return ApiPhanHoi<List<DeThiCauHoiResponseDTO>>.ThanhCongVoiDuLieu(dtos);
         }
 
@@ -59,7 +56,7 @@ namespace ExamService.Services
             examQuestion.ThuTu = newOrder;
             await _context.SaveChangesAsync();
 
-            var dto = _mapper.Map<DeThiCauHoiResponseDTO>(examQuestion);
+            var dto = examQuestion.Adapt<DeThiCauHoiResponseDTO>();
             return ApiPhanHoi<DeThiCauHoiResponseDTO>.ThanhCongVoiDuLieu(dto, "Cập nhật thứ tự thành công.");
         }
 
@@ -80,7 +77,7 @@ namespace ExamService.Services
             examQuestion.Diem = newPoints;
             await _context.SaveChangesAsync();
 
-            var dto = _mapper.Map<DeThiCauHoiResponseDTO>(examQuestion);
+            var dto = examQuestion.Adapt<DeThiCauHoiResponseDTO>();
             return ApiPhanHoi<DeThiCauHoiResponseDTO>.ThanhCongVoiDuLieu(dto, "Cập nhật điểm thành công.");
         }
     }

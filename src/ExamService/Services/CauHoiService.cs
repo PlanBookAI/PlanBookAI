@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using ExamService.Interfaces;
+﻿using ExamService.Interfaces;
 using ExamService.Models.DTOs;
 using ExamService.Models.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -9,19 +8,18 @@ using System.Drawing; // Thêm using cho Color
 using System.Linq.Expressions;
 using MassTransit;
 using ExamService.MessageContracts;
+using Mapster;
 
 namespace ExamService.Services
 {
     public class CauHoiService : ICauHoiService
     {
         private readonly ICauHoiRepository _repo;
-        private readonly IMapper _mapper;
         private readonly IPublishEndpoint _publishEndpoint; // Inject IPublishEndpoint
 
-        public CauHoiService(ICauHoiRepository repo, IMapper mapper, IPublishEndpoint publishEndpoint)
+        public CauHoiService(ICauHoiRepository repo, IPublishEndpoint publishEndpoint)
         {
             _repo = repo;
-            _mapper = mapper;
             _publishEndpoint = publishEndpoint;
         }
 
@@ -37,7 +35,7 @@ namespace ExamService.Services
                                    .Include(c => c.LuaChons)
                                    .ToListAsync();
 
-            var dtos = _mapper.Map<List<CauHoiResponseDTO>>(items);
+            var dtos = items.Adapt<List<CauHoiResponseDTO>>();
             var pagedResult = new PagedResult<CauHoiResponseDTO>(dtos, totalItems, pagingParams.PageNumber, pagingParams.PageSize);
 
             return ApiPhanHoi<PagedResult<CauHoiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
@@ -50,18 +48,18 @@ namespace ExamService.Services
             {
                 return ApiPhanHoi<CauHoiResponseDTO>.ThatBai("Không tìm thấy câu hỏi hoặc không có quyền truy cập.");
             }
-            var responseDto = _mapper.Map<CauHoiResponseDTO>(cauHoi);
+            var responseDto = cauHoi.Adapt<CauHoiResponseDTO>();
             return ApiPhanHoi<CauHoiResponseDTO>.ThanhCongVoiDuLieu(responseDto);
         }
 
         public async Task<ApiPhanHoi<CauHoiResponseDTO>> CreateAsync(CauHoiRequestDTO dto, Guid teacherId)
         {
-            var cauHoi = _mapper.Map<CauHoi>(dto);
+            var cauHoi = dto.Adapt<CauHoi>();
             cauHoi.NguoiTaoId = teacherId;
             cauHoi.Id = Guid.NewGuid();
 
             var newCauHoi = await _repo.CreateAsync(cauHoi);
-            var responseDto = _mapper.Map<CauHoiResponseDTO>(newCauHoi);
+            var responseDto = newCauHoi.Adapt<CauHoiResponseDTO>();
 
             // Publish sự kiện sau khi tạo thành công
             await _publishEndpoint.Publish<CauHoiMoiCreated>(new
@@ -84,19 +82,19 @@ namespace ExamService.Services
             }
 
             // Update properties
-            _mapper.Map(dto, existingCauHoi);
+            dto.Adapt(existingCauHoi);
 
             // Handle choices update (remove old, add new)
             existingCauHoi.LuaChons.Clear();
             foreach (var luaChonDto in dto.LuaChons)
             {
-                existingCauHoi.LuaChons.Add(_mapper.Map<LuaChon>(luaChonDto));
+                existingCauHoi.LuaChons.Add(luaChonDto.Adapt<LuaChon>());
             }
 
             existingCauHoi.CapNhatLuc = DateTime.UtcNow;
 
             var updatedCauHoi = await _repo.UpdateAsync(existingCauHoi);
-            var responseDto = _mapper.Map<CauHoiResponseDTO>(updatedCauHoi);
+            var responseDto = updatedCauHoi.Adapt<CauHoiResponseDTO>();
             return ApiPhanHoi<CauHoiResponseDTO>.ThanhCongVoiDuLieu(responseDto, "Cập nhật câu hỏi thành công.");
         }
 
@@ -170,7 +168,7 @@ namespace ExamService.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            var dtos = _mapper.Map<List<CauHoiResponseDTO>>(items);
+            var dtos = items.Adapt<List<CauHoiResponseDTO>>();
             var pagedResult = new PagedResult<CauHoiResponseDTO>(dtos, totalItems, searchParams.PageNumber, searchParams.PageSize);
 
             return ApiPhanHoi<PagedResult<CauHoiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);

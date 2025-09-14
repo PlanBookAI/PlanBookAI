@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using ExamService.Interfaces;
+﻿using ExamService.Interfaces;
 using ExamService.Models.DTOs;
 using ExamService.Models.Entities;
 using ExamService.Models.Enums;
@@ -8,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Mapster;
 
 namespace ExamService.Services
 {
@@ -16,23 +16,20 @@ namespace ExamService.Services
         private readonly IDeThiRepository _deThiRepo;
         private readonly ICauHoiRepository _cauHoiRepo;
         private readonly IMauDeThiRepository _mauDeThiRepo;
-        private readonly IMapper _mapper;
 
         public TaoDeThiService(
             IDeThiRepository deThiRepo,
             ICauHoiRepository cauHoiRepo,
-            IMauDeThiRepository mauDeThiRepo,
-            IMapper mapper)
+            IMauDeThiRepository mauDeThiRepo)
         {
             _deThiRepo = deThiRepo;
             _cauHoiRepo = cauHoiRepo;
             _mauDeThiRepo = mauDeThiRepo;
-            _mapper = mapper;
         }
 
         public async Task<ApiPhanHoi<DeThiResponseDTO>> CreateFromBankAsync(TaoDeThiTuNganHangDTO dto, Guid teacherId)
         {
-            var deThi = _mapper.Map<DeThi>(dto);
+            var deThi = dto.Adapt<DeThi>();
             deThi.Id = Guid.NewGuid();
             deThi.NguoiTaoId = teacherId;
             deThi.TrangThai = TrangThaiDeThi.Draft.ToString();
@@ -54,7 +51,7 @@ namespace ExamService.Services
             }).ToList();
 
             await _deThiRepo.CreateAsync(deThi);
-            return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(_mapper.Map<DeThiResponseDTO>(deThi));
+            return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(deThi.Adapt<DeThiResponseDTO>());
         }
 
         public async Task<ApiPhanHoi<DeThiResponseDTO>> CreateRandomAsync(TaoDeThiNgauNhienDTO dto, Guid teacherId)
@@ -75,7 +72,7 @@ namespace ExamService.Services
             var random = new Random();
             var selectedIds = availableQuestions.OrderBy(x => random.Next()).Take(dto.SoLuongCauHoi).ToList();
 
-            var createFromBankDto = _mapper.Map<TaoDeThiTuNganHangDTO>(dto);
+            var createFromBankDto = dto.Adapt<TaoDeThiTuNganHangDTO>();
             createFromBankDto.DanhSachCauHoiId = selectedIds;
 
             return await CreateFromBankAsync(createFromBankDto, teacherId);
@@ -118,7 +115,7 @@ namespace ExamService.Services
             }
 
             // 2. Tái sử dụng logic của CreateFromBankAsync
-            var createFromBankDto = _mapper.Map<TaoDeThiTuNganHangDTO>(dto);
+            var createFromBankDto = dto.Adapt<TaoDeThiTuNganHangDTO>();
             createFromBankDto.DanhSachCauHoiId = allRequiredQuestions;
 
             return await CreateFromBankAsync(createFromBankDto, teacherId);
@@ -134,7 +131,7 @@ namespace ExamService.Services
             }
 
             // 2. Chuyển đổi cấu trúc từ mẫu thành ma trận câu hỏi
-            var cauTruc = _mapper.Map<List<YeuCauCauHoiDTO>>(template.CauTruc);
+            var cauTruc = System.Text.Json.JsonSerializer.Deserialize<List<YeuCauCauHoiDTO>>(template.CauTruc) ?? new List<YeuCauCauHoiDTO>();
             var automaticDto = new TaoDeThiTuDongDTO
             {
                 TieuDe = dto.TieuDe,
