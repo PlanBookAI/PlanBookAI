@@ -32,6 +32,7 @@ namespace ClassroomService.Models.Entities
         /// Student ID
         /// </summary>
         [Key]
+        [Column("id")]
         public Guid Id { get; set; } = Guid.NewGuid();
         
         /// <summary>
@@ -58,6 +59,7 @@ namespace ClassroomService.Models.Entities
         /// Student's gender
         /// </summary>
         [Required]
+        [Column("gender")]
         public Gender Gender { get; set; }
         
         /// <summary>

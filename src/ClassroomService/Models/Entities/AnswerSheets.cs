@@ -36,6 +36,7 @@ namespace ClassroomService.Models.Entities
         /// Answer sheet ID
         /// </summary>
         [Key]
+        [Column("id")]
         public Guid Id { get; set; } = Guid.NewGuid();
         
         /// <summary>

@@ -32,6 +32,7 @@ namespace ClassroomService.Models.Entities
         /// Result ID
         /// </summary>
         [Key]
+        [Column("id")]
         public Guid Id { get; set; } = Guid.NewGuid();
         
         /// <summary>
@@ -74,6 +75,7 @@ namespace ClassroomService.Models.Entities
         /// Additional notes about the result
         /// </summary>
         [MaxLength(500)]
+        [Column("notes")]
         public required string Notes { get; set; }
         
         /// <summary>

@@ -13,18 +13,21 @@ namespace ClassroomService.Models.Entities
         /// Class ID
         /// </summary>
         [Key]
+        [Column("id")]
         public Guid Id { get; set; } = Guid.NewGuid();
         
         /// <summary>
         /// Class name
         /// </summary>
         [Required, MaxLength(200)]
+        [Column("name")]
         public required string Name { get; set; }
         
         /// <summary>
         /// Grade level (10-12)
         /// </summary>
         [Required]
+        [Column("grade")]
         public int Grade { get; set; } 
         
         /// <summary>
