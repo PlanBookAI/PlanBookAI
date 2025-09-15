@@ -38,10 +38,44 @@ namespace ExamService.Services
                 var items = await query.Skip((pagingParams.PageNumber - 1) * pagingParams.PageSize)
                                        .Take(pagingParams.PageSize)
                                        .Include(d => d.ExamQuestions)
+                                           .ThenInclude(eq => eq.CauHoi)
+                                               .ThenInclude(q => q.LuaChons)
                                        .AsNoTracking()
                                        .ToListAsync();
 
-                var dtos = items.Adapt<List<DeThiResponseDTO>>();
+                var dtos = items.Select(deThi => 
+                {
+                    var dto = deThi.Adapt<DeThiResponseDTO>();
+                    
+                    // Mapping thủ công cho CauHois để đảm bảo dữ liệu đúng
+                    dto.CauHois = deThi.ExamQuestions
+                        .OrderBy(eq => eq.ThuTu)
+                        .Select(eq => new CauHoiTrongDeThiDTO
+                        {
+                            Id = eq.CauHoi.Id,
+                            NoiDung = eq.CauHoi.NoiDung,
+                            MonHoc = eq.CauHoi.MonHoc,
+                            LoaiCauHoi = eq.CauHoi.LoaiCauHoi,
+                            ChuDe = eq.CauHoi.ChuDe,
+                            DoKho = eq.CauHoi.DoKho,
+                            DapAnDung = eq.CauHoi.DapAnDung,
+                            GiaiThich = eq.CauHoi.GiaiThich,
+                            TaoLuc = eq.CauHoi.TaoLuc,
+                            CapNhatLuc = eq.CauHoi.CapNhatLuc,
+                            NguoiTaoId = eq.CauHoi.NguoiTaoId,
+                            LuaChons = eq.CauHoi.LuaChons.Select(lc => new LuaChonResponseDTO
+                            {
+                                Id = lc.Id,
+                                NoiDung = lc.NoiDung,
+                                LaDapAnDung = lc.MaLuaChon == eq.CauHoi.DapAnDung
+                            }).ToList(),
+                            Diem = eq.Diem,
+                            ThuTu = eq.ThuTu
+                        })
+                        .ToList();
+                    
+                    return dto;
+                }).ToList();
                 var pagedResult = new PagedResult<DeThiResponseDTO>(dtos, totalItems, pagingParams.PageNumber, pagingParams.PageSize);
 
                 return ApiPhanHoi<PagedResult<DeThiResponseDTO>>.ThanhCongVoiDuLieu(pagedResult);
@@ -64,11 +98,32 @@ namespace ExamService.Services
 
                 var responseDto = deThi.Adapt<DeThiResponseDTO>();
 
-                // Sắp xếp câu hỏi theo thứ tự
-                if (responseDto.CauHois != null)
-                {
-                    responseDto.CauHois = responseDto.CauHois.OrderBy(q => q.ThuTu).ToList();
-                }
+                // Mapping thủ công cho CauHois để đảm bảo dữ liệu đúng
+                responseDto.CauHois = deThi.ExamQuestions
+                    .OrderBy(eq => eq.ThuTu)
+                    .Select(eq => new CauHoiTrongDeThiDTO
+                    {
+                        Id = eq.CauHoi.Id,
+                        NoiDung = eq.CauHoi.NoiDung,
+                        MonHoc = eq.CauHoi.MonHoc,
+                        LoaiCauHoi = eq.CauHoi.LoaiCauHoi,
+                        ChuDe = eq.CauHoi.ChuDe,
+                        DoKho = eq.CauHoi.DoKho,
+                        DapAnDung = eq.CauHoi.DapAnDung,
+                        GiaiThich = eq.CauHoi.GiaiThich,
+                        TaoLuc = eq.CauHoi.TaoLuc,
+                        CapNhatLuc = eq.CauHoi.CapNhatLuc,
+                        NguoiTaoId = eq.CauHoi.NguoiTaoId,
+                        LuaChons = eq.CauHoi.LuaChons.Select(lc => new LuaChonResponseDTO
+                        {
+                            Id = lc.Id,
+                            NoiDung = lc.NoiDung,
+                            LaDapAnDung = lc.MaLuaChon == eq.CauHoi.DapAnDung
+                        }).ToList(),
+                        Diem = eq.Diem,
+                        ThuTu = eq.ThuTu
+                    })
+                    .ToList();
 
                 return ApiPhanHoi<DeThiResponseDTO>.ThanhCongVoiDuLieu(responseDto);
             }
