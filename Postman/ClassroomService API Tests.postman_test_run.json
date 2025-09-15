@@ -1,0 +1,352 @@
+{
+	"id": "e3fe555f-c141-4e45-8af8-313d8f5333dd",
+	"name": "ClassroomService API Tests",
+	"timestamp": "2025-09-15T04:42:12.283Z",
+	"collection_id": "39580650-ff45677d-b815-4b4e-ab31-8f626f79697b",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 0,
+	"delay": 500,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2025-09-15T04:41:45.407Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "8e0ec0cf-1f1b-4225-80ec-fe7411fd1330",
+			"name": "Lấy danh sách lớp học",
+			"url": "https://pba.khqi.site/api/v1/lop-hoc?page=1&pageSize=10",
+			"time": 237,
+			"responseCode": {
+				"code": 500,
+				"name": "Internal Server Error"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				237
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "fbb35f02-6e11-4e45-a83f-fcc6f945ce99",
+			"name": "Lấy lớp học theo ID",
+			"url": "https://pba.khqi.site/api/v1/lop-hoc/1",
+			"time": 163,
+			"responseCode": {
+				"code": 500,
+				"name": "Internal Server Error"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				163
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "cac5e5b6-e227-4e99-aac0-346a3a98fb86",
+			"name": "Tạo lớp học mới",
+			"url": "https://pba.khqi.site/api/v1/lop-hoc",
+			"time": 164,
+			"responseCode": {
+				"code": 500,
+				"name": "Internal Server Error"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				164
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "57dfd9cc-54aa-43aa-8d13-810ba9b6d3b4",
+			"name": "Lấy danh sách học sinh",
+			"url": "https://pba.khqi.site/api/v1/hoc-sinh?page=1&pageSize=10",
+			"time": 178,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				178
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "a01ce6e2-ba63-4b34-b697-d624197ce579",
+			"name": "Lấy học sinh theo ID",
+			"url": "https://pba.khqi.site/api/v1/hoc-sinh/1",
+			"time": 175,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				175
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "5a4fa1c0-9e99-4c01-bf0f-24af8d807640",
+			"name": "Lấy học sinh theo lớp",
+			"url": "https://pba.khqi.site/api/v1/hoc-sinh/lop/1?page=1&pageSize=10",
+			"time": 236,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				236
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "eff0818c-9ca8-4ad5-95d4-7b2e5c7f459e",
+			"name": "Thêm học sinh mới",
+			"url": "https://pba.khqi.site/api/v1/hoc-sinh",
+			"time": 155,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				155
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "64c9fccc-5b4d-4fb5-8ae9-5f7bd9ec9d9a",
+			"name": "Cập nhật học sinh",
+			"url": "https://pba.khqi.site/api/v1/hoc-sinh/1",
+			"time": 244,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				244
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "49687600-3a07-494b-9c2b-fe1744ff772a",
+			"name": "Xóa học sinh",
+			"url": "https://pba.khqi.site/api/v1/hoc-sinh/1",
+			"time": 211,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				211
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b911385b-22cb-47ae-a644-de2c0521b1f6",
+			"name": "Tạo bài thi mới",
+			"url": "https://pba.khqi.site/api/v1/answer-sheet",
+			"time": 5172,
+			"responseCode": {
+				"code": 502,
+				"name": "Bad Gateway"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				5172
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "58cd9cdd-20f1-479d-bb78-75c2c0debd40",
+			"name": "Lấy bài thi theo ID",
+			"url": "https://pba.khqi.site/api/v1/answer-sheet/1",
+			"time": 9948,
+			"responseCode": {
+				"code": 502,
+				"name": "Bad Gateway"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				9948
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "7507591a-d5d7-4ef2-9ab7-bdd9dd1b2e17",
+			"name": "Tạo kết quả thi mới",
+			"url": "https://pba.khqi.site/api/v1/student-result",
+			"time": 204,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				204
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "df63fe72-0fac-47a2-b2ca-dfc683417119",
+			"name": "Lấy kết quả thi theo ID",
+			"url": "https://pba.khqi.site/api/v1/student-result/1",
+			"time": 182,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				182
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "81c21d86-ae5a-4c4c-a56d-896373933fa7",
+			"name": "ClassroomService Health Check",
+			"url": "https://pba.khqi.site/api/v1/lop-hoc-health",
+			"time": 134,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				134
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "3d619c87-c706-4ee0-8f07-d6a22ee131f0",
+			"name": "Gateway Health Check",
+			"url": "https://pba.khqi.site/health",
+			"time": 141,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				141
+			],
+			"allTests": [
+				{}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 17544,
+	"collection": {
+		"requests": [
+			{
+				"id": "8e0ec0cf-1f1b-4225-80ec-fe7411fd1330",
+				"method": "GET"
+			},
+			{
+				"id": "fbb35f02-6e11-4e45-a83f-fcc6f945ce99",
+				"method": "GET"
+			},
+			{
+				"id": "cac5e5b6-e227-4e99-aac0-346a3a98fb86",
+				"method": "POST"
+			},
+			{
+				"id": "57dfd9cc-54aa-43aa-8d13-810ba9b6d3b4",
+				"method": "GET"
+			},
+			{
+				"id": "a01ce6e2-ba63-4b34-b697-d624197ce579",
+				"method": "GET"
+			},
+			{
+				"id": "5a4fa1c0-9e99-4c01-bf0f-24af8d807640",
+				"method": "GET"
+			},
+			{
+				"id": "eff0818c-9ca8-4ad5-95d4-7b2e5c7f459e",
+				"method": "POST"
+			},
+			{
+				"id": "64c9fccc-5b4d-4fb5-8ae9-5f7bd9ec9d9a",
+				"method": "PUT"
+			},
+			{
+				"id": "49687600-3a07-494b-9c2b-fe1744ff772a",
+				"method": "DELETE"
+			},
+			{
+				"id": "b911385b-22cb-47ae-a644-de2c0521b1f6",
+				"method": "POST"
+			},
+			{
+				"id": "58cd9cdd-20f1-479d-bb78-75c2c0debd40",
+				"method": "GET"
+			},
+			{
+				"id": "7507591a-d5d7-4ef2-9ab7-bdd9dd1b2e17",
+				"method": "POST"
+			},
+			{
+				"id": "df63fe72-0fac-47a2-b2ca-dfc683417119",
+				"method": "GET"
+			},
+			{
+				"id": "81c21d86-ae5a-4c4c-a56d-896373933fa7",
+				"method": "GET"
+			},
+			{
+				"id": "3d619c87-c706-4ee0-8f07-d6a22ee131f0",
+				"method": "GET"
+			}
+		]
+	}
+}

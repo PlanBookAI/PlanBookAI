@@ -43,7 +43,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Gets answer sheets by student ID
         /// </summary>
-        public async Task<(IEnumerable<AnswerSheetDto> Items, int TotalCount)> LayBaiLamTheoHocSinh(int studentId, int page = 1, int pageSize = 10)
+        public async Task<(IEnumerable<AnswerSheetDto> Items, int TotalCount)> LayBaiLamTheoHocSinh(Guid studentId, int page = 1, int pageSize = 10)
         {
             _logger.LogInformation("Lấy bài làm cho học sinh {StudentId}, trang {Page}", studentId, page);
             
@@ -57,7 +57,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Gets answer sheets by exam ID
         /// </summary>
-        public async Task<(IEnumerable<AnswerSheetDto> Items, int TotalCount)> LayBaiLamTheoDeThi(int examId, int page = 1, int pageSize = 10)
+        public async Task<(IEnumerable<AnswerSheetDto> Items, int TotalCount)> LayBaiLamTheoDeThi(Guid examId, int page = 1, int pageSize = 10)
         {
             _logger.LogInformation("Lấy bài làm cho đề thi {ExamId}, trang {Page}", examId, page);
             
@@ -71,7 +71,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Updates an existing answer sheet
         /// </summary>
-        public async Task<AnswerSheetDto> CapNhatBaiLam(int id, CreateAnswerSheetDto dto)
+        public async Task<AnswerSheetDto> CapNhatBaiLam(Guid id, CreateAnswerSheetDto dto)
         {
             _logger.LogInformation("Cập nhật bài làm {Id}", id);
             
@@ -89,7 +89,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Gets an answer sheet by ID
         /// </summary>
-        public async Task<AnswerSheetDto?> LayBaiLamTheoId(int id)
+        public async Task<AnswerSheetDto?> LayBaiLamTheoId(Guid id)
         {
             _logger.LogInformation("Lấy bài làm theo ID {Id}", id);
             

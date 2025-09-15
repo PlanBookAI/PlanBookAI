@@ -15,21 +15,21 @@ namespace ClassroomService.Services.Interfaces
         /// <summary>
         /// Gets student results by student ID
         /// </summary>
-        Task<(IEnumerable<StudentResultDto> Items, int TotalCount)> LayKetQuaTheoHocSinh(int studentId, int page = 1, int pageSize = 10);
+        Task<(IEnumerable<StudentResultDto> Items, int TotalCount)> LayKetQuaTheoHocSinh(Guid studentId, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Gets student results by exam ID
         /// </summary>
-        Task<(IEnumerable<StudentResultDto> Items, int TotalCount)> LayKetQuaTheoDeThi(int examId, int page = 1, int pageSize = 10);
+        Task<(IEnumerable<StudentResultDto> Items, int TotalCount)> LayKetQuaTheoDeThi(Guid examId, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Updates an existing student result
         /// </summary>
-        Task<StudentResultDto> CapNhatKetQua(int id, CreateStudentResultDto dto);
+        Task<StudentResultDto> CapNhatKetQua(Guid id, CreateStudentResultDto dto);
         
         /// <summary>
         /// Gets a student result by ID
         /// </summary>
-        Task<StudentResultDto?> LayKetQuaTheoId(int id);
+        Task<StudentResultDto?> LayKetQuaTheoId(Guid id);
     }
 }

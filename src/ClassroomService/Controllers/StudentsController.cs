@@ -50,7 +50,7 @@ namespace ClassroomService.Controllers
                 var userId = GetUserIdFromHeader();
                 var userRole = GetUserRoleFromHeader();
                 
-                int? ownerTeacherId = userRole == "TEACHER" ? userId : null;
+                Guid? ownerTeacherId = userRole == "TEACHER" ? userId : null;
                 
                 var (items, totalCount) = await _studentsService.LayDanhSachHocSinh(ownerTeacherId, page, pageSize);
                 
@@ -81,14 +81,14 @@ namespace ClassroomService.Controllers
         /// <param name="id">Student ID</param>
         /// <returns>Student details</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<object>> LayHocSinhTheoId(int id)
+        public async Task<ActionResult<object>> LayHocSinhTheoId(Guid id)
         {
             try
             {
                 var userId = GetUserIdFromHeader();
                 var userRole = GetUserRoleFromHeader();
                 
-                int? ownerTeacherId = userRole == "TEACHER" ? userId : null;
+                Guid? ownerTeacherId = userRole == "TEACHER" ? userId : null;
                 
                 var result = await _studentsService.LayHocSinhTheoId(id, ownerTeacherId);
                 
@@ -118,14 +118,14 @@ namespace ClassroomService.Controllers
         /// <param name="pageSize">Page size</param>
         /// <returns>Paginated list of students in class</returns>
         [HttpGet("lop/{classId}")]
-        public async Task<ActionResult<object>> LayHocSinhTheoLop(int classId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<object>> LayHocSinhTheoLop(Guid classId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
                 var userId = GetUserIdFromHeader();
                 var userRole = GetUserRoleFromHeader();
                 
-                int? ownerTeacherId = userRole == "TEACHER" ? userId : null;
+                Guid? ownerTeacherId = userRole == "TEACHER" ? userId : null;
                 
                 var (items, totalCount) = await _studentsService.LayHocSinhTheoLop(classId, ownerTeacherId, page, pageSize);
                 
@@ -201,7 +201,7 @@ namespace ClassroomService.Controllers
         /// <param name="dto">Student update data</param>
         /// <returns>Updated student</returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult<object>> CapNhatHocSinh(int id, [FromBody] UpdateStudentDto dto)
+        public async Task<ActionResult<object>> CapNhatHocSinh(Guid id, [FromBody] UpdateStudentDto dto)
         {
             try
             {
@@ -243,7 +243,7 @@ namespace ClassroomService.Controllers
         /// <param name="id">Student ID</param>
         /// <returns>Success result</returns>
         [HttpDelete("{id}")]
-        public async Task<ActionResult<object>> XoaHocSinh(int id)
+        public async Task<ActionResult<object>> XoaHocSinh(Guid id)
         {
             try
             {
@@ -268,10 +268,10 @@ namespace ClassroomService.Controllers
             }
         }
 
-        private int GetUserIdFromHeader()
+        private Guid GetUserIdFromHeader()
         {
             var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
-            return int.TryParse(userIdHeader, out int userId) ? userId : 0;
+            return Guid.TryParse(userIdHeader, out Guid userId) ? userId : Guid.Empty;
         }
 
         private string GetUserRoleFromHeader()

@@ -23,7 +23,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets a student result by ID
         /// </summary>
-        public async Task<StudentResults?> GetByIdAsync(int id)
+        public async Task<StudentResults?> GetByIdAsync(Guid id)
         {
             return await _context.StudentResults
                 .Include(sr => sr.Student)
@@ -33,7 +33,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets student results by student ID with pagination
         /// </summary>
-        public async Task<IEnumerable<StudentResults>> GetByStudentIdAsync(int studentId, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<StudentResults>> GetByStudentIdAsync(Guid studentId, int page = 1, int pageSize = 10)
         {
             return await _context.StudentResults
                 .Include(sr => sr.Student)
@@ -47,7 +47,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets student results by exam ID with pagination
         /// </summary>
-        public async Task<IEnumerable<StudentResults>> GetByExamIdAsync(int examId, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<StudentResults>> GetByExamIdAsync(Guid examId, int page = 1, int pageSize = 10)
         {
             return await _context.StudentResults
                 .Include(sr => sr.Student)
@@ -97,7 +97,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets total count of student results
         /// </summary>
-        public async Task<int> GetTotalCountAsync(int? studentId = null, int? examId = null)
+        public async Task<int> GetTotalCountAsync(Guid? studentId = null, Guid? examId = null)
         {
             var query = _context.StudentResults.AsQueryable();
             

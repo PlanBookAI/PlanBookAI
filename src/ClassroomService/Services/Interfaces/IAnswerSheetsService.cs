@@ -15,21 +15,21 @@ namespace ClassroomService.Services.Interfaces
         /// <summary>
         /// Gets answer sheets by student ID
         /// </summary>
-        Task<(IEnumerable<AnswerSheetDto> Items, int TotalCount)> LayBaiLamTheoHocSinh(int studentId, int page = 1, int pageSize = 10);
+        Task<(IEnumerable<AnswerSheetDto> Items, int TotalCount)> LayBaiLamTheoHocSinh(Guid studentId, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Gets answer sheets by exam ID
         /// </summary>
-        Task<(IEnumerable<AnswerSheetDto> Items, int TotalCount)> LayBaiLamTheoDeThi(int examId, int page = 1, int pageSize = 10);
+        Task<(IEnumerable<AnswerSheetDto> Items, int TotalCount)> LayBaiLamTheoDeThi(Guid examId, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Updates an existing answer sheet
         /// </summary>
-        Task<AnswerSheetDto> CapNhatBaiLam(int id, CreateAnswerSheetDto dto);
+        Task<AnswerSheetDto> CapNhatBaiLam(Guid id, CreateAnswerSheetDto dto);
         
         /// <summary>
         /// Gets an answer sheet by ID
         /// </summary>
-        Task<AnswerSheetDto?> LayBaiLamTheoId(int id);
+        Task<AnswerSheetDto?> LayBaiLamTheoId(Guid id);
     }
 }

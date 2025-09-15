@@ -22,16 +22,16 @@ namespace ClassroomService.Models.DTOs
                 .MaximumLength(50).WithMessage("Mã học sinh không được vượt quá 50 ký tự");
                 
             RuleFor(x => x.BirthDate)
-                .NotEmpty().WithMessage("Ngày sinh không được để trống")
                 .Must(BeValidAge).WithMessage("Ngày sinh không hợp lệ");
                 
             RuleFor(x => x.ClassId)
-                .GreaterThan(0).WithMessage("ID lớp học không hợp lệ");
+                .NotEmpty().WithMessage("ID lớp học không được để trống");
         }
         
-        private bool BeValidAge(DateOnly birthDate)
+        private bool BeValidAge(DateTime? birthDate)
         {
-            var age = DateOnly.FromDateTime(DateTime.Today).Year - birthDate.Year;
+            if (!birthDate.HasValue) return true; // Allow null birth dates
+            var age = DateTime.Today.Year - birthDate.Value.Year;
             return age >= 14 && age <= 20;
         }
     }

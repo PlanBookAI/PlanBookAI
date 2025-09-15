@@ -40,7 +40,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Gets student results by student ID
         /// </summary>
-        public async Task<(IEnumerable<StudentResultDto> Items, int TotalCount)> LayKetQuaTheoHocSinh(int studentId, int page = 1, int pageSize = 10)
+        public async Task<(IEnumerable<StudentResultDto> Items, int TotalCount)> LayKetQuaTheoHocSinh(Guid studentId, int page = 1, int pageSize = 10)
         {
             _logger.LogInformation("Lấy kết quả thi cho học sinh {StudentId}, trang {Page}", studentId, page);
             
@@ -54,7 +54,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Gets student results by exam ID
         /// </summary>
-        public async Task<(IEnumerable<StudentResultDto> Items, int TotalCount)> LayKetQuaTheoDeThi(int examId, int page = 1, int pageSize = 10)
+        public async Task<(IEnumerable<StudentResultDto> Items, int TotalCount)> LayKetQuaTheoDeThi(Guid examId, int page = 1, int pageSize = 10)
         {
             _logger.LogInformation("Lấy kết quả thi cho đề thi {ExamId}, trang {Page}", examId, page);
             
@@ -68,7 +68,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Updates an existing student result
         /// </summary>
-        public async Task<StudentResultDto> CapNhatKetQua(int id, CreateStudentResultDto dto)
+        public async Task<StudentResultDto> CapNhatKetQua(Guid id, CreateStudentResultDto dto)
         {
             _logger.LogInformation("Cập nhật kết quả thi {Id}", id);
             
@@ -86,7 +86,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Gets a student result by ID
         /// </summary>
-        public async Task<StudentResultDto?> LayKetQuaTheoId(int id)
+        public async Task<StudentResultDto?> LayKetQuaTheoId(Guid id)
         {
             _logger.LogInformation("Lấy kết quả thi theo ID {Id}", id);
             

@@ -10,17 +10,17 @@ namespace ClassroomService.Repositories.Interfaces
         /// <summary>
         /// Get answer sheet by ID
         /// </summary>
-        Task<AnswerSheets?> GetByIdAsync(int id);
+        Task<AnswerSheets?> GetByIdAsync(Guid id);
         
         /// <summary>
         /// Get answer sheets by student ID with pagination
         /// </summary>
-        Task<IEnumerable<AnswerSheets>> GetByStudentIdAsync(int studentId, int page = 1, int pageSize = 10);
+        Task<IEnumerable<AnswerSheets>> GetByStudentIdAsync(Guid studentId, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Get answer sheets by exam ID with pagination
         /// </summary>
-        Task<IEnumerable<AnswerSheets>> GetByExamIdAsync(int examId, int page = 1, int pageSize = 10);
+        Task<IEnumerable<AnswerSheets>> GetByExamIdAsync(Guid examId, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Create new answer sheet
@@ -35,6 +35,6 @@ namespace ClassroomService.Repositories.Interfaces
         /// <summary>
         /// Get total count of answer sheets
         /// </summary>
-        Task<int> GetTotalCountAsync(int? studentId = null, int? examId = null);
+        Task<int> GetTotalCountAsync(Guid? studentId = null, Guid? examId = null);
     }
 }

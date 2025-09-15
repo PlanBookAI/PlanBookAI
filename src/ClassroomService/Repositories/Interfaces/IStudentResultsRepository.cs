@@ -10,17 +10,17 @@ namespace ClassroomService.Repositories.Interfaces
         /// <summary>
         /// Get student result by ID
         /// </summary>
-        Task<StudentResults?> GetByIdAsync(int id);
+        Task<StudentResults?> GetByIdAsync(Guid id);
         
         /// <summary>
         /// Get student results by student ID with pagination
         /// </summary>
-        Task<IEnumerable<StudentResults>> GetByStudentIdAsync(int studentId, int page = 1, int pageSize = 10);
+        Task<IEnumerable<StudentResults>> GetByStudentIdAsync(Guid studentId, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Get student results by exam ID with pagination
         /// </summary>
-        Task<IEnumerable<StudentResults>> GetByExamIdAsync(int examId, int page = 1, int pageSize = 10);
+        Task<IEnumerable<StudentResults>> GetByExamIdAsync(Guid examId, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Create new student result
@@ -35,6 +35,6 @@ namespace ClassroomService.Repositories.Interfaces
         /// <summary>
         /// Get total count of student results
         /// </summary>
-        Task<int> GetTotalCountAsync(int? studentId = null, int? examId = null);
+        Task<int> GetTotalCountAsync(Guid? studentId = null, Guid? examId = null);
     }
 }

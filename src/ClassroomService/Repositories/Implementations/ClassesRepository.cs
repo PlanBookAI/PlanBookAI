@@ -23,7 +23,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets a class by ID, optionally filtered by homeroom teacher ID
         /// </summary>
-        public async Task<Classes?> GetByIdAsync(int id, int? homeroomTeacherId = null)
+        public async Task<Classes?> GetByIdAsync(Guid id, Guid? homeroomTeacherId = null)
         {
             var query = _context.Classes.AsQueryable();
             
@@ -38,7 +38,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets all classes with pagination and optional homeroom teacher filter
         /// </summary>
-        public async Task<IEnumerable<Classes>> GetAllAsync(int? homeroomTeacherId = null, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<Classes>> GetAllAsync(Guid? homeroomTeacherId = null, int page = 1, int pageSize = 10)
         {
             var query = _context.Classes.AsQueryable();
             
@@ -58,7 +58,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets classes by homeroom teacher ID with pagination
         /// </summary>
-        public async Task<IEnumerable<Classes>> GetByHomeroomTeacherIdAsync(int homeroomTeacherId, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<Classes>> GetByHomeroomTeacherIdAsync(Guid homeroomTeacherId, int page = 1, int pageSize = 10)
         {
             return await _context.Classes
                 .Where(c => c.HomeroomTeacherId == homeroomTeacherId)
@@ -97,7 +97,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Deletes a class by ID, ensuring only homeroom teacher can delete
         /// </summary>
-        public async Task<bool> DeleteAsync(int id, int homeroomTeacherId)
+        public async Task<bool> DeleteAsync(Guid id, Guid homeroomTeacherId)
         {
             var entity = await _context.Classes
                 .FirstOrDefaultAsync(c => c.Id == id && c.HomeroomTeacherId == homeroomTeacherId);
@@ -112,7 +112,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets total count of classes, optionally filtered by homeroom teacher ID
         /// </summary>
-        public async Task<int> GetTotalCountAsync(int? homeroomTeacherId = null)
+        public async Task<int> GetTotalCountAsync(Guid? homeroomTeacherId = null)
         {
             var query = _context.Classes.AsQueryable();
             

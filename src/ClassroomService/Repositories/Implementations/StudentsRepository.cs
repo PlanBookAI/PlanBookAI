@@ -23,7 +23,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets a student by ID with optional owner teacher filter
         /// </summary>
-        public async Task<Students?> GetByIdAsync(int id, int? ownerTeacherId = null)
+        public async Task<Students?> GetByIdAsync(Guid id, Guid? ownerTeacherId = null)
         {
             var query = _context.Students.Include(s => s.Class).AsQueryable();
             
@@ -38,7 +38,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets students by class ID with pagination and optional owner teacher filter
         /// </summary>
-        public async Task<IEnumerable<Students>> GetByClassIdAsync(int classId, int? ownerTeacherId = null, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<Students>> GetByClassIdAsync(Guid classId, Guid? ownerTeacherId = null, int page = 1, int pageSize = 10)
         {
             var query = _context.Students.Include(s => s.Class).Where(s => s.ClassId == classId);
             
@@ -57,7 +57,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets students by owner teacher ID with pagination
         /// </summary>
-        public async Task<IEnumerable<Students>> GetByOwnerTeacherIdAsync(int ownerTeacherId, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<Students>> GetByOwnerTeacherIdAsync(Guid ownerTeacherId, int page = 1, int pageSize = 10)
         {
             return await _context.Students
                 .Include(s => s.Class)
@@ -108,7 +108,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Deletes a student by ID, ensuring only owner teacher can delete
         /// </summary>
-        public async Task<bool> DeleteAsync(int id, int ownerTeacherId)
+        public async Task<bool> DeleteAsync(Guid id, Guid ownerTeacherId)
         {
             var entity = await _context.Students
                 .FirstOrDefaultAsync(s => s.Id == id && s.OwnerTeacherId == ownerTeacherId);
@@ -123,7 +123,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Checks if a student code already exists, optionally excluding a specific student
         /// </summary>
-        public async Task<bool> ExistsByStudentCodeAsync(string studentCode, int? excludeId = null)
+        public async Task<bool> ExistsByStudentCodeAsync(string studentCode, Guid? excludeId = null)
         {
             var query = _context.Students.Where(s => s.StudentCode == studentCode);
             
@@ -138,7 +138,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets total count of students with optional filters
         /// </summary>
-        public async Task<int> GetTotalCountAsync(int? classId = null, int? ownerTeacherId = null)
+        public async Task<int> GetTotalCountAsync(Guid? classId = null, Guid? ownerTeacherId = null)
         {
             var query = _context.Students.AsQueryable();
             

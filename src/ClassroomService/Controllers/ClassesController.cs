@@ -50,7 +50,7 @@ namespace ClassroomService.Controllers
                 var userId = GetUserIdFromHeader();
                 var userRole = GetUserRoleFromHeader();
                 
-                int? homeroomTeacherId = userRole == "TEACHER" ? userId : null;
+                Guid? homeroomTeacherId = userRole == "TEACHER" ? userId : null;
                 
                 var (items, totalCount) = await _classesService.LayDanhSachLopHoc(homeroomTeacherId, page, pageSize);
                 
@@ -81,14 +81,14 @@ namespace ClassroomService.Controllers
         /// <param name="id">Class ID</param>
         /// <returns>Class details</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<object>> LayLopHocTheoId(int id)
+        public async Task<ActionResult<object>> LayLopHocTheoId(Guid id)
         {
             try
             {
                 var userId = GetUserIdFromHeader();
                 var userRole = GetUserRoleFromHeader();
                 
-                int? homeroomTeacherId = userRole == "TEACHER" ? userId : null;
+                Guid? homeroomTeacherId = userRole == "TEACHER" ? userId : null;
                 
                 var result = await _classesService.LayLopHocTheoId(id, homeroomTeacherId);
                 
@@ -148,10 +148,10 @@ namespace ClassroomService.Controllers
             }
         }
 
-        private int GetUserIdFromHeader()
+        private Guid GetUserIdFromHeader()
         {
             var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
-            return int.TryParse(userIdHeader, out int userId) ? userId : 0;
+            return Guid.TryParse(userIdHeader, out Guid userId) ? userId : Guid.Empty;
         }
 
         private string GetUserRoleFromHeader()

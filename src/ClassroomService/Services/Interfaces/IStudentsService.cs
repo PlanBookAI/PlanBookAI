@@ -10,17 +10,17 @@ namespace ClassroomService.Services.Interfaces
         /// <summary>
         /// Gets paginated list of students
         /// </summary>
-        Task<(IEnumerable<StudentDto> Items, int TotalCount)> LayDanhSachHocSinh(int? ownerTeacherId = null, int page = 1, int pageSize = 10);
+        Task<(IEnumerable<StudentDto> Items, int TotalCount)> LayDanhSachHocSinh(Guid? ownerTeacherId = null, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Gets a student by ID
         /// </summary>
-        Task<StudentDto> LayHocSinhTheoId(int id, int? ownerTeacherId = null);
+        Task<StudentDto> LayHocSinhTheoId(Guid id, Guid? ownerTeacherId = null);
         
         /// <summary>
         /// Gets students by class ID with pagination
         /// </summary>
-        Task<(IEnumerable<StudentDto> Items, int TotalCount)> LayHocSinhTheoLop(int classId, int? ownerTeacherId = null, int page = 1, int pageSize = 10);
+        Task<(IEnumerable<StudentDto> Items, int TotalCount)> LayHocSinhTheoLop(Guid classId, Guid? ownerTeacherId = null, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Creates a new student
@@ -30,11 +30,11 @@ namespace ClassroomService.Services.Interfaces
         /// <summary>
         /// Updates an existing student
         /// </summary>
-        Task<StudentDto> CapNhatHocSinh(int id, UpdateStudentDto dto, int ownerTeacherId);
+        Task<StudentDto> CapNhatHocSinh(Guid id, UpdateStudentDto dto, Guid ownerTeacherId);
         
         /// <summary>
         /// Deletes a student
         /// </summary>
-        Task<bool> XoaHocSinh(int id, int ownerTeacherId);
+        Task<bool> XoaHocSinh(Guid id, Guid ownerTeacherId);
     }
 }

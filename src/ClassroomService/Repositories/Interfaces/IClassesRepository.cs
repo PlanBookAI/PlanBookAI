@@ -35,11 +35,11 @@ namespace ClassroomService.Repositories.Interfaces
         /// <summary>
         /// Delete class by ID
         /// </summary>
-        Task<bool> DeleteAsync(int id, int homeroomTeacherId);
+        Task<bool> DeleteAsync(Guid id, Guid homeroomTeacherId);
         
         /// <summary>
         /// Get total count of classes
         /// </summary>
-        Task<int> GetTotalCountAsync(int? homeroomTeacherId = null);
+        Task<int> GetTotalCountAsync(Guid? homeroomTeacherId = null);
     }
 }

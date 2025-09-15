@@ -28,7 +28,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Creates a new class
         /// </summary>
-        public async Task<ClassDto> TaoLopHoc(CreateClassDto dto, int homeroomTeacherId)
+        public async Task<ClassDto> TaoLopHoc(CreateClassDto dto, Guid homeroomTeacherId)
         {
             _logger.LogInformation("Tạo lớp học mới: {Name}", dto.Name);
             
@@ -42,7 +42,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Updates an existing class
         /// </summary>
-        public async Task<ClassDto> CapNhatLopHoc(int id, UpdateClassDto dto, int homeroomTeacherId)
+        public async Task<ClassDto> CapNhatLopHoc(Guid id, UpdateClassDto dto, Guid homeroomTeacherId)
         {
             _logger.LogInformation("Cập nhật lớp học: {Id}", id);
             
@@ -60,7 +60,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Deletes a class
         /// </summary>
-        public async Task<bool> XoaLopHoc(int id, int homeroomTeacherId)
+        public async Task<bool> XoaLopHoc(Guid id, Guid homeroomTeacherId)
         {
             _logger.LogInformation("Xóa lớp học: {Id}", id);
             return await _repository.DeleteAsync(id, homeroomTeacherId);
@@ -69,7 +69,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Gets paginated list of classes
         /// </summary>
-        public async Task<(IEnumerable<ClassDto> Items, int TotalCount)> LayDanhSachLopHoc(int? homeroomTeacherId = null, int page = 1, int pageSize = 10)
+        public async Task<(IEnumerable<ClassDto> Items, int TotalCount)> LayDanhSachLopHoc(Guid? homeroomTeacherId = null, int page = 1, int pageSize = 10)
         {
             var items = await _repository.GetAllAsync(homeroomTeacherId, page, pageSize);
             var totalCount = await _repository.GetTotalCountAsync(homeroomTeacherId);
@@ -81,7 +81,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Gets a class by ID
         /// </summary>
-        public async Task<ClassDto> LayLopHocTheoId(int id, int? homeroomTeacherId = null)
+        public async Task<ClassDto> LayLopHocTheoId(Guid id, Guid? homeroomTeacherId = null)
         {
             var entity = await _repository.GetByIdAsync(id, homeroomTeacherId);
             if (entity == null)
@@ -95,7 +95,7 @@ namespace ClassroomService.Services.Implementations
         /// <summary>
         /// Gets classes by homeroom teacher
         /// </summary>
-        public async Task<(IEnumerable<ClassDto> Items, int TotalCount)> LayLopHocTheoGiaoVien(int homeroomTeacherId, int page = 1, int pageSize = 10)
+        public async Task<(IEnumerable<ClassDto> Items, int TotalCount)> LayLopHocTheoGiaoVien(Guid homeroomTeacherId, int page = 1, int pageSize = 10)
         {
             var items = await _repository.GetByHomeroomTeacherIdAsync(homeroomTeacherId, page, pageSize);
             var totalCount = await _repository.GetTotalCountAsync(homeroomTeacherId);

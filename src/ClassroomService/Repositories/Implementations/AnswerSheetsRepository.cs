@@ -23,7 +23,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets an answer sheet by ID
         /// </summary>
-        public async Task<AnswerSheets?> GetByIdAsync(int id)
+        public async Task<AnswerSheets?> GetByIdAsync(Guid id)
         {
             return await _context.AnswerSheets
                 .Include(a => a.Student)
@@ -33,7 +33,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets answer sheets by student ID with pagination
         /// </summary>
-        public async Task<IEnumerable<AnswerSheets>> GetByStudentIdAsync(int studentId, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<AnswerSheets>> GetByStudentIdAsync(Guid studentId, int page = 1, int pageSize = 10)
         {
             return await _context.AnswerSheets
                 .Include(a => a.Student)
@@ -47,7 +47,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets answer sheets by exam ID with pagination
         /// </summary>
-        public async Task<IEnumerable<AnswerSheets>> GetByExamIdAsync(int examId, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<AnswerSheets>> GetByExamIdAsync(Guid examId, int page = 1, int pageSize = 10)
         {
             return await _context.AnswerSheets
                 .Include(a => a.Student)
@@ -95,7 +95,7 @@ namespace ClassroomService.Repositories.Implementations
         /// <summary>
         /// Gets total count of answer sheets
         /// </summary>
-        public async Task<int> GetTotalCountAsync(int? studentId = null, int? examId = null)
+        public async Task<int> GetTotalCountAsync(Guid? studentId = null, Guid? examId = null)
         {
             var query = _context.AnswerSheets.AsQueryable();
             
