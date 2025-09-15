@@ -5,9 +5,11 @@ using ClassroomService.Services.Implementations;
 using ClassroomService.Services.Interfaces;
 using ClassroomService.Profiles;
 using ClassroomService.Middleware;
+using ClassroomService.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Text.Json;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +52,14 @@ builder.Services.AddScoped<IClassesService, ClassesService>();
 builder.Services.AddScoped<IStudentsService, StudentsService>();
 builder.Services.AddScoped<IStudentResultsService, StudentResultsService>();
 builder.Services.AddScoped<IAnswerSheetsService, AnswerSheetsService>();
+
+// FluentValidation Registration
+builder.Services.AddScoped<IValidator<CreateClassDto>, CreateClassDtoValidator>();
+builder.Services.AddScoped<IValidator<UpdateClassDto>, UpdateClassDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateStudentDto>, CreateStudentDtoValidator>();
+builder.Services.AddScoped<IValidator<UpdateStudentDto>, UpdateStudentDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateStudentResultDto>, CreateStudentResultDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateAnswerSheetDto>, CreateAnswerSheetDtoValidator>();
 
 // Health Checks
 builder.Services.AddHealthChecks()

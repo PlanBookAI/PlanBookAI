@@ -1,0 +1,750 @@
+{
+	"info": {
+		"_postman_id": "classroom-service-updated-2024",
+		"name": "ClassroomService Updated API Tests",
+		"description": "Updated API tests for ClassroomService với DTOs chính xác và Guid types",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"teacher@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/xac-thuc/dang-nhap",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"xac-thuc",
+								"dang-nhap"
+							]
+						},
+						"description": "Đăng nhập để lấy JWT token"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data && response.data.token) {",
+									"        pm.environment.set('jwt_token', response.data.token);",
+									"        pm.environment.set('user_id', response.data.user.id);",
+									"        pm.environment.set('user_email', response.data.user.email);",
+									"        pm.environment.set('user_role', response.data.user.role);",
+									"        console.log('Token saved:', response.data.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Classes (Lớp học)",
+			"item": [
+				{
+					"name": "Get All Classes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/lop-hoc?page=1&pageSize=10",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"lop-hoc"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lấy danh sách lớp học với phân trang"
+					}
+				},
+				{
+					"name": "Get Class by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/lop-hoc/{{class_id}}",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"lop-hoc",
+								"{{class_id}}"
+							]
+						},
+						"description": "Lấy thông tin lớp học theo ID"
+					}
+				},
+				{
+					"name": "Create Class",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"10A1\",\n  \"grade\": 10,\n  \"homeroomTeacherId\": \"{{user_id}}\",\n  \"academicYear\": \"2024-2025\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/lop-hoc",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"lop-hoc"
+							]
+						},
+						"description": "Tạo lớp học mới"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data && response.data.id) {",
+									"        pm.environment.set('class_id', response.data.id);",
+									"        console.log('Class ID saved:', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Update Class",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"10A1 - Updated\",\n  \"grade\": 10,\n  \"academicYear\": \"2024-2025\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/lop-hoc/{{class_id}}",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"lop-hoc",
+								"{{class_id}}"
+							]
+						},
+						"description": "Cập nhật thông tin lớp học"
+					}
+				},
+				{
+					"name": "Delete Class",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/lop-hoc/{{class_id}}",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"lop-hoc",
+								"{{class_id}}"
+							]
+						},
+						"description": "Xóa lớp học"
+					}
+				}
+			]
+		},
+		{
+			"name": "Students (Học sinh)",
+			"item": [
+				{
+					"name": "Get All Students",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/hoc-sinh?page=1&pageSize=10",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lấy danh sách học sinh với phân trang"
+					}
+				},
+				{
+					"name": "Get Student by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/hoc-sinh/{{student_id}}",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh",
+								"{{student_id}}"
+							]
+						},
+						"description": "Lấy thông tin học sinh theo ID"
+					}
+				},
+				{
+					"name": "Get Students by Class",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/hoc-sinh/lop/{{class_id}}?page=1&pageSize=10",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh",
+								"lop",
+								"{{class_id}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lấy danh sách học sinh theo lớp"
+					}
+				},
+				{
+					"name": "Create Student",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Nguyễn Văn A\",\n  \"studentCode\": \"HS001\",\n  \"birthDate\": \"2008-05-15T00:00:00Z\",\n  \"gender\": \"MALE\",\n  \"classId\": \"{{class_id}}\",\n  \"ownerTeacherId\": \"{{user_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/hoc-sinh",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh"
+							]
+						},
+						"description": "Tạo học sinh mới"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data && response.data.id) {",
+									"        pm.environment.set('student_id', response.data.id);",
+									"        console.log('Student ID saved:', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Update Student",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Nguyễn Văn A - Updated\",\n  \"studentCode\": \"HS001\",\n  \"birthDate\": \"2008-05-15T00:00:00Z\",\n  \"gender\": \"MALE\",\n  \"classId\": \"{{class_id}}\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/hoc-sinh/{{student_id}}",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh",
+								"{{student_id}}"
+							]
+						},
+						"description": "Cập nhật thông tin học sinh"
+					}
+				},
+				{
+					"name": "Delete Student",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/hoc-sinh/{{student_id}}",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hoc-sinh",
+								"{{student_id}}"
+							]
+						},
+						"description": "Xóa học sinh"
+					}
+				}
+			]
+		},
+		{
+			"name": "Student Results (Kết quả học sinh)",
+			"item": [
+				{
+					"name": "Create Student Result",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{student_id}}\",\n  \"examId\": \"{{exam_id}}\",\n  \"score\": 8.5,\n  \"actualDuration\": 45,\n  \"answerDetails\": \"{\\\"answers\\\": [\\\"A\\\", \\\"B\\\", \\\"C\\\", \\\"D\\\"]}\",\n  \"gradingMethod\": \"AUTO\",\n  \"notes\": \"Làm bài tốt\",\n  \"examDate\": \"2024-01-15T08:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/ket-qua-hoc-sinh",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ket-qua-hoc-sinh"
+							]
+						},
+						"description": "Tạo kết quả thi cho học sinh"
+					}
+				},
+				{
+					"name": "Get Student Results by Student",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/ket-qua-hoc-sinh/hoc-sinh/{{student_id}}?page=1&pageSize=10",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ket-qua-hoc-sinh",
+								"hoc-sinh",
+								"{{student_id}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lấy kết quả thi theo học sinh"
+					}
+				},
+				{
+					"name": "Get Student Results by Exam",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/ket-qua-hoc-sinh/de-thi/{{exam_id}}?page=1&pageSize=10",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ket-qua-hoc-sinh",
+								"de-thi",
+								"{{exam_id}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lấy kết quả thi theo đề thi"
+					}
+				}
+			]
+		},
+		{
+			"name": "Answer Sheets (Bài làm)",
+			"item": [
+				{
+					"name": "Create Answer Sheet",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{student_id}}\",\n  \"examId\": \"{{exam_id}}\",\n  \"imageUrl\": \"https://example.com/answer-sheet.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/answer-sheet",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"answer-sheet"
+							]
+						},
+						"description": "Tạo bài làm mới"
+					}
+				},
+				{
+					"name": "Get Answer Sheets by Student",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/answer-sheet/hoc-sinh/{{student_id}}?page=1&pageSize=10",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"answer-sheet",
+								"hoc-sinh",
+								"{{student_id}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lấy bài làm theo học sinh"
+					}
+				},
+				{
+					"name": "Get Answer Sheets by Exam",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/answer-sheet/de-thi/{{exam_id}}?page=1&pageSize=10",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"answer-sheet",
+								"de-thi",
+								"{{exam_id}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lấy bài làm theo đề thi"
+					}
+				}
+			]
+		},
+		{
+			"name": "Health Checks",
+			"item": [
+				{
+					"name": "Gateway Health",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{gateway_url}}/health",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Kiểm tra sức khỏe Gateway"
+					}
+				},
+				{
+					"name": "ClassroomService Health",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{gateway_url}}/api/v1/lop-hoc-health",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"lop-hoc-health"
+							]
+						},
+						"description": "Kiểm tra sức khỏe ClassroomService"
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set default values if not set",
+					"if (!pm.environment.get('gateway_url')) {",
+					"    pm.environment.set('gateway_url', 'http://localhost:8080');",
+					"}",
+					"",
+					"// Set default exam_id for testing",
+					"if (!pm.environment.get('exam_id')) {",
+					"    pm.environment.set('exam_id', '550e8400-e29b-41d4-a716-446655440001');",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "gateway_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "class_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "student_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "exam_id",
+			"value": "550e8400-e29b-41d4-a716-446655440001",
+			"type": "string"
+		}
+	]
+}
