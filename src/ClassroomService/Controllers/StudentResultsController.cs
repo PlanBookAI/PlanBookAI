@@ -9,7 +9,7 @@ namespace ClassroomService.Controllers
     /// Controller for managing student results
     /// </summary>
     [ApiController]
-    [Route("api/v1/ket-qua-hoc-sinh")]
+    [Route("api/v1/lop-hoc/ket-qua-hoc-sinh")]
     public class StudentResultsController : ControllerBase
     {
         private readonly IStudentResultsService _studentResultsService;

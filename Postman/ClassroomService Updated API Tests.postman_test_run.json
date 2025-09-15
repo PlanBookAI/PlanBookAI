@@ -1,7 +1,7 @@
 {
-	"id": "4e06a813-9005-471c-a3ad-6ba8baad1c18",
+	"id": "6c44d438-9fae-47d9-b3d2-d53d2457108f",
 	"name": "ClassroomService Updated API Tests",
-	"timestamp": "2025-09-15T05:35:48.536Z",
+	"timestamp": "2025-09-15T06:06:48.177Z",
 	"collection_id": "39580650-ef9e0545-bc18-4c7b-bd98-92697e14408d",
 	"folder_id": 0,
 	"environment_id": "0",
@@ -9,319 +9,13 @@
 	"delay": "0500",
 	"persist": true,
 	"status": "finished",
-	"startedAt": "2025-09-15T05:35:16.352Z",
+	"startedAt": "2025-09-15T06:06:15.786Z",
 	"totalFail": 0,
 	"results": [
 		{
 			"id": "47318b00-f880-4d9c-a038-b1c3790f318e",
 			"name": "Get All Classes",
 			"url": "http://localhost:8080/api/v1/lop-hoc?page=1&pageSize=10",
-			"time": 36,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				36
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "4bf3c493-300f-407e-ba07-5510e20bbaa6",
-			"name": "Get Class by ID",
-			"url": "http://localhost:8080/api/v1/lop-hoc/2851e448-4d19-4eda-b0cb-e10a9a22920f",
-			"time": 95,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				95
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "bfced22c-45f9-46fb-90e3-1098fddb7fe8",
-			"name": "Create Class",
-			"url": "http://localhost:8080/api/v1/lop-hoc",
-			"time": 129,
-			"responseCode": {
-				"code": 201,
-				"name": "Created"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				129
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "bd7de084-5658-45d6-a335-f9253c77b1d5",
-			"name": "Update Class",
-			"url": "http://localhost:8080/api/v1/lop-hoc/f0151e9b-3e03-41fd-ab5e-036ee2c8cd10",
-			"time": 19,
-			"responseCode": {
-				"code": 405,
-				"name": "Method Not Allowed"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				19
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "7979fd86-5a46-453b-9a28-88a95b97cf6e",
-			"name": "Delete Class",
-			"url": "http://localhost:8080/api/v1/lop-hoc/f0151e9b-3e03-41fd-ab5e-036ee2c8cd10",
-			"time": 32,
-			"responseCode": {
-				"code": 405,
-				"name": "Method Not Allowed"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				32
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "4f5caf99-a9b2-4b1f-a7c5-7eb8ead29ad8",
-			"name": "Get All Students",
-			"url": "http://localhost:8080/api/v1/hoc-sinh?page=1&pageSize=10",
-			"time": 16,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				16
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "6014ded7-3ccd-4459-b233-5e9065643642",
-			"name": "Get Student by ID",
-			"url": "http://localhost:8080/api/v1/hoc-sinh/",
-			"time": 24,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				24
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "095a6e79-d695-4d92-a1a5-1c99a75a1320",
-			"name": "Get Students by Class",
-			"url": "http://localhost:8080/api/v1/hoc-sinh/lop/f0151e9b-3e03-41fd-ab5e-036ee2c8cd10?page=1&pageSize=10",
-			"time": 17,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				17
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "bf53abfa-d70e-4563-9300-b420080c734f",
-			"name": "Create Student",
-			"url": "http://localhost:8080/api/v1/hoc-sinh",
-			"time": 15,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				15
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "271bf8b3-d15f-4431-a0ea-85b6956741e8",
-			"name": "Update Student",
-			"url": "http://localhost:8080/api/v1/hoc-sinh/",
-			"time": 19,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				19
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "119ee006-ac4a-4b12-84be-1afd4bf2f56c",
-			"name": "Delete Student",
-			"url": "http://localhost:8080/api/v1/hoc-sinh/",
-			"time": 19,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				19
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "49bc00c3-34d9-4dd4-a636-2deb7e9dfa92",
-			"name": "Create Student Result",
-			"url": "http://localhost:8080/api/v1/ket-qua-hoc-sinh",
-			"time": 15,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				15
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "dfdd6848-f837-4177-adb3-e1f72c54037a",
-			"name": "Get Student Results by Student",
-			"url": "http://localhost:8080/api/v1/ket-qua-hoc-sinh/hoc-sinh/?page=1&pageSize=10",
-			"time": 90,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				90
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "b064600d-0696-40b3-abfe-011dc5aa634b",
-			"name": "Get Student Results by Exam",
-			"url": "http://localhost:8080/api/v1/ket-qua-hoc-sinh/de-thi/550e8400-e29b-41d4-a716-446655440001?page=1&pageSize=10",
-			"time": 23,
-			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				23
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "c6fa1e83-bb07-4d7c-968e-02204034c916",
-			"name": "Create Answer Sheet",
-			"url": "http://localhost:8080/api/v1/answer-sheet",
-			"time": 5036,
-			"responseCode": {
-				"code": 502,
-				"name": "Bad Gateway"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				5036
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "f21d6f81-56c9-4f90-8899-4a61ee428697",
-			"name": "Get Answer Sheets by Student",
-			"url": "http://localhost:8080/api/v1/answer-sheet/hoc-sinh/?page=1&pageSize=10",
-			"time": 5031,
-			"responseCode": {
-				"code": 502,
-				"name": "Bad Gateway"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				5031
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "2268cead-e7e6-474a-bd55-2017314044c4",
-			"name": "Get Answer Sheets by Exam",
-			"url": "http://localhost:8080/api/v1/answer-sheet/de-thi/550e8400-e29b-41d4-a716-446655440001?page=1&pageSize=10",
-			"time": 9445,
-			"responseCode": {
-				"code": 502,
-				"name": "Bad Gateway"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				9445
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "0ee0bd75-4151-4b75-9657-900969438295",
-			"name": "Gateway Health",
-			"url": "http://localhost:8080/health",
 			"time": 29,
 			"responseCode": {
 				"code": 200,
@@ -337,10 +31,82 @@
 			]
 		},
 		{
-			"id": "064dcd42-3d9c-4082-918a-65adb4b5a9da",
-			"name": "ClassroomService Health",
-			"url": "http://localhost:8080/api/v1/lop-hoc-health",
-			"time": 140,
+			"id": "4bf3c493-300f-407e-ba07-5510e20bbaa6",
+			"name": "Get Class by ID",
+			"url": "http://localhost:8080/api/v1/lop-hoc/2851e448-4d19-4eda-b0cb-e10a9a22920f",
+			"time": 23,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				23
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "bfced22c-45f9-46fb-90e3-1098fddb7fe8",
+			"name": "Create Class",
+			"url": "http://localhost:8080/api/v1/lop-hoc",
+			"time": 33,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				33
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "bd7de084-5658-45d6-a335-f9253c77b1d5",
+			"name": "Update Class",
+			"url": "http://localhost:8080/api/v1/lop-hoc/e5fc49ae-32ca-492b-94bd-f04bcda63fa9",
+			"time": 143,
+			"responseCode": {
+				"code": 500,
+				"name": "Internal Server Error"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				143
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "7979fd86-5a46-453b-9a28-88a95b97cf6e",
+			"name": "Delete Class",
+			"url": "http://localhost:8080/api/v1/lop-hoc/e5fc49ae-32ca-492b-94bd-f04bcda63fa9",
+			"time": 37,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				37
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "4f5caf99-a9b2-4b1f-a7c5-7eb8ead29ad8",
+			"name": "Get All Students",
+			"url": "http://localhost:8080/api/v1/hoc-sinh?page=1&pageSize=10",
+			"time": 17,
 			"responseCode": {
 				"code": 404,
 				"name": "Not Found"
@@ -348,7 +114,241 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				140
+				17
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "6014ded7-3ccd-4459-b233-5e9065643642",
+			"name": "Get Student by ID",
+			"url": "http://localhost:8080/api/v1/hoc-sinh/",
+			"time": 18,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				18
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "095a6e79-d695-4d92-a1a5-1c99a75a1320",
+			"name": "Get Students by Class",
+			"url": "http://localhost:8080/api/v1/hoc-sinh/lop/e5fc49ae-32ca-492b-94bd-f04bcda63fa9?page=1&pageSize=10",
+			"time": 15,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				15
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "bf53abfa-d70e-4563-9300-b420080c734f",
+			"name": "Create Student",
+			"url": "http://localhost:8080/api/v1/hoc-sinh",
+			"time": 16,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				16
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "271bf8b3-d15f-4431-a0ea-85b6956741e8",
+			"name": "Update Student",
+			"url": "http://localhost:8080/api/v1/hoc-sinh/",
+			"time": 21,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				21
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "119ee006-ac4a-4b12-84be-1afd4bf2f56c",
+			"name": "Delete Student",
+			"url": "http://localhost:8080/api/v1/hoc-sinh/",
+			"time": 101,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				101
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "49bc00c3-34d9-4dd4-a636-2deb7e9dfa92",
+			"name": "Create Student Result",
+			"url": "http://localhost:8080/api/v1/ket-qua-hoc-sinh",
+			"time": 19,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				19
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "dfdd6848-f837-4177-adb3-e1f72c54037a",
+			"name": "Get Student Results by Student",
+			"url": "http://localhost:8080/api/v1/ket-qua-hoc-sinh/hoc-sinh/?page=1&pageSize=10",
+			"time": 15,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				15
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b064600d-0696-40b3-abfe-011dc5aa634b",
+			"name": "Get Student Results by Exam",
+			"url": "http://localhost:8080/api/v1/ket-qua-hoc-sinh/de-thi/550e8400-e29b-41d4-a716-446655440001?page=1&pageSize=10",
+			"time": 13,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				13
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "c6fa1e83-bb07-4d7c-968e-02204034c916",
+			"name": "Create Answer Sheet",
+			"url": "http://localhost:8080/api/v1/answer-sheet",
+			"time": 9788,
+			"responseCode": {
+				"code": 502,
+				"name": "Bad Gateway"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				9788
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "f21d6f81-56c9-4f90-8899-4a61ee428697",
+			"name": "Get Answer Sheets by Student",
+			"url": "http://localhost:8080/api/v1/answer-sheet/hoc-sinh/?page=1&pageSize=10",
+			"time": 5023,
+			"responseCode": {
+				"code": 502,
+				"name": "Bad Gateway"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				5023
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "2268cead-e7e6-474a-bd55-2017314044c4",
+			"name": "Get Answer Sheets by Exam",
+			"url": "http://localhost:8080/api/v1/answer-sheet/de-thi/550e8400-e29b-41d4-a716-446655440001?page=1&pageSize=10",
+			"time": 5085,
+			"responseCode": {
+				"code": 502,
+				"name": "Bad Gateway"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				5085
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "0ee0bd75-4151-4b75-9657-900969438295",
+			"name": "Gateway Health",
+			"url": "http://localhost:8080/health",
+			"time": 44,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				44
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "064dcd42-3d9c-4082-918a-65adb4b5a9da",
+			"name": "ClassroomService Health",
+			"url": "http://localhost:8080/api/v1/lop-hoc-health",
+			"time": 47,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				47
 			],
 			"allTests": [
 				{}
@@ -356,7 +356,7 @@
 		}
 	],
 	"count": 1,
-	"totalTime": 20230,
+	"totalTime": 20487,
 	"collection": {
 		"requests": [
 			{

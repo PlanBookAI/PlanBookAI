@@ -9,7 +9,7 @@ namespace ClassroomService.Controllers
     /// Controller for managing students
     /// </summary>
     [ApiController]
-    [Route("api/v1/hoc-sinh")]
+    [Route("api/v1/lop-hoc/hoc-sinh")]
     public class StudentsController : ControllerBase
     {
         private readonly IStudentsService _studentsService;

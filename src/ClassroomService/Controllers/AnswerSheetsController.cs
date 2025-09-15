@@ -9,7 +9,7 @@ namespace ClassroomService.Controllers
     /// Controller for managing answer sheets
     /// </summary>
     [ApiController]
-    [Route("api/v1/bai-lam")]
+    [Route("api/v1/lop-hoc/answer-sheet")]
     public class AnswerSheetsController : ControllerBase
     {
         private readonly IAnswerSheetsService _answerSheetsService;
