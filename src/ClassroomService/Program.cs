@@ -9,6 +9,7 @@ using ClassroomService.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +30,8 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.WriteIndented = true;
+        // Chấp nhận enum dạng chuỗi (ví dụ: "MALE", "FEMALE", "OTHER") và cả số
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

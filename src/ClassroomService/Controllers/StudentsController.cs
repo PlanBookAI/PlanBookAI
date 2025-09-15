@@ -160,6 +160,10 @@ namespace ClassroomService.Controllers
         {
             try
             {
+                // Set OwnerTeacherId từ header trước khi validate
+                var userId = GetUserIdFromHeader();
+                dto.OwnerTeacherId = userId;
+
                 var validationResult = await _createValidator.ValidateAsync(dto);
                 if (!validationResult.IsValid)
                 {
@@ -170,10 +174,7 @@ namespace ClassroomService.Controllers
                         errors = validationResult.Errors.Select(e => e.ErrorMessage)
                     });
                 }
-                
-                var userId = GetUserIdFromHeader();
-                dto.OwnerTeacherId = userId;
-                
+
                 var result = await _studentsService.ThemHocSinh(dto);
                 
                 return CreatedAtAction(nameof(LayHocSinhTheoId), new { id = result.Id }, new
