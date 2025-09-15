@@ -231,6 +231,10 @@ namespace ClassroomService.Controllers
             {
                 return NotFound(new { success = false, message = "Không tìm thấy học sinh" });
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi cập nhật học sinh {Id}", id);
