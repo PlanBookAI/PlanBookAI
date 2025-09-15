@@ -83,7 +83,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Health check endpoint
+// Health check endpoints
 app.MapHealthChecks("/health");
+app.MapHealthChecks("/api/v1/health");
 
 app.Run();

@@ -148,6 +148,82 @@ namespace ClassroomService.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates an existing class
+        /// </summary>
+        /// <param name="id">Class ID</param>
+        /// <param name="dto">Class update data</param>
+        /// <returns>Updated class</returns>
+        [HttpPut("{id}")]
+        public async Task<ActionResult<object>> CapNhatLopHoc(Guid id, [FromBody] UpdateClassDto dto)
+        {
+            try
+            {
+                var validationResult = await _updateValidator.ValidateAsync(dto);
+                if (!validationResult.IsValid)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Dữ liệu không hợp lệ",
+                        errors = validationResult.Errors.Select(e => e.ErrorMessage)
+                    });
+                }
+                
+                var userId = GetUserIdFromHeader();
+                var result = await _classesService.CapNhatLopHoc(id, dto, userId);
+                
+                return Ok(new
+                {
+                    success = true,
+                    message = "Cập nhật lớp học thành công",
+                    data = result
+                });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy lớp học" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi cập nhật lớp học {Id}", id);
+                return StatusCode(500, new { success = false, message = "Đã xảy ra lỗi hệ thống" });
+            }
+        }
+
+        /// <summary>
+        /// Deletes a class
+        /// </summary>
+        /// <param name="id">Class ID</param>
+        /// <returns>Deletion result</returns>
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<object>> XoaLopHoc(Guid id)
+        {
+            try
+            {
+                var userId = GetUserIdFromHeader();
+                var result = await _classesService.XoaLopHoc(id, userId);
+                
+                if (result)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Xóa lớp học thành công"
+                    });
+                }
+                else
+                {
+                    return NotFound(new { success = false, message = "Không tìm thấy lớp học" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xóa lớp học {Id}", id);
+                return StatusCode(500, new { success = false, message = "Đã xảy ra lỗi hệ thống" });
+            }
+        }
+
         private Guid GetUserIdFromHeader()
         {
             var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
