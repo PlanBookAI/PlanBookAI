@@ -10,17 +10,17 @@ namespace ClassroomService.Repositories.Interfaces
         /// <summary>
         /// Get class by ID with optional homeroom teacher filter
         /// </summary>
-        Task<Classes?> GetByIdAsync(int id, int? homeroomTeacherId = null);
+        Task<Classes?> GetByIdAsync(Guid id, Guid? homeroomTeacherId = null);
         
         /// <summary>
         /// Get all classes with pagination
         /// </summary>
-        Task<IEnumerable<Classes>> GetAllAsync(int? homeroomTeacherId = null, int page = 1, int pageSize = 10);
+        Task<IEnumerable<Classes>> GetAllAsync(Guid? homeroomTeacherId = null, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Get classes by homeroom teacher ID
         /// </summary>
-        Task<IEnumerable<Classes>> GetByHomeroomTeacherIdAsync(int homeroomTeacherId, int page = 1, int pageSize = 10);
+        Task<IEnumerable<Classes>> GetByHomeroomTeacherIdAsync(Guid homeroomTeacherId, int page = 1, int pageSize = 10);
         
         /// <summary>
         /// Create new class

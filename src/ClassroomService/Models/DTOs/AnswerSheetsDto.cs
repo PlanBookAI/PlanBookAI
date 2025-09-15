@@ -11,12 +11,12 @@ namespace ClassroomService.Models.DTOs
         /// <summary>
         /// Student ID
         /// </summary>
-        public int StudentId { get; set; }
+        public Guid StudentId { get; set; }
         
         /// <summary>
         /// Exam ID
         /// </summary>
-        public int ExamId { get; set; }
+        public Guid ExamId { get; set; }
         
         /// <summary>
         /// Image URL
@@ -32,12 +32,12 @@ namespace ClassroomService.Models.DTOs
         /// <summary>
         /// Answer sheet ID
         /// </summary>
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         /// <summary>
         /// Student ID
         /// </summary>
-        public int StudentId { get; set; }
+        public Guid StudentId { get; set; }
         
         /// <summary>
         /// Student name
@@ -47,7 +47,7 @@ namespace ClassroomService.Models.DTOs
         /// <summary>
         /// Exam ID
         /// </summary>
-        public int ExamId { get; set; }
+        public Guid ExamId { get; set; }
         
         /// <summary>
         /// Image URL
@@ -91,10 +91,10 @@ namespace ClassroomService.Models.DTOs
         public CreateAnswerSheetDtoValidator()
         {
             RuleFor(x => x.StudentId)
-                .GreaterThan(0).WithMessage("ID học sinh không hợp lệ");
+                .NotEmpty().WithMessage("ID học sinh không được để trống");
 
             RuleFor(x => x.ExamId)
-                .GreaterThan(0).WithMessage("ID đề thi không hợp lệ");
+                .NotEmpty().WithMessage("ID đề thi không được để trống");
 
             RuleFor(x => x.ImageUrl)
                 .NotEmpty().WithMessage("URL hình ảnh không được để trống")

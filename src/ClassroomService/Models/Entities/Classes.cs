@@ -6,14 +6,14 @@ namespace ClassroomService.Models.Entities
     /// <summary>
     /// Class entity representing school classes
     /// </summary>
-    [Table("classes")]
+    [Table("classes", Schema = "students")]
     public class Classes
     {
         /// <summary>
         /// Class ID
         /// </summary>
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         
         /// <summary>
         /// Class name
@@ -37,7 +37,7 @@ namespace ClassroomService.Models.Entities
         /// Homeroom teacher ID
         /// </summary>
         [Column("homeroom_teacher_id")]
-        public int HomeroomTeacherId { get; set; }
+        public Guid? HomeroomTeacherId { get; set; }
         
         /// <summary>
         /// Academic year (e.g., 2023-2024)

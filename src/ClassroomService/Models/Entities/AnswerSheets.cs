@@ -29,26 +29,26 @@ namespace ClassroomService.Models.Entities
     /// <summary>
     /// Answer sheet entity representing scanned answer sheets
     /// </summary>
-    [Table("answer_sheets")]
+    [Table("answer_sheets", Schema = "students")]
     public class AnswerSheets
     {
         /// <summary>
         /// Answer sheet ID
         /// </summary>
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         
         /// <summary>
         /// ID of the student who submitted this answer sheet
         /// </summary>
         [Column("student_id")]
-        public int StudentId { get; set; }
+        public Guid StudentId { get; set; }
         
         /// <summary>
         /// ID of the exam this answer sheet belongs to
         /// </summary>
         [Column("exam_id")]
-        public int ExamId { get; set; }
+        public Guid ExamId { get; set; }
         
         /// <summary>
         /// URL to the scanned image of the answer sheet

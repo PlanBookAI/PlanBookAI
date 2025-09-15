@@ -25,14 +25,14 @@ namespace ClassroomService.Models.Entities
     /// <summary>
     /// Student entity representing school students
     /// </summary>
-    [Table("students")]
+    [Table("students", Schema = "students")]
     public class Students
     {
         /// <summary>
         /// Student ID
         /// </summary>
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         
         /// <summary>
         /// Student's full name
@@ -52,7 +52,7 @@ namespace ClassroomService.Models.Entities
         /// Student's birth date
         /// </summary>
         [Column("birth_date")]
-        public DateOnly BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
         
         /// <summary>
         /// Student's gender
@@ -64,13 +64,13 @@ namespace ClassroomService.Models.Entities
         /// ID of the class this student belongs to
         /// </summary>
         [Column("class_id")]
-        public int ClassId { get; set; }
+        public Guid? ClassId { get; set; }
         
         /// <summary>
         /// ID of the teacher who owns/manages this student
         /// </summary>
         [Column("owner_teacher_id")]
-        public int OwnerTeacherId { get; set; }
+        public Guid OwnerTeacherId { get; set; }
         
         /// <summary>
         /// Whether the student is currently active

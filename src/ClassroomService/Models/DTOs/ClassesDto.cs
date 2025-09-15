@@ -20,7 +20,7 @@ namespace ClassroomService.Models.DTOs
         /// <summary>
         /// Homeroom teacher ID
         /// </summary>
-        public int HomeroomTeacherId { get; set; }
+        public Guid? HomeroomTeacherId { get; set; }
         
         /// <summary>
         /// Academic year
@@ -62,7 +62,7 @@ namespace ClassroomService.Models.DTOs
         /// <summary>
         /// Class ID
         /// </summary>
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         /// <summary>
         /// Class name
@@ -82,7 +82,7 @@ namespace ClassroomService.Models.DTOs
         /// <summary>
         /// Homeroom teacher ID
         /// </summary>
-        public int HomeroomTeacherId { get; set; }
+        public Guid? HomeroomTeacherId { get; set; }
         
         /// <summary>
         /// Academic year
@@ -124,7 +124,7 @@ namespace ClassroomService.Models.DTOs
                 .WithMessage("Khối phải từ 10 đến 12");
                 
             RuleFor(x => x.HomeroomTeacherId)
-                .GreaterThan(0).WithMessage("ID giáo viên chủ nhiệm không hợp lệ");
+                .NotEmpty().WithMessage("ID giáo viên chủ nhiệm không được để trống");
                 
             RuleFor(x => x.AcademicYear)
                 .NotEmpty().WithMessage("Năm học không được để trống")

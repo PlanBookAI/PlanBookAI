@@ -25,26 +25,26 @@ namespace ClassroomService.Models.Entities
     /// <summary>
     /// Student result entity representing exam results
     /// </summary>
-    [Table("student_results")]
+    [Table("student_results", Schema = "students")]
     public class StudentResults
     {
         /// <summary>
         /// Result ID
         /// </summary>
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         
         /// <summary>
         /// ID of the student who took the exam
         /// </summary>
         [Column("student_id")]
-        public int StudentId { get; set; }
+        public Guid StudentId { get; set; }
         
         /// <summary>
         /// ID of the exam
         /// </summary>
         [Column("exam_id")]
-        public int ExamId { get; set; }
+        public Guid ExamId { get; set; }
         
         /// <summary>
         /// Score achieved by the student
